@@ -1,8 +1,9 @@
 #File include declareation and denfinition of Class Member and Leader
+#coding=utf-8
 
 import sys
 import os.path
-import xml.etree.cElementTree as ET
+import xml.etree.ElementTree as ET
 import time
 import department
 
@@ -36,12 +37,12 @@ class Member():
                 xmltree = ET.parse(xmlPath)
                 member = xmltree.getroot()
                 name = member.find('Name')
-                self.name = name.text
+                self.name = name.text.encode('utf-8')
                 title = member.find('Title')
-                self.title = title.text
+                self.title = title.text.encode('utf-8')
                 try:
                     for project in member.iter('Project'):
-                        self.projectList.append(project.text)
+                        self.projectList.append(project.text.encode('utf-8'))
                 except :
                     self.projectList = []
                     
@@ -63,7 +64,7 @@ class Member():
         xmltree = ET.parse(self.dataPath)
         member = xmltree.getroot()
         nameTag = member.find('Name')
-        nameTag.text = name
+        nameTag.text = name.decode('utf-8')
         xmltree.write(self.dataPath)
     
     def getName(self):
@@ -75,7 +76,7 @@ class Member():
         xmltree = ET.parse(self.dataPath)
         member = xmltree.getroot()
         titleTag = member.find('Title')
-        titleTag.text = title
+        titleTag.text = title.decode('utf-8')
         xmltree.write(self.dataPath)
     
     
@@ -92,7 +93,7 @@ class Member():
         xmltree = ET.parse(self.dataPath)
         projectList = xmltree.getroot().find('ProjectList')
         newproject = ET.SubElement(projectList,'Project')
-        newproject.text = pro
+        newproject.text = pro.decode('utf-8')
         xmltree.write(self.dataPath)
         
     
@@ -105,7 +106,7 @@ class Member():
         xmltree = ET.parse(self.dataPath)
         projectList = xmltree.getroot().find('ProjectList')
         for project in projectList.iter('Project'):
-            if project.text == pro:
+            if project.text == pro.decode('utf-8'):
                 projectList.remove(project)
         xmltree.write(self.dataPath)
     
@@ -161,3 +162,27 @@ class Leader(Member):
         pass
     
         
+
+
+def testIntializeMember(path):
+    a = Member(path)
+    a.setName('Yao')
+    a.setTitle('FX')
+    a.addProject('ZY')
+    a.addProject('ZGKJG')    
+    
+def testChangeMember(path):
+    a = Member(path)
+    print a.getName()
+    print a.getTitle()
+    print a.getAllProjects()
+    
+    a.setName('姚灏')
+    a.setTitle('ANI')
+    a.addProject('滁州科技馆')
+    a.deleteProject('ZY')
+        
+if __name__ == '__main__':
+    #testIntializeMember('D:\Dev\overtime-management\member1.xml')
+    testChangeMember('D:\Dev\overtime-management\member1.xml')
+    
