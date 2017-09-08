@@ -38,17 +38,17 @@ class Department():
                 #get department name
                 try:
                     self.depName = root.get('depName').encode('utf-8')
-                    print 'Department name: '+ root.get('depName')
+                    print '部门名称：'.decode('utf-8') + root.get('depName')
                 except AttributeError,e:
                     self.depName = ''
-                    print 'Department name: '
+                    print '部门名称：'.decode('utf-8') 
 
                 #loop all member and get their names
                 try:
                     for member in root.iter('member'):
                         name = member.get('name')
                         self.memberList.add(name.encode('utf-8'))
-                        print 'Department has member: '+name
+                        print '成员名称：'.decode('utf-8') + name
                 except AttributeError,e:
                     print e
                     self.memberList = []
@@ -58,7 +58,7 @@ class Department():
                     for project in root.iter('project'):
                         pro = project.get('project-name')
                         self.projectList.add(pro.encode('utf-8'))
-                        print 'Department has project: '+ pro
+                        print '项目名称: '.decode('utf-8') + pro
                 except AttributeError,e:
                     print e
                     self.projectList =[]                    
@@ -90,25 +90,24 @@ class Department():
             
     
     def getDepName(self):
-        return self.depName.decode('utf-8')
+        print '部门名称： '.decode('utf-8') +self.depName.decode('utf-8')
+        return self.depName
     
     def addMember(self,member):
-        member = member
-        self.memberList.add(member)
+        if member not in self.memberList:
+            self.memberList.add(member)
+            print '添加成员： '.decode('utf-8') + member.decode('utf-8')
         xmltree = ET.parse(self.dataPath)
         memberList = xmltree.find('MemberList')
         memberList.clear()
         for mem in self.memberList:
             newMember = ET.SubElement(memberList,'member')
             newMember.set('name',mem.decode('utf-8'))
-            print 'add member: '+newMember.attrib['name']
         xmltree.write(self.dataPath )
         
     def deleteMember(self,name):
-        try:
+        if name in self.memberList:
             self.memberList.remove(name)
-        except ValueError,e:
-            print e
         xmltree = ET.parse(self.dataPath)
         memberlist = xmltree.getroot().find('MemberList')
         for member in memberlist.findall('member'):
@@ -118,25 +117,27 @@ class Department():
         
     
     def getAllMembers(self):
+        print '成员列表： '.decode('utf-8')
+        for mem in self.memberList:
+            print '\t'+mem.decode('utf-8')
         return self.memberList
 
     
     def addProject(self,project):
-        self.projectList.add(project)          
+        if project not in self.projectList:
+            self.projectList.add(project)          
+            print '添加项目： '.decode('utf-8') + project.decode('utf-8')
         xmltree = ET.parse(self.dataPath)
         projectList = xmltree.find('ProjectList')
         projectList.clear()
         for pro in self.projectList:
             newProject = ET.SubElement(projectList,'project')
             newProject.set('project-name',pro.decode('utf-8'))
-            print 'add project: '+newProject.attrib['project-name']
         xmltree.write(self.dataPath)   
         
     def deleteProject(self,pro):
-        try:
+        if pro in self.projectList:
             self.projectList.remove(pro)
-        except ValueError,e:
-            print e
         xmltree = ET.parse(self.dataPath)
         projectlist = xmltree.getroot().find('ProjectList')
         for project in projectlist.findall('project'):
@@ -145,6 +146,9 @@ class Department():
         xmltree.write(self.dataPath)        
         
     def getAllProjects(self):
+        print '项目列表： '.decode('utf-8')
+        for pro in self.projectList:
+            print '\t'+pro.decode('utf-8')
         return self.projectList
         
 
@@ -161,18 +165,13 @@ def testIntializeDepartment(path):
     
 def testChangeDepartment(path):
     a = Department(path)
-    print a.getDepName()
     
     a.setDepName('二维')
     a.addMember('姚灏')
-    print a.getAllMembers()
     a.deleteMember('姚灏')
-    print a.getAllMembers()
     a.addProject('中国科技馆')
-    print a.getAllProjects()
     a.deleteProject('中国科技馆')
-    print a.getAllProjects()
-    
+
 if __name__ == '__main__':
-    #testIntializeDepartment('D:\Dev\overtime-management\department1.xml')
-    testChangeDepartment('D:\Dev\overtime-management\department1.xml')
+    #testIntializeDepartment('F:\Dev\overtime-management\department1.xml')
+    testChangeDepartment('F:\Dev\overtime-management\department1.xml')
