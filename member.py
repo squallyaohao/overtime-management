@@ -6,6 +6,7 @@ import os.path
 import xml.etree.ElementTree as ET
 import time
 import department
+import project
 
 
 #Function used to initialize and xml file
@@ -123,7 +124,7 @@ class Member():
         xmltree.write(self.dataPath)
     
     
-    def applyOvertime(self,date=time.time(),duration=0,project='',dinner='',description=''):
+    def applyOvertime(self,date=time.time(),duration=0,project='',meal='',description=''):
         pass
     
     
@@ -144,44 +145,51 @@ class Leader(Member):
         try:
             depdata = member.find('DepartmentData')
             self.depDataPath = depdata.text
+            print 'department :' + self.depDataPath
         except AttributeError ,e:
             depdata = ET.SubElement(member, 'DepartmentData')
             dirname = os.path.dirname(self.dataPath)
             depxmlname = dirname + '\\department.xml'
             depdata.text = depxmlname
+            self.depDataPath = depxmlname
             print self.depDataPath
-            xmltree.write(self.dataPath)
-        self.department = department.Department(self.depDataPath)
+            xmltree.write(self.dataPath) 
         
         
         
     def getDepartment(self):
-        return self.department
-        
+        dep = department.Department(self.depDataPath)
+        return dep
+           
+    
+    def addDepMember(self,name):
+        dep = self.getDepartment()
+        dep.addMember(name)
     
     
-    def addMember(self,name):
-        self.department.addMember(name)
+    def deleteDepMember(self,name):
+        dep = self.getDepartment()
+        dep.deleteMember(name)
     
     
-    def deleteMember(self,name):
-        self.department.deleteMember(name)
+    def getAllDepMembers(self):
+        dep = self.getDepartment()
+        dep.getAllMembers()
     
     
-    def getAllMembers(self):
-        self.department.getAllMembers()
+    def addDepProject(self,pro):
+        dep = self.getDepartment()
+        dep.addProject(pro)
     
     
-    def addProject(self,pro):
-        self.department.addProject(pro)
+    def deleteDepProject(self,pro):
+        dep = self.getDepartment()
+        dep.deleteProject(pro)
     
     
-    def deleteProject(self,pro):
-        self.department.deleteProject(pro)
-    
-    
-    def getAllProjects(self):
-        self.department.getAllProjects()
+    def getAllDepProjects(self):
+        dep = self.getDepartment()
+        dep.getAllProjects()
     
     
     def queryOvertime(self,timeduration=(),project='',member=(),):
@@ -189,14 +197,16 @@ class Leader(Member):
     
         
 
-
+#define test fuction
 def testIntializeMember(path):
     a = Member(path)
     a.setName('Yao')
     a.setTitle('FX')
     a.addProject('ZY')
     a.addProject('ZGKJG')    
-    
+
+
+#define test fuction    
 def testChangeMember(path):
     a = Member(path)
  
@@ -211,17 +221,52 @@ def testChangeMember(path):
     print a.getTitle()
     print a.getAllProjects()    
 
+
+#define test fuction
 def testLeaderInit(path):
     leader = Leader(path)
     leader.setName('万涛涛')
     leader.setTitle('三维主管')
     
-    leader.addMember(name)
+    leader.addDepMember('姚灏')
+    leader.addDepMember('孙林')
+    leader.addDepMember('王恒')
+    leader.addDepMember('王政')
+    
+    leader.addDepProject('遵义科技馆')
+    leader.addDepProject('滁州科技馆')
+    leader.addDepProject('中国科技馆')
+    leader.addDepProject('鸟馆')
+    leader.addDepProject('郑州科技馆')
+    leader.addDepProject('单县科技馆')
+    
+    leader.addProject('遵义科技馆')
+    leader.addProject('中国科技馆')
+    
+    
+#define test fuction
+def testChangeLeader(path):
+    leader = Leader(path)
+    leader.addDepMember('苏里找')
+    leader.addDepMember('姜峰')
+    leader.addDepMember('郑伟')
+    leader.deleteDepMember('姚灏')
+    leader.deleteDepMember('孙林')
+    
+    leader.addDepProject('海门科技馆')
+    leader.addDepProject('郑州科技馆')
+    leader.deleteDepProject('遵义科技馆')
+    
+    leader.addProject('郑州科技馆')
+    leader.addProject('单县科技馆')    
+    leader.deleteProject('遵义科技馆')
+    leader.deleteProject('中国科技馆')
+    
     
     
         
 if __name__ == '__main__':
-    #testIntializeMember('F:\Dev\overtime-management\member1.xml')
-    #testChangeMember('F:\Dev\overtime-management\member1.xml')
-    testLeaderInit('F:\Dev\overtime-management\Leader.xml')
-    
+    #testIntializeMember('D:\Dev\overtime-management\member1.xml')
+    #testChangeMember('D:\Dev\overtime-management\member1.xml')
+    #testLeaderInit('D:\Dev\overtime-management\Leader.xml')
+    #testChangeLeader('D:\Dev\overtime-management\Leader.xml') 
