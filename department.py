@@ -7,20 +7,16 @@ import xml.etree.cElementTree as ET
 
 
 def initXML(path):
-    #check if xml file exist,otherwise create one
-    if os.path.exists(path):
-        xmltree = ET.parse(path)
-    else:
-        root = ET.Element('Department')
-        xmltree = ET.ElementTree(root) 
-        memberList = ET.SubElement(root,'MemberList')
-        projectList = ET.SubElement(root,'ProjectList')
-        xmltree = ET.ElementTree(root)
-        xmltree.write(path )
+    root = ET.Element('Department')
+    xmltree = ET.ElementTree(root) 
+    memberList = ET.SubElement(root,'MemberList')
+    projectList = ET.SubElement(root,'ProjectList')
+    xmltree = ET.ElementTree(root)
+    xmltree.write(path )
 
     
 
-class Department():
+class Department(): 
     def __init__(self,*args):
         self.dataPath= ''
         self.depName = ''
