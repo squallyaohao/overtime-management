@@ -2,11 +2,14 @@
 #coding=utf-8
 
 import sys
-import os.path
+import os,os.path
+import codecs
 import xml.etree.ElementTree as ET
 import time
 import department
 import project
+import mysql_test
+import MySQLdb as sql
 
 
 #Function used to initialize and xml file
@@ -124,11 +127,22 @@ class Member():
         xmltree.write(self.dataPath)
     
     
-    def applyOvertime(self,date=time.time(),duration=0,project='',meal='',description=''):
-        pass
+    def applyOvertime(self,table='',date='',duration=0,project='',meal='',description=''):
+        hostid = open('hostname','r').readline()
+        if hostid[:3] == codecs.BOM_UTF8:
+            hostid = hostid[3:]
+        conn = sql.connect(hostid,'root','123456','myfirstdb',charset='utf8')
+        cursor = conn.cursor()
+        #cursor.execute('delete from overtime;')
+        insert_statement = mysql_test.sqlInsertState(table,[date,self.getName(),project,duration,meal])
+        print insert_statement
+        cursor.execute(insert_statement)
+        conn.commit()
+        cursor.close()
+        conn.close()
     
     
-    def queryOvertime(self,data=time.time()):
+    def queryOvertime(self,date=(),project=''):
         pass
     
     
@@ -199,27 +213,31 @@ class Leader(Member):
 
 #define test fuction
 def testIntializeMember(path):
-    a = Member(path)
-    a.setName('Yao')
-    a.setTitle('FX')
-    a.addProject('ZY')
-    a.addProject('ZGKJG')    
+    member = Member(path)
+    member.setName('Yao')
+    member.setTitle('FX')
+    member.addProject('ZY')
+    member.addProject('ZGKJG')   
+    
+    return member
 
 
 #define test fuction    
 def testChangeMember(path):
-    a = Member(path)
+    member = Member(path)
  
-    a.setName('姚灏')
-    a.setTitle('ANI')
-    a.addProject('zgfdafa')
-    a.addProject('中国科技馆')
-    a.addProject('遵义科技馆')
-    a.addProject('滁州科技馆')
+    member.setName('姚灏')
+    member.setTitle('ANI')
+    member.addProject('zgfdafa')
+    member.addProject('中国科技馆')
+    member.addProject('遵义科技馆')
+    member.addProject('滁州科技馆')
     
-    print a.getName()
-    print a.getTitle()
-    print a.getAllProjects()    
+    #print member.getName()
+    #print member.getTitle()
+    #print member.getAllProjects()    
+    
+    return member
 
 
 #define test fuction
@@ -243,6 +261,8 @@ def testLeaderInit(path):
     leader.addProject('遵义科技馆')
     leader.addProject('中国科技馆')
     
+    return leader
+    
     
 #define test fuction
 def testChangeLeader(path):
@@ -262,6 +282,15 @@ def testChangeLeader(path):
     leader.deleteProject('遵义科技馆')
     leader.deleteProject('中国科技馆')
     
+    return leader
+    
+
+
+def testOvertime(path):
+    member = testIntializeMember(path)
+    member.setName('姚灏')
+    member.applyOvertime(table='overtime',date='2017-9-20',duration='3',project='遵义科技馆',meal='米饭',description='')
+    
     
     
         
@@ -269,4 +298,5 @@ if __name__ == '__main__':
     #testIntializeMember('D:\Dev\overtime-management\member1.xml')
     #testChangeMember('D:\Dev\overtime-management\member1.xml')
     #testLeaderInit('D:\Dev\overtime-management\Leader.xml')
-    #testChangeLeader('D:\Dev\overtime-management\Leader.xml') 
+    #testChangeLeader('D:\Dev\overtime-management\Leader.xml')
+    testOvertime('D:\Dev\overtime-management\member1.xml')

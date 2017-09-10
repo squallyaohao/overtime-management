@@ -21,7 +21,7 @@ class Department():
         self.dataPath= ''
         self.depName = ''
         self.memberList = set([])
-        self.projectList = set([])        
+        self.projectList = set([])
         if len(args)!=0 :
             if len(args)>1:
                 print 'More than one argument has been passed!'
