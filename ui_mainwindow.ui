@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>620</width>
-    <height>400</height>
+    <height>450</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -25,7 +25,7 @@
   <property name="maximumSize">
    <size>
     <width>620</width>
-    <height>400</height>
+    <height>450</height>
    </size>
   </property>
   <property name="font">
@@ -45,7 +45,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>80</y>
+      <y>110</y>
       <width>581</width>
       <height>281</height>
      </rect>
@@ -59,13 +59,13 @@
      <bool>false</bool>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
       <string>Apply</string>
      </attribute>
-     <widget class="QPushButton" name="pushButton_3">
+     <widget class="QPushButton" name="apply_overtime">
       <property name="geometry">
        <rect>
         <x>450</x>
@@ -132,6 +132,9 @@
          </property>
          <property name="alignment">
           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         </property>
+         <property name="displayFormat">
+          <string>yyyy-M-d</string>
          </property>
         </widget>
        </item>
@@ -268,7 +271,7 @@
      <attribute name="title">
       <string>Query</string>
      </attribute>
-     <widget class="QPushButton" name="pushButton_4">
+     <widget class="QPushButton" name="query">
       <property name="geometry">
        <rect>
         <x>450</x>
@@ -513,7 +516,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton">
+      <widget class="QPushButton" name="name_edit">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -538,7 +541,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="name_2">
+      <widget class="QLabel" name="dep">
        <property name="font">
         <font>
          <family>Microsoft YaHei UI</family>
@@ -550,7 +553,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="comboBox">
+      <widget class="QComboBox" name="dep_line">
        <property name="enabled">
         <bool>false</bool>
        </property>
@@ -594,7 +597,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="pushButton_2">
+      <widget class="QPushButton" name="dep_edit">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -629,7 +632,7 @@
      <x>0</x>
      <y>0</y>
      <width>620</width>
-     <height>27</height>
+     <height>23</height>
     </rect>
    </property>
   </widget>

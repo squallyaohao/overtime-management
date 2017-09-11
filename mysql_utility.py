@@ -60,7 +60,7 @@ def sqldeletState(table='',condition={}):
 
 #MySQL utility function
 def sqlQuerysState(table='',condition={}):
-    if condition is not None:
+    if len(condition.keys())>0:
         statement = "select * from " + table + " where "
         timequery = ''
         namequery = ''    
@@ -161,7 +161,7 @@ def querySQL(dbname='',table='',condition={}):
         data = cur.fetchone()
     cur.close()
     conn.close()
-    pass
+
 
 
 def querySQLPandas(dbname='',table='',condition={}):
