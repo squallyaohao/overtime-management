@@ -22,11 +22,16 @@ class UI_ApplyOvertime(Ui_MainWindow):
         dep  = self.member.getDepartment()
         self.name_line.setText(name)
         self.dep_line.setCurrentIndex(dep)
+        curDate = QtCore.QDate.currentDate()
+        self.apply_date.setDate(curDate)
+        self.query_fromdate.setDate(curDate)
+        self.query_todate.setDate(curDate)
         self.setConnections()
         self.member.updateProjects(table='project')
         projectList = self.member.getAllProjects()
         for pro in projectList:
             self.apply_project.addItem(pro)
+            self.query_project.addItem(pro)
                    
         
     def setConnections(self):    
@@ -72,7 +77,7 @@ class UI_ApplyOvertime(Ui_MainWindow):
         query_dates = (unicode(self.query_fromdate.text()),unicode(self.query_todate.text()))
         query_project = unicode(self.query_project.currentText())
         result = self.member.queryOvertime(table='overtime', date=query_dates, project=query_project)
-        if result is not None:
+        if len(result)>0:
             numRows = len(result)
             numCols = len(result[0])
             self.result_window = Ui_QueryTable()
@@ -88,8 +93,14 @@ class UI_ApplyOvertime(Ui_MainWindow):
                     item.setTextAlignment(0x0004|0x0080	)
                     item.setFont(textFont)
                     self.result_window.tableWidget.setItem(i,j, item)
+            self.result_window.show()
+        else:
+            messagebox = QtGui.QMessageBox(2,QtCore.QString(u'提示'),QtCore.QString(u'没有查询到相关记录'),QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel)
+            #messagebox = QtGui.QMessageBox(QtGui.QMessageBox.warning,QtCore.QString('提示'),QtCore.QString('没有查询到相关记录！'))
+            messagebox.exec_()
             
-        self.result_window.show()
+
+  
                             
     
         

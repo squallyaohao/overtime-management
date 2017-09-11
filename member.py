@@ -145,6 +145,7 @@ class Member():
         pwd = loginfile[3]
         if hostid[:3] == codecs.BOM_UTF8:
             hostid = hostid[3:]
+        print hostid+' '+database+' '+user+' '+pwd
         conn = sql.connect(hostid,user,pwd,database,charset='utf8')
         cursor = conn.cursor()
         query_statement = mysql_utility.sqlQuerysState(table)
