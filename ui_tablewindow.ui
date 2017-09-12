@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>694</width>
-    <height>463</height>
+    <width>582</width>
+    <height>511</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,10 +19,10 @@
      <x>20</x>
      <y>20</y>
      <width>541</width>
-     <height>421</height>
+     <height>371</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,1">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1">
     <item>
      <widget class="QPushButton" name="pushButton">
       <property name="minimumSize">
@@ -38,7 +38,7 @@
        </size>
       </property>
       <property name="text">
-       <string>Export Excel</string>
+       <string>导出Excel表格</string>
       </property>
      </widget>
     </item>
@@ -64,6 +64,145 @@
       <column/>
       <column/>
       <column/>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="horizontalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>400</x>
+     <y>400</y>
+     <width>161</width>
+     <height>80</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetDefaultConstraint</enum>
+    </property>
+    <item>
+     <widget class="QPushButton" name="pushButton_2">
+      <property name="maximumSize">
+       <size>
+        <width>100</width>
+        <height>35</height>
+       </size>
+      </property>
+      <property name="text">
+       <string>保存修改</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="horizontalLayoutWidget_2">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>400</y>
+     <width>311</width>
+     <height>80</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <item>
+     <widget class="QLabel" name="label">
+      <property name="maximumSize">
+       <size>
+        <width>90</width>
+        <height>30</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Adobe Arabic</family>
+        <pointsize>12</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
+      <property name="text">
+       <string>加班总计</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="totaltime">
+      <property name="maximumSize">
+       <size>
+        <width>50</width>
+        <height>30</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Adobe Arabic</family>
+        <pointsize>12</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>TextLabel</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QLabel" name="label_3">
+      <property name="maximumSize">
+       <size>
+        <width>80</width>
+        <height>30</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Adobe Arabic</family>
+        <pointsize>12</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="layoutDirection">
+       <enum>Qt::LeftToRight</enum>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::NoFrame</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
+      <property name="text">
+       <string>小时</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+      </property>
      </widget>
     </item>
    </layout>

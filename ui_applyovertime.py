@@ -4,17 +4,18 @@
 import sys,os,os.path
 from PyQt4 import QtCore
 from PyQt4 import QtGui
-from ui_mainwindow import Ui_MainWindow
+from ui_membermainwindow import Ui_MemberMainWindow
 from ui_querytable import Ui_QueryTable
 import xml.etree.ElementInclude as ET
 import department,member
 import pandas as pd
+import excelUtility
 
 
 
-class UI_ApplyOvertime(Ui_MainWindow):
+class UI_ApplyOvertime(Ui_MemberMainWindow):
     def __init__(self,parent=None,xmlpath=''):
-        super(Ui_MainWindow,self).__init__(parent)       
+        super(Ui_MemberMainWindow,self).__init__(parent)       
         self.setupUi(self)
         
         self.member = member.Member(xmlpath)
@@ -26,13 +27,19 @@ class UI_ApplyOvertime(Ui_MainWindow):
         self.apply_date.setDate(curDate)
         self.query_fromdate.setDate(curDate)
         self.query_todate.setDate(curDate)
-        self.setConnections()
+        self.apply_date.setEnabled(False)
+    
         self.member.updateProjects(table='project')
         projectList = self.member.getAllProjects()
         for pro in projectList:
             self.apply_project.addItem(pro)
             self.query_project.addItem(pro)
-                   
+        self.tabWidget.setCurrentIndex(0)
+        
+        self.result_window = Ui_QueryTable()
+        
+        self.setConnections()
+
         
     def setConnections(self):    
         self.connect(self.name_edit,QtCore.SIGNAL("clicked()"),self.editName)
@@ -41,6 +48,7 @@ class UI_ApplyOvertime(Ui_MainWindow):
         self.connect(self.dep_line,QtCore.SIGNAL('currentIndexChanged(int)'),self.confirmDepartment)
         self.connect(self.apply_overtime,QtCore.SIGNAL('clicked()'),self.applyForOvertime)
         self.connect(self.query,QtCore.SIGNAL('clicked()'),self.showQueryResult)
+        self.result_window.updateSignal.connect(self.updateServer)
         
         
         
@@ -78,29 +86,16 @@ class UI_ApplyOvertime(Ui_MainWindow):
         query_project = unicode(self.query_project.currentText())
         result = self.member.queryOvertime(table='overtime', date=query_dates, project=query_project)
         if len(result)>0:
-            numRows = len(result)
-            numCols = len(result[0])
-            self.result_window = Ui_QueryTable()
-            self.result_window.tableWidget.setRowCount(numRows)
-            self.result_window.tableWidget.setColumnCount(numCols)
-            self.result_window.tableWidget.setHorizontalHeaderLabels(['Date','Name','Project','Duration','Meal'])
-            self.result_window.tableWidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-            textFont = QtGui.QFont('Hei',11)  
-
-            for i,row in enumerate(result):
-                for j,col in enumerate(row):
-                    item = QtGui.QTableWidgetItem(unicode(col))
-                    item.setTextAlignment(0x0004|0x0080	)
-                    item.setFont(textFont)
-                    self.result_window.tableWidget.setItem(i,j, item)
+            self.result_window.drawTable(result)
             self.result_window.show()
         else:
             messagebox = QtGui.QMessageBox(2,QtCore.QString(u'提示'),QtCore.QString(u'没有查询到相关记录'),QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel)
-            #messagebox = QtGui.QMessageBox(QtGui.QMessageBox.warning,QtCore.QString('提示'),QtCore.QString('没有查询到相关记录！'))
             messagebox.exec_()
             
 
-  
+    def updateServer(self):
+        list = self.result_window.getTableData()
+        print 'update!'
                             
     
         

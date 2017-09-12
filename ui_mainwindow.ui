@@ -63,7 +63,7 @@
     </property>
     <widget class="QWidget" name="tab_2">
      <attribute name="title">
-      <string>Apply</string>
+      <string>申请加班</string>
      </attribute>
      <widget class="QPushButton" name="apply_overtime">
       <property name="geometry">
@@ -87,7 +87,7 @@
        </size>
       </property>
       <property name="text">
-       <string>Confirm</string>
+       <string>申请加班</string>
       </property>
      </widget>
      <widget class="QWidget" name="layoutWidget">
@@ -107,18 +107,18 @@
         <widget class="QLabel" name="label">
          <property name="minimumSize">
           <size>
-           <width>40</width>
+           <width>80</width>
            <height>30</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>40</width>
+           <width>80</width>
            <height>30</height>
           </size>
          </property>
          <property name="text">
-          <string>Date</string>
+          <string>加班日期</string>
          </property>
         </widget>
        </item>
@@ -147,7 +147,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Duration</string>
+          <string>加班时长</string>
          </property>
         </widget>
        </item>
@@ -185,7 +185,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Meal</string>
+          <string>加班餐</string>
          </property>
         </widget>
        </item>
@@ -224,18 +224,18 @@
         <widget class="QLabel" name="label_2">
          <property name="minimumSize">
           <size>
-           <width>60</width>
+           <width>80</width>
            <height>30</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>40</width>
+           <width>80</width>
            <height>30</height>
           </size>
          </property>
          <property name="text">
-          <string>Project</string>
+          <string>加班项目</string>
          </property>
         </widget>
        </item>
@@ -269,7 +269,7 @@
     </widget>
     <widget class="QWidget" name="tab">
      <attribute name="title">
-      <string>Query</string>
+      <string>查询加班</string>
      </attribute>
      <widget class="QPushButton" name="query">
       <property name="geometry">
@@ -287,7 +287,7 @@
        </size>
       </property>
       <property name="text">
-       <string>Start Query</string>
+       <string>开始查询</string>
       </property>
      </widget>
      <widget class="QWidget" name="layoutWidget">
@@ -329,7 +329,7 @@
           </font>
          </property>
          <property name="text">
-          <string>From</string>
+          <string>从</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -387,7 +387,7 @@
           <number>0</number>
          </property>
          <property name="text">
-          <string>To</string>
+          <string>至</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -423,7 +423,7 @@
        <rect>
         <x>20</x>
         <y>100</y>
-        <width>441</width>
+        <width>531</width>
         <height>32</height>
        </rect>
       </property>
@@ -438,23 +438,29 @@
          </property>
          <property name="minimumSize">
           <size>
-           <width>40</width>
+           <width>80</width>
            <height>0</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
-           <width>60</width>
+           <width>80</width>
            <height>16777215</height>
           </size>
          </property>
          <property name="text">
-          <string>Project</string>
+          <string>查询项目</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QComboBox" name="query_project">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>0</width>
@@ -499,7 +505,7 @@
         </font>
        </property>
        <property name="text">
-        <string>name</string>
+        <string>姓名</string>
        </property>
       </widget>
      </item>
@@ -531,12 +537,12 @@
        </property>
        <property name="font">
         <font>
-         <family>Microsoft YaHei UI</family>
-         <pointsize>9</pointsize>
+         <family>Adobe Arabic</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="text">
-        <string>edit</string>
+        <string>编辑</string>
        </property>
       </widget>
      </item>
@@ -548,7 +554,7 @@
         </font>
        </property>
        <property name="text">
-        <string>Department</string>
+        <string>部门</string>
        </property>
       </widget>
      </item>
@@ -612,12 +618,12 @@
        </property>
        <property name="font">
         <font>
-         <family>Microsoft YaHei UI</family>
-         <pointsize>9</pointsize>
+         <family>Adobe Arabic</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="text">
-        <string>edit</string>
+        <string>编辑</string>
        </property>
       </widget>
      </item>
