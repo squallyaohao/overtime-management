@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'F:\Dev\overtime-management\ui_tablewindow.ui'
+# Form implementation generated from reading ui file 'D:\Dev\overtime-management\ui_tablewindow.ui'
 #
-# Created: Tue Sep 12 20:44:12 2017
+# Created: Tue Sep 12 23:30:01 2017
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -36,6 +36,9 @@ class Ui_Form(QtGui.QWidget):
         self.pushButton = QtGui.QPushButton(self.layoutWidget)
         self.pushButton.setMinimumSize(QtCore.QSize(0, 30))
         self.pushButton.setMaximumSize(QtCore.QSize(100, 16777215))
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.pushButton.setFont(font)
         self.pushButton.setObjectName(_fromUtf8("pushButton"))
         self.verticalLayout.addWidget(self.pushButton)
         self.tableWidget = QtGui.QTableWidget(self.layoutWidget)
@@ -59,10 +62,16 @@ class Ui_Form(QtGui.QWidget):
         self.horizontalLayout.setObjectName(_fromUtf8("horizontalLayout"))
         self.pushButton_2 = QtGui.QPushButton(self.horizontalLayoutWidget)
         self.pushButton_2.setMaximumSize(QtCore.QSize(100, 35))
+        font = QtGui.QFont()
+        font.setPointSize(10)
+        self.pushButton_2.setFont(font)
+        self.pushButton_2.setAutoDefault(False)
+        self.pushButton_2.setDefault(False)
+        self.pushButton_2.setFlat(False)
         self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
         self.horizontalLayout.addWidget(self.pushButton_2)
         self.horizontalLayoutWidget_2 = QtGui.QWidget(Form)
-        self.horizontalLayoutWidget_2.setGeometry(QtCore.QRect(20, 400, 311, 80))
+        self.horizontalLayoutWidget_2.setGeometry(QtCore.QRect(20, 400, 161, 81))
         self.horizontalLayoutWidget_2.setObjectName(_fromUtf8("horizontalLayoutWidget_2"))
         self.horizontalLayout_2 = QtGui.QHBoxLayout(self.horizontalLayoutWidget_2)
         self.horizontalLayout_2.setSpacing(0)
@@ -86,7 +95,7 @@ class Ui_Form(QtGui.QWidget):
         self.totaltime = QtGui.QLabel(self.horizontalLayoutWidget_2)
         self.totaltime.setMaximumSize(QtCore.QSize(50, 30))
         font = QtGui.QFont()
-        font.setFamily(_fromUtf8("Adobe Arabic"))
+        font.setFamily(_fromUtf8("Arial"))
         font.setPointSize(12)
         font.setBold(True)
         font.setWeight(75)
@@ -106,7 +115,7 @@ class Ui_Form(QtGui.QWidget):
         self.label_3.setAutoFillBackground(False)
         self.label_3.setFrameShape(QtGui.QFrame.NoFrame)
         self.label_3.setFrameShadow(QtGui.QFrame.Sunken)
-        self.label_3.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+        self.label_3.setAlignment(QtCore.Qt.AlignCenter)
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.horizontalLayout_2.addWidget(self.label_3)
 

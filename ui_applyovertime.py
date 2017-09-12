@@ -85,8 +85,9 @@ class UI_ApplyOvertime(Ui_MemberMainWindow):
         query_dates = (unicode(self.query_fromdate.text()),unicode(self.query_todate.text()))
         query_project = unicode(self.query_project.currentText())
         result = self.member.queryOvertime(table='overtime', date=query_dates, project=query_project)
+        projectlist = self.member.getAllProjects()
         if len(result)>0:
-            self.result_window.drawTable(result)
+            self.result_window.drawTable(result,projectlist)
             self.result_window.show()
         else:
             messagebox = QtGui.QMessageBox(2,QtCore.QString(u'提示'),QtCore.QString(u'没有查询到相关记录'),QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel)
@@ -94,13 +95,13 @@ class UI_ApplyOvertime(Ui_MemberMainWindow):
             
 
     def updateServer(self):
-        list = self.result_window.getTableData()
-        print 'update!'
+        curTable = self.result_window.getTableData()
+        success  = self.member.updateServer('overtime',curTable)
+        if success:
+            messagebox = QtGui.QMessageBox(2,QtCore.QString(u'提示'),QtCore.QString(u'加班记录已更新成功！'),QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel)
+            messagebox.exec_()
+            
                             
-    
-        
-    
-        
 
 if __name__ =='__main__':
     app = QtGui.QApplication(sys.argv) 

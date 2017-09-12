@@ -223,12 +223,34 @@ class Member():
         conn = sql.connect(hostid,user,pwd,database,charset='utf8')
         cursor = conn.cursor()
         query_condition = {'date':date,'name':self.name,'project':project}
-        print query_condition
         querystatement = mysql_utility.sqlQuerysState(table,query_condition)
         cursor.execute(querystatement)
         conn.commit()
         result = cursor.fetchall()
         return result
+    
+    
+    
+    def updateServer(self,table,curTable=[]):
+        loginfile = open('hostname','r').read().split(' ')
+        hostid = loginfile[0]
+        database = loginfile[1]
+        user = loginfile[2]
+        pwd = loginfile[3]
+        if hostid[:3] == codecs.BOM_UTF8:
+            hostid = hostid[3:]
+        conn = sql.connect(hostid,user,pwd,database,charset='utf8')
+        cursor = conn.cursor()
+        for row in curTable:
+            updatestatement = mysql_utility.sqlUpdateState(table,row)
+            print updatestatement
+            cursor.execute(updatestatement)
+            conn.commit()
+        
+        cursor.close()
+        conn.close()
+        return 1
+            
         
             
     
