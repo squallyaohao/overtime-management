@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'F:\Dev\overtime-management\ui_mainwindow.ui'
 #
-# Created: Tue Sep 12 11:24:26 2017
+# Created: Wed Sep 13 12:52:48 2017
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,23 +26,27 @@ except AttributeError:
 class Ui_MemberMainWindow(QtGui.QMainWindow):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(620, 450)
+        MainWindow.setWindowModality(QtCore.Qt.WindowModal)
+        MainWindow.resize(620, 600)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
-        MainWindow.setMinimumSize(QtCore.QSize(620, 400))
-        MainWindow.setMaximumSize(QtCore.QSize(620, 450))
+        MainWindow.setMinimumSize(QtCore.QSize(620, 600))
+        MainWindow.setMaximumSize(QtCore.QSize(620, 600))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Microsoft YaHei UI"))
         font.setPointSize(12)
         MainWindow.setFont(font)
         MainWindow.setAutoFillBackground(False)
+        MainWindow.setToolButtonStyle(QtCore.Qt.ToolButtonIconOnly)
+        MainWindow.setTabShape(QtGui.QTabWidget.Rounded)
         self.centralwidget = QtGui.QWidget(MainWindow)
+        self.centralwidget.setMinimumSize(QtCore.QSize(0, 0))
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.tabWidget = QtGui.QTabWidget(self.centralwidget)
-        self.tabWidget.setGeometry(QtCore.QRect(20, 110, 581, 281))
+        self.tabWidget.setGeometry(QtCore.QRect(20, 110, 581, 441))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Microsoft YaHei UI"))
         self.tabWidget.setFont(font)
@@ -51,7 +55,7 @@ class Ui_MemberMainWindow(QtGui.QMainWindow):
         self.tab_2 = QtGui.QWidget()
         self.tab_2.setObjectName(_fromUtf8("tab_2"))
         self.apply_overtime = QtGui.QPushButton(self.tab_2)
-        self.apply_overtime.setGeometry(QtCore.QRect(450, 170, 100, 40))
+        self.apply_overtime.setGeometry(QtCore.QRect(460, 360, 100, 40))
         self.apply_overtime.setMinimumSize(QtCore.QSize(100, 40))
         self.apply_overtime.setMaximumSize(QtCore.QSize(100, 40))
         self.apply_overtime.setObjectName(_fromUtf8("apply_overtime"))
@@ -115,11 +119,19 @@ class Ui_MemberMainWindow(QtGui.QMainWindow):
         self.apply_project.setEditable(False)
         self.apply_project.setObjectName(_fromUtf8("apply_project"))
         self.horizontalLayout_3.addWidget(self.apply_project)
+        self.desc = QtGui.QTextEdit(self.tab_2)
+        self.desc.setGeometry(QtCore.QRect(20, 190, 541, 161))
+        self.desc.setObjectName(_fromUtf8("desc"))
+        self.label_9 = QtGui.QLabel(self.tab_2)
+        self.label_9.setGeometry(QtCore.QRect(20, 150, 80, 30))
+        self.label_9.setMinimumSize(QtCore.QSize(80, 30))
+        self.label_9.setMaximumSize(QtCore.QSize(80, 30))
+        self.label_9.setObjectName(_fromUtf8("label_9"))
         self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
         self.tab = QtGui.QWidget()
         self.tab.setObjectName(_fromUtf8("tab"))
         self.query = QtGui.QPushButton(self.tab)
-        self.query.setGeometry(QtCore.QRect(450, 170, 100, 40))
+        self.query.setGeometry(QtCore.QRect(460, 360, 100, 40))
         self.query.setMinimumSize(QtCore.QSize(100, 40))
         self.query.setObjectName(_fromUtf8("query"))
         self.layoutWidget2 = QtGui.QWidget(self.tab)
@@ -227,7 +239,7 @@ class Ui_MemberMainWindow(QtGui.QMainWindow):
         self.name_edit.setMaximumSize(QtCore.QSize(50, 16777215))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Adobe Arabic"))
-        font.setPointSize(9)
+        font.setPointSize(8)
         self.name_edit.setFont(font)
         self.name_edit.setObjectName(_fromUtf8("name_edit"))
         self.horizontalLayout.addWidget(self.name_edit)
@@ -258,7 +270,7 @@ class Ui_MemberMainWindow(QtGui.QMainWindow):
         self.dep_edit.setMaximumSize(QtCore.QSize(50, 16777215))
         font = QtGui.QFont()
         font.setFamily(_fromUtf8("Adobe Arabic"))
-        font.setPointSize(9)
+        font.setPointSize(8)
         self.dep_edit.setFont(font)
         self.dep_edit.setObjectName(_fromUtf8("dep_edit"))
         self.horizontalLayout.addWidget(self.dep_edit)
@@ -272,17 +284,23 @@ class Ui_MemberMainWindow(QtGui.QMainWindow):
         MainWindow.setStatusBar(self.statusbar)
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(1)
+        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(_translate("MainWindow", "Apply Overtime", None))
+        MainWindow.setWindowTitle(_translate("MainWindow", "加班申请", None))
         self.apply_overtime.setText(_translate("MainWindow", "申请加班", None))
         self.label.setText(_translate("MainWindow", "加班日期", None))
         self.apply_date.setDisplayFormat(_translate("MainWindow", "yyyy-M-d", None))
         self.label_3.setText(_translate("MainWindow", "加班时长", None))
         self.label_4.setText(_translate("MainWindow", "加班餐", None))
         self.label_2.setText(_translate("MainWindow", "加班项目", None))
+        self.desc.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'Microsoft YaHei UI\'; font-size:12pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">加班描述</p></body></html>", None))
+        self.label_9.setText(_translate("MainWindow", "描述", None))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "申请加班", None))
         self.query.setText(_translate("MainWindow", "开始查询", None))
         self.label_5.setText(_translate("MainWindow", "从", None))

@@ -15,7 +15,7 @@ import excelUtility
 
 class UI_ApplyOvertime(Ui_MemberMainWindow):
     def __init__(self,parent=None,xmlpath=''):
-        super(Ui_MemberMainWindow,self).__init__(parent)       
+        super(Ui_MemberMainWindow,self).__init__(parent)
         self.setupUi(self)
         
         self.member = member.Member(xmlpath)
@@ -29,7 +29,7 @@ class UI_ApplyOvertime(Ui_MemberMainWindow):
         self.query_todate.setDate(curDate)
         self.apply_date.setEnabled(False)
     
-        self.member.updateProjects(table='project')
+        self.member.getProjectsFromServer(table='project')
         projectList = self.member.getAllProjects()
         for pro in projectList:
             self.apply_project.addItem(pro)
@@ -39,6 +39,7 @@ class UI_ApplyOvertime(Ui_MemberMainWindow):
         self.result_window = Ui_QueryTable()
         
         self.setConnections()
+        
 
         
     def setConnections(self):    
@@ -77,8 +78,10 @@ class UI_ApplyOvertime(Ui_MemberMainWindow):
         duration = unicode(self.apply_duration.text())
         meal = unicode(self.apply_meal.text())
         project = unicode(self.apply_project.currentText())
+        des = unicode(self.desc.toPlainText())
+        print des
         self.member.applyOvertime('overtime', date, duration, project, 
-                                 meal, )
+                                 meal,des )
         
     
     def showQueryResult(self):
@@ -105,10 +108,10 @@ class UI_ApplyOvertime(Ui_MemberMainWindow):
 
 if __name__ =='__main__':
     app = QtGui.QApplication(sys.argv) 
+    #app.setStyle(QtGui.QStyleFactory.create('Plasitc'))
     path = sys.argv[0]
     cwd = os.path.dirname(path)
     xmlPath = cwd + '''\member.xml'''
-    print xmlPath
     ui = UI_ApplyOvertime(xmlpath = xmlPath)
     ui.show()
 sys.exit(app.exec_()) 

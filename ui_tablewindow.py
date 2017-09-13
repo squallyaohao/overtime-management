@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'D:\Dev\overtime-management\ui_tablewindow.ui'
+# Form implementation generated from reading ui file 'F:\Dev\overtime-management\ui_tablewindow.ui'
 #
-# Created: Tue Sep 12 23:30:01 2017
+# Created: Wed Sep 13 12:56:29 2017
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
@@ -26,9 +26,9 @@ except AttributeError:
 class Ui_Form(QtGui.QWidget):
     def setupUi(self, Form):
         Form.setObjectName(_fromUtf8("Form"))
-        Form.resize(582, 511)
+        Form.resize(779, 511)
         self.layoutWidget = QtGui.QWidget(Form)
-        self.layoutWidget.setGeometry(QtCore.QRect(20, 20, 541, 371))
+        self.layoutWidget.setGeometry(QtCore.QRect(20, 20, 751, 371))
         self.layoutWidget.setObjectName(_fromUtf8("layoutWidget"))
         self.verticalLayout = QtGui.QVBoxLayout(self.layoutWidget)
         self.verticalLayout.setMargin(0)
@@ -54,7 +54,7 @@ class Ui_Form(QtGui.QWidget):
         self.verticalLayout.addWidget(self.tableWidget)
         self.verticalLayout.setStretch(1, 1)
         self.horizontalLayoutWidget = QtGui.QWidget(Form)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(400, 400, 161, 80))
+        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(610, 400, 161, 80))
         self.horizontalLayoutWidget.setObjectName(_fromUtf8("horizontalLayoutWidget"))
         self.horizontalLayout = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
@@ -71,7 +71,7 @@ class Ui_Form(QtGui.QWidget):
         self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
         self.horizontalLayout.addWidget(self.pushButton_2)
         self.horizontalLayoutWidget_2 = QtGui.QWidget(Form)
-        self.horizontalLayoutWidget_2.setGeometry(QtCore.QRect(20, 400, 161, 81))
+        self.horizontalLayoutWidget_2.setGeometry(QtCore.QRect(40, 400, 161, 81))
         self.horizontalLayoutWidget_2.setObjectName(_fromUtf8("horizontalLayoutWidget_2"))
         self.horizontalLayout_2 = QtGui.QHBoxLayout(self.horizontalLayoutWidget_2)
         self.horizontalLayout_2.setSpacing(0)
@@ -118,6 +118,7 @@ class Ui_Form(QtGui.QWidget):
         self.label_3.setAlignment(QtCore.Qt.AlignCenter)
         self.label_3.setObjectName(_fromUtf8("label_3"))
         self.horizontalLayout_2.addWidget(self.label_3)
+        self.tableWidget.horizontalHeader().setResizeMode(QtGui.QHeaderView.Stretch)
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)

@@ -22,12 +22,11 @@ import random
 #in this case list should be like  ['date','name','project','duration','meal']
 #we use utf-8 to encode our database,so make sure every element in the list should be a unicode string
 def sqlInsertState(table='',list=[]):
-    insert_statement = 'insert into ' + table + " values('" + list[0] + "','" + list[1] + "','" + list[2] + "','" + list[3] + "','" + list[4] +"');"
-    #for data in list:
-        #state2 = state2 + data + "','"
-    #state2 = state2[:-2] 
-    #insert_statement = state1 + state2 + state3
-    #print insertstate
+    insert_statement = "insert into " + table + " values('"
+    for value in list:
+        insert_statement = insert_statement + value + "','"
+    insert_statement = insert_statement[:-2] + ");"   
+    #insert_statement = "insert into " + table + " values('" + list[0] + "','" + list[1] + "','" + list[2] + "','" + list[3] + "','" + list[4] + "','" + list[5] + "');"
     return insert_statement
 
 
@@ -37,7 +36,7 @@ def sqlInsertState(table='',list=[]):
 #the list should contain a serial of data that match the format of the table 
 #in this case list should be like ['date','name','project','duration','meal']
 def sqlUpdateState(table='',list=''):
-    state1 = 'update ' + table + ' set project="' + list[2] + '",duration=' + list[3] +',meal="' + list[4] +'" '
+    state1 = 'update ' + table + ' set project="' + list[2] + '",duration=' + list[3] +',meal="' + list[4] +'", description = "' + list[5] + '" '
     state2 = 'where date="' + list[0] + '" and name="' + list[1] + '";'
     update_statement = state1 + state2
     #print updatestate

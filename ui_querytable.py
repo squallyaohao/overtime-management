@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 from ui_tablewindow import Ui_Form
 import excelUtility
 
-tablehead = ['日期','姓名','加班项目','加班时长','加班餐']
+tablehead = [u'日期',u'姓名',u'加班项目',u'加班时长',u'加班餐',u'加班描述']
 
 
 class Ui_QueryTable(Ui_Form):
@@ -34,7 +34,7 @@ class Ui_QueryTable(Ui_Form):
         self.numCols = numCols
         self.tableWidget.setRowCount(numRows)
         self.tableWidget.setColumnCount(numCols)
-        self.tableWidget.setHorizontalHeaderLabels(['Date','Name','Project','Duration','Meal'])
+        self.tableWidget.setHorizontalHeaderLabels(tablehead)
         #self.tableWidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         textFont = QtGui.QFont('Hei',11)
         #start draw table
@@ -55,7 +55,7 @@ class Ui_QueryTable(Ui_Form):
                             comboItem.addItem(pro)
                     comboItem.setCurrentIndex(0)
                     self.tableWidget.setCellWidget(i,j,comboItem)
-        self.calcTotalDuration()
+        #self.calcTotalDuration()
         
         
     

@@ -2,8 +2,15 @@
 #coding=utf-8
 
 import sys
-import os.path
+import os,os.path
+import codecs
 import xml.etree.cElementTree as ET
+import time
+import mysql_utility
+import MySQLdb as sql
+
+
+depDict = {0:'三维动画',1:'投标动画',2:'二维动画',3:'平面设计',4:'编导'}
 
 
 def initXML(path):
@@ -57,7 +64,7 @@ class Department():
                         print '项目名称: '.decode('utf-8') + pro
                 except AttributeError,e:
                     print e
-                    self.projectList =[]                    
+                    self.projectList =[]
           
             elif os.path.exists(args[0]) and  os.path.splitext(args[0])[1]=='.xml' and os.path.getsize(args[0])==0:
                 self.dataPath= args[0]
@@ -77,12 +84,13 @@ class Department():
             print 'pleas pass the data file(*.xml)'
         
         
-    def setDepName(self,name):
-        self.depName = name
+    def setDepName(self,dep):
+        self.depName = dep
+        #print '设置部门: '.decode('utf-8') + depDict[dep].decode('utf-8')
         xmltree = ET.parse(self.dataPath)
-        root = xmltree.getroot()
-        root.set('depName',name.decode('utf-8'))
-        xmltree.write(self.dataPath )
+        department = xmltree.getroot()
+        department.set('depName',str(dep))
+        xmltree.write(self.dataPath)
             
     
     def getDepName(self):
@@ -119,27 +127,60 @@ class Department():
         return self.memberList
 
     
-    def addProject(self,project):
-        if project not in self.projectList:
-            self.projectList.add(project)          
-            print '添加项目： '.decode('utf-8') + project.decode('utf-8')
-        xmltree = ET.parse(self.dataPath)
-        projectList = xmltree.find('ProjectList')
-        projectList.clear()
-        for pro in self.projectList:
-            newProject = ET.SubElement(projectList,'project')
-            newProject.set('project-name',pro.decode('utf-8'))
-        xmltree.write(self.dataPath)   
+    def addProject(self,projectdict):
+        #if project not in self.projectList:
+            #self.projectList.add(project)          
+            #print '添加项目： '.decode('utf-8') + project.decode('utf-8')
+        #xmltree = ET.parse(self.dataPath)
+        #projectList = xmltree.find('ProjectList')
+        #projectList.clear()
+        #for pro in self.projectList:
+            #newProject = ET.SubElement(projectList,'project')
+            #newProject.set('project-name',pro.decode('utf-8'))
+        #xmltree.write(self.dataPath)
+        loginfile = open('hostname','r').read().split(' ')
+        hostid = loginfile[0]
+        database = loginfile[1]
+        user = loginfile[2]
+        pwd = loginfile[3]
+        if hostid[:3] == codecs.BOM_UTF8:
+            hostid = hostid[3:] 
+        conn = sql.connect(hostid,user,pwd,database,charset='utf8')
+        cursor = conn.cursor()
+        project = projectdict.keys()[0]
+        insert_statement = mysql_utility.sqlInsertState('project',[project,projectdict[project]])
+        print insert_statement
+        cursor.execute(insert_statement)
+        conn.commit()
+        cursor.close()
+        return 1
+            
+             
         
-    def deleteProject(self,pro):
-        if pro in self.projectList:
-            self.projectList.remove(pro)
-        xmltree = ET.parse(self.dataPath)
-        projectlist = xmltree.getroot().find('ProjectList')
-        for project in projectlist.findall('project'):
-            if project.get('project-name') == pro.decode('utf-8'):
-                projectlist.remove(project)
-        xmltree.write(self.dataPath)        
+    def deleteProject(self,projectdict):
+        #if pro in self.projectList:
+            #self.projectList.remove(pro)
+        #xmltree = ET.parse(self.dataPath)
+        #projectlist = xmltree.getroot().find('ProjectList')
+        #for project in projectlist.findall('project'):
+            #if project.get('project-name') == pro.decode('utf-8'):
+                #projectlist.remove(project)
+        #xmltree.write(self.dataPath)
+        loginfile = open('hostname','r').read().split(' ')
+        hostid = loginfile[0]
+        database = loginfile[1]
+        user = loginfile[2]
+        pwd = loginfile[3]
+        if hostid[:3] == codecs.BOM_UTF8:
+            hostid = hostid[3:]
+        conn = sql.connect(hostid,user,pwd,database,charset='utf8')
+        cursor = conn.cursor()
+        delete_statment = mysql_utility.sqldeletState('project',projectdict)
+        print delete_statment
+        cursor.execute(delete_statment)
+        conn.commit()
+        cursor.close()
+        return 1
         
     def getAllProjects(self):
         print '项目列表： '.decode('utf-8')
@@ -147,17 +188,65 @@ class Department():
             print '\t'+pro.decode('utf-8')
         return self.projectList
         
+        
+    def getProjectsFromServer(self,table=''):
+        projectDict = {}
+        loginfile = open('hostname','r').read().split(' ')
+        hostid = loginfile[0]
+        database = loginfile[1]
+        user = loginfile[2]
+        pwd = loginfile[3]
+        if hostid[:3] == codecs.BOM_UTF8:
+            hostid = hostid[3:]    
+        conn = sql.connect(hostid,user,pwd,database,charset='utf8')
+        cursor = conn.cursor()
+        query_statement = mysql_utility.sqlQuerysState(table)
+        cursor.execute(query_statement)
+        conn.commit()
+        result = cursor.fetchall()
+        for data in result:
+            if projectDict.has_key(data[0]):
+                if data[1] is not None and len(data[1])>0:
+                    projectDict[data[0]].append(data[1])
+                else:
+                    projectDict[data[0]]=[]
+            else:
+                if data[1] is not None and len(data[1])>0:
+                    projectDict[data[0]]=[data[1]]
+                else:
+                    projectDict[data[0]]=[]                
+        cursor.close()
+        conn.close()
+        self.projectList = projectDict        
+        xmltree = ET.parse(self.dataPath)
+        projectList = xmltree.getroot().find('ProjectList')
+        projectList.clear()
+        for pro in self.projectList:
+            newproject = ET.SubElement(projectList,'Project')
+            newproject.set('project-name',pro)
+            if len(self.projectList[pro])>0:
+                for subpro in self.projectList[pro]:
+                    subproject = ET.SubElement(newproject,'Subproject')
+                    subproject.text = subpro
+        xmltree.write(self.dataPath)
+        return projectDict
+    
+    
+    def updateServer(self,table='',l=[]): 
+        pass
+        
 
 
 def testIntializeDepartment(path):
     a = Department(path)
-    a.setDepName('三维')
+    a.setDepName(0)
     a.addMember('姚灏')
     a.addMember('孙林')
     a.addMember('孙林')
     a.addProject('遵义科技馆')
     a.addProject('滁州科技馆')    
     a.addProject('滁州科技馆')
+    a.getProjectsFromServer(table='project')
     
 def testChangeDepartment(path):
     a = Department(path)
@@ -169,5 +258,5 @@ def testChangeDepartment(path):
     a.deleteProject('中国科技馆')
 
 if __name__ == '__main__':
-    #testIntializeDepartment('F:\Dev\overtime-management\department1.xml')
-    testChangeDepartment('F:\Dev\overtime-management\department1.xml')
+    testIntializeDepartment('F:\Dev\overtime-management\department1.xml')
+    #testChangeDepartment('F:\Dev\overtime-management\department1.xml')

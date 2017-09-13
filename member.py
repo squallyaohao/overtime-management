@@ -100,7 +100,6 @@ class Member():
     
     def setDepartment(self,dep):
         self.department = dep
-        print '设置部门: '.decode('utf-8') + depDict[dep].decode('utf-8')
         xmltree = ET.parse(self.dataPath)
         member = xmltree.getroot()
         depTag = member.find('Department')
@@ -125,18 +124,14 @@ class Member():
     
     
     def getTitle(self):
-        print '职位： '.decode('utf-8') + self.title.decode('utf-8')
         return self.title
     
     
     def getAllProjects(self):
-        print '项目列表： '.decode('utf-8')
-        for pro in self.projectList:
-            print '\t' + pro
         return self.projectList
     
     
-    def updateProjects(self,table=''):
+    def getProjectsFromServer(self,table=''):
         #update project list from sql server
         loginfile = open('hostname','r').read().split(' ')
         hostid = loginfile[0]
@@ -157,7 +152,7 @@ class Member():
             temp.append(data[0])
         cursor.close()
         conn.close()
-        self.projectList = temp
+        self.projectList = set(temp)
         #write new project list into local xml file
         xmltree = ET.parse(self.dataPath)
         projectList = xmltree.getroot().find('ProjectList')
@@ -204,7 +199,7 @@ class Member():
         conn = sql.connect(hostid,user,pwd,database,charset='utf8')
         cursor = conn.cursor()
         #cursor.execute('delete from overtime;')
-        insert_statement = mysql_utility.sqlInsertState(table,[date,self.getName(),project,duration,meal])
+        insert_statement = mysql_utility.sqlInsertState(table,[date,self.getName(),project,duration,meal,description])
         print insert_statement
         cursor.execute(insert_statement)
         conn.commit()
@@ -245,8 +240,7 @@ class Member():
             updatestatement = mysql_utility.sqlUpdateState(table,row)
             print updatestatement
             cursor.execute(updatestatement)
-            conn.commit()
-        
+            conn.commit()        
         cursor.close()
         conn.close()
         return 1
@@ -268,14 +262,12 @@ class Leader(Member):
         try:
             depdata = member.find('DepartmentData')
             self.depDataPath = depdata.text
-            print 'department :' + self.depDataPath
         except AttributeError ,e:
             depdata = ET.SubElement(member, 'DepartmentData')
             dirname = os.path.dirname(self.dataPath)
             depxmlname = dirname + '\\department.xml'
             depdata.text = depxmlname
             self.depDataPath = depxmlname
-            print self.depDataPath
             xmltree.write(self.dataPath) 
         
         
