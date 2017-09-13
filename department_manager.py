@@ -19,11 +19,17 @@ class DepartmentManager(Ui_MainWindow):
         super(Ui_MainWindow,self).__init__(parent)
         self.setupUi(self)
         self.department = department.Department(xmlpath)
-        dep = self.department.getDepName()
+        self.dep = self.department.getDepName()
+        self.dep_line.setCurrentIndex(self.dep)
         self.tabWidget.setCurrentIndex(0)
+        curDate = QtCore.QDate.currentDate()
+        self.query_fromdate.setDate(curDate)
+        self.query_todate.setDate(curDate)
         self.projectDict = {}
         self.getAllProject()
+        self.getAllMembers()
         self.drawList('project_list',self.projectDict)
+        self.drawList('member_list',self.allMembers)
         #set up connections
         self.setConnections()
         
@@ -35,7 +41,9 @@ class DepartmentManager(Ui_MainWindow):
         self.connect(self.add_project_btn,QtCore.SIGNAL('clicked()'),self.addProject)
         self.connect(self.delete_project_btn,QtCore.SIGNAL('clicked()'),self.deleteProject)
         self.connect(self.add_subproject_btn,QtCore.SIGNAL('clicked()'),self.addSubproject)
-        self.connect(self.delete_subproject,QtCore.SIGNAL('clicked()'),self.deleteSubproject)
+        self.connect(self.delete_subproject_btn,QtCore.SIGNAL('clicked()'),self.deleteSubproject)
+        self.connect(self.project_name,QtCore.SIGNAL('returnPressed()'),self.addProject)
+        self.connect(self.subproject_name,QtCore.SIGNAL('returnPressed()'),self.addSubproject)
         self.project_list.itemClicked.connect(self.showSubproject)
         #self.connect(self.project_list,QtCore.SIGNAL('doubleClicked()'),self.showSubproject)
  
@@ -45,6 +53,8 @@ class DepartmentManager(Ui_MainWindow):
         
         
     def confirmDepartment(self):
+        index = self.dep_line.currentIndex()
+        self.department.setDepName(index)
         self.dep_line.setEnabled(False)
         
     
@@ -95,10 +105,21 @@ class DepartmentManager(Ui_MainWindow):
             
     
     
-
     
     def deleteSubproject(self):
-        pass
+        curProjectItem = self.project_list.currentItem()
+        curSubprojectItem = self.subproject_list.currentItem()
+        curSubprojectIndex = self.subproject_list.currentRow()
+        if curSubprojectItem is not None:
+            curProject= curProjectItem.text()
+            curSubproject = curSubprojectItem.text()
+            projectdict = {}
+            projectdict['project'] = unicode(curProject)
+            projectdict['subproject'] = unicode(curSubproject)
+            success = self.department.deleteProject(projectdict)
+            if success:
+                self.subproject_list.takeItem(curSubprojectIndex)
+                self.projectDict[unicode(curProject)].remove(unicode(curSubproject))
     
     
 
@@ -124,6 +145,10 @@ class DepartmentManager(Ui_MainWindow):
     
     def getAllProject(self):
         self.projectDict = self.department.getProjectsFromServer('project')
+        
+        
+    def getAllMembers(self):
+        self.allMembers = self.department.getAllMembersFromServer('members')
         
         
         

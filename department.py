@@ -40,11 +40,10 @@ class Department():
 
                 #get department name
                 try:
-                    self.depName = root.get('depName').encode('utf-8')
-                    print '部门名称：'.decode('utf-8') + root.get('depName')
+                    self.depName = int(root.get('depName').encode('utf-8'))
                 except AttributeError,e:
-                    self.depName = ''
-                    print '部门名称：'.decode('utf-8') 
+                    self.depName = 0
+
 
                 #loop all member and get their names
                 try:
@@ -85,16 +84,15 @@ class Department():
         
         
     def setDepName(self,dep):
-        self.depName = dep
-        #print '设置部门: '.decode('utf-8') + depDict[dep].decode('utf-8')
+        self.department = dep
+        print dep
         xmltree = ET.parse(self.dataPath)
         department = xmltree.getroot()
-        department.set('depName',str(dep))
+        department.set('depName',str(self.department))
         xmltree.write(self.dataPath)
             
     
     def getDepName(self):
-        print '部门名称： '.decode('utf-8') +self.depName.decode('utf-8')
         return self.depName
     
     def addMember(self,member):
@@ -120,10 +118,26 @@ class Department():
         xmltree.write(self.dataPath)
         
     
-    def getAllMembers(self):
-        print '成员列表： '.decode('utf-8')
-        for mem in self.memberList:
-            print '\t'+mem.decode('utf-8')
+    def getAllMembersFromServer(self,table=''):
+        loginfile = open('hostname','r').read().split(' ')
+        hostid = loginfile[0]
+        database = loginfile[1]
+        user = loginfile[2]
+        pwd = loginfile[3]
+        if hostid[:3] == codecs.BOM_UTF8:
+            hostid = hostid[3:] 
+        conn = sql.connect(hostid,user,pwd,database,charset='utf8')
+        cursor = conn.cursor()
+        query_statement = mysql_utility.sqlQuerysState(table)
+        cursor.execute(query_statement)
+        conn.commit()
+        result = cursor.fetchall()
+        if result is not None:
+            memberlist = []
+            for data in result:
+                memberlist.append(data[1])
+                print data[1]
+        self.memberList = memberlist
         return self.memberList
 
     
@@ -204,17 +218,18 @@ class Department():
         cursor.execute(query_statement)
         conn.commit()
         result = cursor.fetchall()
-        for data in result:
-            if projectDict.has_key(data[0]):
-                if data[1] is not None and len(data[1])>0:
-                    projectDict[data[0]].append(data[1])
+        if result is not None:
+            for data in result:
+                if projectDict.has_key(data[0]):
+                    if data[1] is not None and len(data[1])>0:
+                        projectDict[data[0]].append(data[1])
+                    else:
+                        projectDict[data[0]]=[]
                 else:
-                    projectDict[data[0]]=[]
-            else:
-                if data[1] is not None and len(data[1])>0:
-                    projectDict[data[0]]=[data[1]]
-                else:
-                    projectDict[data[0]]=[]                
+                    if data[1] is not None and len(data[1])>0:
+                        projectDict[data[0]]=[data[1]]
+                    else:
+                        projectDict[data[0]]=[]                
         cursor.close()
         conn.close()
         self.projectList = projectDict        
