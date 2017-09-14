@@ -216,18 +216,13 @@ class DepartmentManager(Ui_MainWindow):
             curTable = []
             curTable.append(overtimetablehead)
             rows = self.query_overtime_table.rowCount()
-            cols = self.query_overtime_table.colorCount()
+            cols = self.query_overtime_table.columnCount()
             for i in range(0,rows):
                 temp = []
                 for j in range(0,cols):
-                    item = self.query_overtime_table.item(i,j)
-                    if j!=2:                 
-                        t = item.text()
-                        temp.append(unicode(t))
-                    else:
-                        comboItem = self.query_overtime_table.cellWidget(i,j)
-                        t = comboItem.currentText()
-                        temp.append(unicode(t))
+                    item = self.query_overtime_table.item(i,j)               
+                    t = item.text()
+                    temp.append(unicode(t))
                 curTable.append(temp)        
             #catch error if IOError
             error = excelUtility.exportToExcel(path,curTable)
