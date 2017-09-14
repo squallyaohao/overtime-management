@@ -4,7 +4,7 @@
 import sys,os,os.path
 from PyQt4 import QtCore
 from PyQt4 import QtGui
-from ui_department_manager import Ui_MainWindow
+from ui_department_manager2 import Ui_MainWindow
 from ui_querytable import Ui_QueryTable
 import xml.etree.ElementInclude as ET
 import department,member
@@ -27,10 +27,8 @@ class DepartmentManager(Ui_MainWindow):
         self.query_fromdate.setDate(curDate)
         self.query_todate.setDate(curDate)
         self.projectDict = {}
-        self.taksDict = {}
         self.allMembers = []
         self.getAllProject()
-        self.getAllTask()
         self.getAllMembers()
         #intialize all widgets
         self.drawList('project_list',self.projectDict)
@@ -73,9 +71,6 @@ class DepartmentManager(Ui_MainWindow):
     
     def addProject(self):
         project = self.project_name.text()
-        project_start_date = self.project_start_date.date()
-        project_end_date = self.project_end_date.date()
-        project_desc = self.project_desc.toPlainText()
         if project not in self.projectDict.keys() and project is not None:
             projectdict = {}
             projectdict[unicode(project)]=''
@@ -91,10 +86,6 @@ class DepartmentManager(Ui_MainWindow):
     def addSubproject(self):
         curProjectItem = self.project_list.currentItem()
         subproject = self.subproject_name.text()
-        subproject.category = self.subproject_category.currentText()
-        subproject_start_date = self.subproject_start_date.date()
-        subproject_end_date = self.subproject_end_date.date()
-        subproject_start_desc = self.subproject_desc.toPlainText()
         if curProjectItem is not None :
             curProject = curProjectItem.text()
             if subproject is not None and subproject not in self.projectDict[unicode(curProject)]:            
@@ -109,11 +100,7 @@ class DepartmentManager(Ui_MainWindow):
             
                 
     def addTask(self):
-        task_name = self.task_name.text()
-        task_start_date = self.task_start_date.date()
-        task_end_date = self.task_end_date.date()
-        task_description = self.task_description.toPlainText
-        
+        pass
     
     
     def addMember(self):
@@ -225,8 +212,6 @@ class DepartmentManager(Ui_MainWindow):
     def getAllProject(self):
         self.projectDict = self.department.getProjectsFromServer('project')
         
-    def getAllTask(self):
-        pass
         
     def getAllMembers(self):
         self.allMembers = self.department.getAllMembersFromServer('members')

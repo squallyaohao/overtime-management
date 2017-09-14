@@ -222,6 +222,7 @@ class Member():
         cursor.execute(querystatement)
         conn.commit()
         result = cursor.fetchall()
+        cursor.close()
         return result
     
     

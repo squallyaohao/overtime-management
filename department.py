@@ -95,17 +95,36 @@ class Department():
     def getDepName(self):
         return self.depName
     
-    def addMember(self,member):
-        if member not in self.memberList:
-            self.memberList.add(member)
-            print '添加成员： '.decode('utf-8') + member.decode('utf-8')
-        xmltree = ET.parse(self.dataPath)
-        memberList = xmltree.find('MemberList')
-        memberList.clear()
-        for mem in self.memberList:
-            newMember = ET.SubElement(memberList,'member')
-            newMember.set('name',mem.decode('utf-8'))
-        xmltree.write(self.dataPath )
+    def addMember(self,member=[]):
+        #if member not in self.memberList:
+            #self.memberList.add(member)
+            #print '添加成员： '.decode('utf-8') + member.decode('utf-8')
+        #xmltree = ET.parse(self.dataPath)
+        #memberList = xmltree.find('MemberList')
+        #memberList.clear()
+        #for mem in self.memberList:
+            #newMember = ET.SubElement(memberList,'member')
+            #newMember.set('name',mem.decode('utf-8'))
+        #xmltree.write(self.dataPath )
+        loginfile = open('hostname','r').read().split(' ')
+        hostid = loginfile[0]
+        database = loginfile[1]
+        user = loginfile[2]
+        pwd = loginfile[3]
+        if hostid[:3] == codecs.BOM_UTF8:
+            hostid = hostid[3:] 
+        conn = sql.connect(hostid,user,pwd,database,charset='utf8')
+        cursor = conn.cursor()
+        queryAllMember = cursor.execute('select * from members;')
+        conn.commit()
+        result = cursor.fetchall()
+        member.insert(0, str(len(result)+1))
+        insert_statement = mysql_utility.sqlInsertState('members',member)
+        print insert_statement
+        cursor.execute(insert_statement)
+        conn.commit()
+        cursor.close()
+        return 1        
         
     def deleteMember(self,name):
         if name in self.memberList:
@@ -139,6 +158,9 @@ class Department():
                 print data[1]
         self.memberList = memberlist
         return self.memberList
+    
+    def getAllTasksFromeServer(self,table=''):
+        pass
 
     
     def addProject(self,projectdict):
@@ -247,9 +269,31 @@ class Department():
         return projectDict
     
     
+    
+    
     def updateServer(self,table='',l=[]): 
         pass
         
+   
+    
+    def queryOvertime(self,table='',date=(),member='',project='',subproject=''):
+        loginfile = open('hostname','r').read().split(' ')
+        hostid = loginfile[0]
+        database = loginfile[1]
+        user = loginfile[2]
+        pwd = loginfile[3]
+        if hostid[:3] == codecs.BOM_UTF8:
+            hostid = hostid[3:]
+        conn = sql.connect(hostid,user,pwd,database,charset='utf8')
+        cursor = conn.cursor()
+        query_condition = {'date':date,'name':member,'project':project,'subproject':subproject}
+        #query_condition = {'date':date,'name':member,'project':project}
+        querystatement = mysql_utility.sqlQuerysState(table,query_condition)
+        cursor.execute(querystatement)
+        conn.commit()
+        result = cursor.fetchall()
+        cursor.close()
+        return result
 
 
 def testIntializeDepartment(path):

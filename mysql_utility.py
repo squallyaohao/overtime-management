@@ -64,18 +64,35 @@ def sqlQuerysState(table='',condition={}):
         timequery = ''
         namequery = ''    
         projectquery = ''
+        subprojectquery = ''
+        #query date
         if condition.has_key('date'):
             timequery = "(date>'" + condition['date'][0] + "' or date='" + condition['date'][0] + "') and (date<'" + condition['date'][1] + "' or date='" + condition['date'][1] + "') and "
-        if condition.has_key('name') and condition['name'] != '*':
-            namequery = "name='" + condition['name'] + "' and "
-        else:
-            namequery = "name like '%' and "
-        if condition.has_key('project') and condition['project'] != '*':
-            projectquery = "project='" + condition['project'] + "'; "
-        else:
-            projectquery = "project like '%';"
+        
+        #query name
+        if condition.has_key('name'):
+            if condition['name'] != '*':
+                namequery = "name='" + condition['name'] + "' and "
+            else:
+                namequery = "name like '%' and "
+        
+        #query project
+        if condition.has_key('project'): 
+            if condition['project'] != '*':
+                projectquery = "project='" + condition['project'] + "' and "
+            else:
+                projectquery = "project like '%' and "
+        
+        #query subproject
+        if condition.has_key('subproject'): 
+            if condition['subproject']!='*':
+                subprojectquery = "subproject='" + condition['subproject'] + "' and "
+            else:
+                subprojectquery = "subproject like '%' and "
+            
     
-        statement = statement + timequery + namequery + projectquery
+        statement = statement + timequery + namequery + projectquery + subprojectquery
+        statement = statement[:-5] + ";"
     else:
         statement = "select * from " + table + ";"
 

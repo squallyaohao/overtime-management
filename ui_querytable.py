@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 from ui_tablewindow import Ui_Form
 import excelUtility
 
-tablehead = [u'日期',u'姓名',u'加班项目',u'加班时长',u'加班餐',u'加班描述']
+tablehead = [u'日期',u'姓名',u'加班项目',u'加班展项',u'加班时长',u'加班餐',u'加班描述']
 
 
 class Ui_QueryTable(Ui_Form):
@@ -29,7 +29,7 @@ class Ui_QueryTable(Ui_Form):
     #show query result    
     def drawTable(self,result,projectlist):
         numRows = len(result)
-        numCols = len(result[0])
+        numCols = len(tablehead)
         self.numRows = numRows
         self.numCols = numCols
         self.tableWidget.setRowCount(numRows)
@@ -55,7 +55,7 @@ class Ui_QueryTable(Ui_Form):
                             comboItem.addItem(pro)
                     comboItem.setCurrentIndex(0)
                     self.tableWidget.setCellWidget(i,j,comboItem)
-        #self.calcTotalDuration()
+        self.calcTotalDuration()
         
         
     
@@ -63,7 +63,7 @@ class Ui_QueryTable(Ui_Form):
         total = 0
         numRows = self.numRows
         for i in range(numRows):
-            dur = int(self.tableWidget.item(i,3).text())
+            dur = int(self.tableWidget.item(i,4).text())
             total = total + dur
         self.totaltime.setText(str(total))
                 
