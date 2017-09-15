@@ -11,10 +11,10 @@ import MySQLdb as sql
 
 
 depDict = {0:'三维动画',1:'投标动画',2:'二维动画',3:'平面设计',4:'编导'}
-membersTableList = ['name','id','department','title'] 
-projectTableList = ['project','start_date','finish_date','subprojects','description']
-subprojectTableList = ['subproject','subproject_category','start_date','finish_date','tasks','subproject_description']
-tasksTableList = ['task','department','project','subproject','start_date','finish_date','progress','members','description']
+membersTableList = [u'id',u'department',u'title'] 
+projectTableList = [u'start_date',u'finish_date',u'subprojects',u'description']
+subprojectTableList = [u'subproject_category',u'project',u'start_date',u'finish_date',u'tasks',u'subproject_description']
+tasksTableList = [u'department',u'project',u'subproject',u'start_date',u'finish_date',u'progress',u'members',u'description']
 
 
 def initXML(path):
@@ -37,7 +37,6 @@ class Department():
             if len(args)>1:
                 print 'More than one argument has been passed!'
             elif os.path.exists(args[0]) and os.path.getsize(args[0])>0 and os.path.splitext(args[0])[1]=='.xml':
-                print 'start initialzie'
                 self.dataPath = args[0]
                 xmltree = ET.parse(self.dataPath)
                 root = xmltree.getroot()
@@ -88,7 +87,7 @@ class Department():
             
             self.projectDict = {}
             self.subprojectDict = {}
-            self.taksDict = {}
+            self.tasksDict = {}
             self.allMembers = {}            
         
         
@@ -120,11 +119,10 @@ class Department():
     def tableInsert(self,table='',vars_list=[]):
         conn,cursor = self.connectToServer()
         insert_statement = mysql_utility.sqlInsertState(table,vars_list)
-        print insert_statement
-
         cursor.execute(insert_statement)
         conn.commit()
         cursor.close()
+        conn.close()
         return 1
 
     
@@ -135,13 +133,24 @@ class Department():
         cursor.execute(query_statement)
         conn.commit()
         result = cursor.fetchall()
+        for row in result:
+            tempDict[row[0]] = dict(zip(tableList,row[1:]))
+        cursor.close()
+        conn.close()
+        return tempDict
     
     
+    def updateServer(self,table='',varsList=[],conditionsList=[]): 
+        conn,cursor = self.connectToServer()
+        update_statement = mysql_utility.sqlUpdateState(table, varsList,conditionsList)
+        print update_statement
+        cursor.execute(update_statement)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return 1
     
-    def addMember(self,member=[]):
-        success = self.tableInsert(table='members', vars_list=member)
-        return success
-        
+     
         
     def deleteMember(self,name):
         if name in self.memberList:
@@ -155,54 +164,103 @@ class Department():
         
         
     
-    def getAllMembersFromServer(self,table=''):
-        conn,cursor = self.connectToServer()
-        query_statement = mysql_utility.sqlQuerysState(table)
-        cursor.execute(query_statement)
-        conn.commit()
-        result = cursor.fetchall()
-        if result is not None:
-            memberlist = []
-            for data in result:
-                memberlist.append(data[1])
-                print data[1]
-        self.memberList = memberlist
-        return self.memberList
+    def getMembersFromServer(self):
+        self.allMembers = self.tableQuery(table='members', tableList=membersTableList)
+        return self.allMembers
 
+
+    def getProjectsFromServer(self):
+        self.projectDict = self.tableQuery(table='project',tableList=projectTableList)
+        return self.projectDict
 
     
-    def getAllTasksFromeServer(self,table=''):
-        pass
+    def getSubprojectFromServer(self):
+        self.subprojectDict = self.tableQuery(table='subproject', tableList=subprojectTableList)
+        return self.subprojectDict
+    
+    
+    def getTasksFromeServer(self,table=''):
+        self.tasksDict = self.tableQuery(table='tasks', tableList=tasksTableList)
+        return self.tasksDict
 
     
     def addProject(self,project_vars=[]):
         success = self.tableInsert(table='project', vars_list=project_vars)
-        return success
+        if success:
+             newProjectDict = dict(zip(projectTableList, project_vars[1:]))
+             return newProjectDict
+        else:
+             return 0        
 
-    def addSubproject(sefl,subproject_vars=[]):
+    def addSubproject(self,subproject_vars=[]):
         success = self.tableInsert(table='subproject', vars_list=subproject_vars)
-        return success
+        if success:
+            newSubprojectDict = dict(zip(subprojectTableList, subproject_vars[1:]))
+            return newSubprojectDict
+        else:
+            return 0 
+
+    def addTask(self,task_vars=[]):
+        success = self.tableInsert(table='tasks',vars_list=task_vars)
+        if success:
+            newTaskDict = dict(zip(tasksTableList,task_vars[1:]))
+            return newTaskDict
+        else:
+            return 0
+    
+    
+    def addMember(self,member=[]):
+        success = self.tableInsert(table='members', vars_list=member)
+        if success:
+            newMemberDict = dict(zip(membersTableList,member[1:]))
+            return newMemberDict
+        else :
+            return 0            
     
         
     def deleteProject(self,projectdict):
-        loginfile = open('hostname','r').read().split(' ')
-        hostid = loginfile[0]
-        database = loginfile[1]
-        user = loginfile[2]
-        pwd = loginfile[3]
-        if hostid[:3] == codecs.BOM_UTF8:
-            hostid = hostid[3:]
-        conn = sql.connect(hostid,user,pwd,database,charset='utf8')
-        cursor = conn.cursor()
-        delete_statment = mysql_utility.sqldeletState('project',projectdict)
-        print delete_statment
-        cursor.execute(delete_statment)
+        conn,cursor = self.connectToServer()
+        delete_project_statment = mysql_utility.sqldeletState('project',projectdict)
+        delete_subproject_statement = mysql_utility.sqldeletState('subproject', projectdict)
+        delete_tasks_statement = mysql_utility.sqldeletState('tasks',projectdict)
+        cursor.execute(delete_project_statment)
+        conn.commit()
+        cursor.execute(delete_subproject_statement)
+        conn.commit()
+        cursor.execute(delete_tasks_statement)
         conn.commit()
         cursor.close()
+        conn.close()
         return 1
-        
-        
-        
+
+
+    def deleteSubproject(self,subprojectdict,project):
+        conn,cursor = self.connectToServer()
+        delete_subproject_statement = mysql_utility.sqldeletState('subproject',subprojectdict)
+        delete_tasks_statement = mysql_utility.sqldeletState('tasks',subprojectdict)
+        cursor.execute(delete_subproject_statement)
+        conn.commit()
+        cursor.execute(delete_tasks_statement)
+        conn.commit()     
+        query_project_statement = mysql_utility.sqlQuerysState('project',{'project':project})
+        cursor.execute(query_project_statement)
+        conn.commit()
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        projectDict = {}
+        projectDict[project] = dict(zip(projectTableList,result[1:]))
+        print 'project'
+        print projectDict[project]['subprojects']
+        print subprojectdict['subproject']+';'
+        projectDict[project]['subprojects'] = projectDict[project]['subprojects'].replace(subprojectdict['subproject']+';','')
+        varsList = [('subprojects',projectDict[project]['subprojects'])]
+        conditionsList = [('project',project)]
+        self.updateServer('project', varsList, conditionsList) 
+        return 1
+
+
+
     def getAllProjects(self):
         print '项目列表： '.decode('utf-8')
         for pro in self.projectList:
@@ -210,34 +268,9 @@ class Department():
         return self.projectList
         
         
-    def getProjectsFromServer(self,table=''):
-        projectDict = {}
-        conn,cursor = self.connectToServer()
-        query_statement = mysql_utility.sqlQuerysState(table)
-        cursor.execute(query_statement)
-        conn.commit()
-        result = cursor.fetchall()
-        if result is not None:
-            for data in result:
-                if projectDict.has_key(data[0]):
-                    if data[1] is not None and len(data[1])>0:
-                        projectDict[data[0]].append(data[1])
-                    else:
-                        projectDict[data[0]]=[]
-                else:
-                    if data[1] is not None and len(data[1])>0:
-                        projectDict[data[0]]=[data[1]]
-                    else:
-                        projectDict[data[0]]=[]                
-        cursor.close()
-        conn.close()
-        self.projectList = projectDict        
-        return projectDict
+
         
-    
-    def updateServer(self,table='',vars=[],conditions=[]): 
-        pass
-        
+
    
     
     def queryOvertime(self,table='',date=(),member='',project='',subproject=''):
@@ -260,26 +293,4 @@ class Department():
         return result
 
 
-def testIntializeDepartment(path):
-    a = Department(path)
-    a.setDepName(0)
-    a.addMember('姚灏')
-    a.addMember('孙林')
-    a.addMember('孙林')
-    a.addProject('遵义科技馆')
-    a.addProject('滁州科技馆')    
-    a.addProject('滁州科技馆')
-    a.getProjectsFromServer(table='project')
-    
-def testChangeDepartment(path):
-    a = Department(path)
-    
-    a.setDepName('二维')
-    a.addMember('姚灏')
-    a.deleteMember('姚灏')
-    a.addProject('中国科技馆')
-    a.deleteProject('中国科技馆')
 
-if __name__ == '__main__':
-    testIntializeDepartment('F:\Dev\overtime-management\department1.xml')
-    #testChangeDepartment('F:\Dev\overtime-management\department1.xml')

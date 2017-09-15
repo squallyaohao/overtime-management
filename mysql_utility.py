@@ -24,7 +24,7 @@ pwd = '123456'
 overtime_varslist = ['overtime',('date','date'),('name','varchar(10)'),('project','varchar(20)'),('subproject','varchar(20)'),('duration','tinyint'),('meal','varchar(10)'),('description','varchar(50)')]
 members_varslist = ['members',('name','varchar(10)'),('id','int'),('department','varchar(10)'),('title','varchar(10)')] 
 project_varlist = ['project',('project','varchar(20)'),('start_date','date'),('finish_date','date'),('subprojects','varchar(500)'),('description','varchar(200)')]
-subproject_varslist = ['subproject',('subproject','varchar(20)'),('subproject_category','varchar(10)'),('start_date','date'),('finish_date','date'),('tasks','varchar(500)'),('subproject_description','varchar(200)')]
+subproject_varslist = ['subproject',('subproject','varchar(20)'),('subproject_category','varchar(10)'),('project','varchar(20)'),('start_date','date'),('finish_date','date'),('tasks','varchar(500)'),('subproject_description','varchar(200)')]
 tasks_varslist = ['tasks',('task','varchar(50)'),('department','varchar(10)'),('project','varchar(20)'),('subproject','varchar(20)'),('start_date','date'),('finish_date','date'),('progress','float'),('members','varchar(200)'),('description','varchar(50)')]
 
 tableList = [overtime_varslist,members_varslist,project_varlist,tasks_varslist,subproject_varslist]
@@ -48,12 +48,16 @@ def sqlInsertState(table='',list=[]):
 #given a table name and a list,generate update statement used to update old data into the table
 #the list should contain a serial of data that match the format of the table 
 #in this case list should be like ['date','name','project','duration','meal']
-def sqlUpdateState(table='',list=''):
-    state1 = 'update ' + table + ' set project="' + list[2] + '",duration=' + list[3] +',meal="' + list[4] +'", description = "' + list[5] + '" '
-    state2 = 'where date="' + list[0] + '" and name="' + list[1] + '";'
-    update_statement = state1 + state2
-    #print updatestate
-    return update_statement
+def sqlUpdateState(table='',varsList='',conditionList=''):
+    statement = "update " + table + " set "
+    for var in varsList:
+        statement = statement + var[0] +"='" + var[1] + "', "
+    statement = statement[:-2] + " where "
+    for condition in conditionList:
+        statement = statement + condition[0] + "='" + condition[1] + "' and "
+    statement = statement[:-5] + ";"
+    print statement
+    return statement
 
 
 #MySQL utility function

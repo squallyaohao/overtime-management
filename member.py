@@ -397,9 +397,3 @@ def testOvertime(path):
     
     
         
-if __name__ == '__main__':
-    testIntializeMember('F:\Dev\overtime-management\member.xml')
-    #testChangeMember('F:\Dev\overtime-management\member.xml')
-    #testLeaderInit('F:\Dev\overtime-management\Leader.xml')
-    #testChangeLeader('F:\Dev\overtime-management\Leader.xml')
-    #testOvertime('F:\Dev\overtime-management\member.xml')

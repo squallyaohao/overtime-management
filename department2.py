@@ -140,9 +140,8 @@ class Department():
     
     
     
-    def addMember(self,member=[]):
-        success = self.tableInsert(table='members', vars_list=member)
-        return success
+
+        
         
         
     def deleteMember(self,name):
@@ -178,11 +177,28 @@ class Department():
     
     def addProject(self,project_vars=[]):
         success = self.tableInsert(table='project', vars_list=project_vars)
-        return success
+        if success:
+             newProjectDict = dict(zip(projectTableList, project_vars[1:]))
+             return newProjectDict
+        else:
+             return 0        
 
     def addSubproject(self,subproject_vars=[]):
         success = self.tableInsert(table='subproject', vars_list=subproject_vars)
         return success
+    
+
+    def addTask(self,task_vars=[]):
+        return 1
+    
+    
+    def addMember(self,member=[]):
+        success = self.tableInsert(table='members', vars_list=member)
+        if success:
+            newMemberDict = dict(zip(membersTableList,member[1:]))
+            return newMemberDict
+        else :
+            return 0            
     
         
     def deleteProject(self,projectdict):
@@ -213,10 +229,14 @@ class Department():
         
 
         
-    
-    def updateServer(self,table='',vars=[],conditions=[]): 
-        pass
-        
+    def updateServer(self,table='',varsList=[],conditionsList=[]): 
+        conn,cursor = self.connectToServer()
+        update_statement = mysql_utility.sqlUpdateState(table, varsList,conditionsList)
+        cursor.execute(update_statement)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return 1
    
     
     def queryOvertime(self,table='',date=(),member='',project='',subproject=''):

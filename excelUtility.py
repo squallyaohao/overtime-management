@@ -43,11 +43,3 @@ def exportToExcel(path,list=[]):
         
         
         
-                
- 
- 
-if __name__ == '__main__':    
-    exportToExcel(u'C:\\aa2.xlsx',[['a','b','c'],['d','e','f'],['g','h','l']])
-        
-        
-        

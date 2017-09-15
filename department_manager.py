@@ -7,7 +7,7 @@ from PyQt4 import QtGui
 from ui_department_manager import Ui_MainWindow
 from ui_querytable import Ui_QueryTable
 import xml.etree.ElementInclude as ET
-import department2 as department
+import department as department
 import member
 import pandas as pd
 import excelUtility
@@ -46,13 +46,16 @@ class DepartmentManager(Ui_MainWindow):
         
         
     def getAllProject(self):
-        self.projectDict = self.department.getProjectsFromServer()        
+        self.projectDict = self.department.getProjectsFromServer()
+
         
     def getAllSubproject(self):
         self.subprojectDict = self.department.getSubprojectFromServer()
+
         
     def getAllTask(self):
         self.tasksDict = self.department.getTasksFromeServer()
+
         
     def getAllMembers(self):
         self.allMembers = self.department.getMembersFromServer()
@@ -67,6 +70,8 @@ class DepartmentManager(Ui_MainWindow):
         self.connect(self.project_name,QtCore.SIGNAL('returnPressed()'),self.addProject)
         self.connect(self.add_subproject_btn,QtCore.SIGNAL('clicked()'),self.addSubproject)
         self.connect(self.subproject_name,QtCore.SIGNAL('returnPressed()'),self.addSubproject)
+        self.connect(self.add_task_btn,QtCore.SIGNAL('clicked()'),self.addTask)
+        self.connect(self.task_name,QtCore.SIGNAL('returnPressed()'),self.addTask)
         
         self.connect(self.delete_project_btn,QtCore.SIGNAL('clicked()'),self.deleteProject)  
         self.connect(self.delete_subproject_btn,QtCore.SIGNAL('clicked()'),self.deleteSubproject)
@@ -77,6 +82,7 @@ class DepartmentManager(Ui_MainWindow):
         self.connect(self.save_excel,QtCore.SIGNAL('clicked()'),self.saveExcel)
         
         self.project_list.itemClicked.connect(self.showSubproject)
+        self.subproject_list.itemClicked.connect(self.showTasks)
         self.query_project.currentIndexChanged.connect(self.showSubprojectComobox)
         
         #self.connect(self.project_list,QtCore.SIGNAL('doubleClicked()'),self.showSubproject)
@@ -100,14 +106,14 @@ class DepartmentManager(Ui_MainWindow):
         project_desc = unicode(self.project_desc.toPlainText())
         if project not in self.projectDict.keys() and project is not None:
             project_vars = [project,project_start_date,project_end_date,project_subprojects,project_desc]
-            success = self.department.addProject(project_vars)
-            if success:
+            newProjectDict = self.department.addProject(project_vars)
+            if newProjectDict:
                 newItem = QtGui.QListWidgetItem(project)
                 self.project_list.addItem(newItem)
-                self.projectDict[unicode(project)]={}
+                self.projectDict[unicode(project)]=newProjectDict      
                 self.project_name.setText('')
- 
- 
+
+
 
     def addSubproject(self):
         curProjectItem = self.project_list.currentItem()
@@ -119,56 +125,86 @@ class DepartmentManager(Ui_MainWindow):
         subproject_desc = unicode(self.subproject_desc.toPlainText())
         if curProjectItem is not None :
             curProject = curProjectItem.text()
-            print '1'
-            if subproject is not None and subproject not in self.subprojectDict.keys():
-                print '2'
-                subproject_vars = [subproject,subproject_category,subproject_start_date,subproject_end_date,subproject_tasks,subproject_desc]
-                success = self.department.addSubproject(subproject_vars)
-                if success:
-                    newItem = QtGui.QListWidgetItem(subproject)
-                    self.subproject_list.addItem(newItem)
+            subproject_list = self.projectDict[unicode(curProject)][u'subprojects'].split(';')
+            if (subproject is not None) and (subproject not in subproject_list):
+                subproject_vars = [subproject,subproject_category,unicode(curProject),subproject_start_date,subproject_end_date,subproject_tasks,subproject_desc]
+                newSubprojectDict = self.department.addSubproject(subproject_vars)
+                if newSubprojectDict:
+                    #newItem = QtGui.QListWidgetItem(subproject)
+                    #self.subproject_list.addItem(newItem)
                     self.subproject_name.setText('')
-                    self.projectDict[unicode(curProject)][u'subprojects']+unicode(subproject)+";"
-                    self.subprojectDict[unicode(subproject)]={}
+                    self.subprojectDict[subproject] = newSubprojectDict
+                    self.projectDict[unicode(curProject)][u'subprojects'] = self.projectDict[unicode(curProject)][u'subprojects'] + subproject + ";"
+                    self.department.updateServer(table=u'project', varsList=[(u'subprojects',self.projectDict[unicode(curProject)][u'subprojects'])], 
+                                                conditionsList=[(u'project',unicode(curProject))])
+                    self.showSubproject()
+                    
             
                 
     def addTask(self):
-        task_name = self.task_name.text()
-        task_start_date = self.task_start_date.date()
-        task_end_date = self.task_end_date.date()
-        task_description = self.task_description.toPlainText()
+        task = unicode(self.task_name.text())
+        department = depdict[self.dep_line.currentIndex()].decode('utf-8')
+        curProjectItem = self.project_list.currentItem()
+        curSubprojectItem = self.subproject_list.currentItem()
+        task_start_date = unicode(self.task_start_date.text())
+        task_finish_date = unicode(self.task_end_date.text())
+        progress = str(0)
+        membersList = ''
+        task_description = unicode(self.task_description.toPlainText())
+        if curProjectItem is not None and curSubprojectItem is not None:
+            curProject = curProjectItem.text()
+            curSubproject = curSubprojectItem.text()
+            tasks_list = self.subprojectDict[unicode(curSubproject)]['tasks'].split(';')
+            if task is not None and task not in tasks_list:
+                task_vars = [task,department,unicode(curProject),unicode(curSubproject),task_start_date,task_finish_date,progress,membersList,task_description]
+                newTaskDict = self.department.addTask(task_vars)
+                if newTaskDict:
+                    self.task_name.setText('')
+                    self.tasksDict[task] = newTaskDict
+                    self.subprojectDict[unicode(curSubproject)][u'tasks'] = self.subprojectDict[unicode(curSubproject)][u'tasks'] + task + ";"
+                    self.department.updateServer(table=u'subproject',varsList = [(u'tasks',self.subprojectDict[unicode(curSubproject)]['tasks'])],
+                                                 conditionsList = [(u'subproject',unicode(curSubproject))])
+                    self.showTasks()
         
     
     
     def deleteProject(self):
-        curItem = self.project_list.currentItem()
+        curProjectItem = self.project_list.currentItem()
         curRow = self.project_list.currentRow()
-        print curItem
-        if curItem is not None:
-            project = curItem.text()
+        if curProjectItem is not None:
+            project = curProjectItem.text()
             projectdict = {}
             projectdict['project']=unicode(project)
             success = self.department.deleteProject(projectdict)
             if success:
                 self.project_list.takeItem(curRow)
-                self.showSubproject()    
+                self.subproject_list.clear()
+                self.task_list.clear()
+                self.getAllProject()
+                self.getAllSubproject()
+                self.getAllTask()
+                self.showSubproject()
+                self.showTasks()
  
  
     
     def deleteSubproject(self):
-        curProjectItem = self.project_list.currentItem()
         curSubprojectItem = self.subproject_list.currentItem()
-        curSubprojectIndex = self.subproject_list.currentRow()
+        curRow = self.subproject_list.currentRow()
         if curSubprojectItem is not None:
-            curProject= curProjectItem.text()
             curSubproject = curSubprojectItem.text()
-            projectdict = {}
-            projectdict['project'] = unicode(curProject)
-            projectdict['subproject'] = unicode(curSubproject)
-            success = self.department.deleteProject(projectdict)
+            subprojectdict = {}
+            subprojectdict['subproject'] = unicode(curSubproject)
+            project = self.subprojectDict[unicode(curSubproject)]['project']
+            success = self.department.deleteSubproject(subprojectdict,project)
             if success:
-                self.subproject_list.takeItem(curSubprojectIndex)
-                self.projectDict[unicode(curProject)].remove(unicode(curSubproject)) 
+                self.subproject_list.takeItem(curRow)
+                self.task_list.clear()
+                self.getAllProject()
+                self.getAllSubproject()
+                self.getAllTask()
+                self.showSubproject()
+                self.showTasks()
                 
     
     def deleteTask(self):
@@ -234,21 +270,38 @@ class DepartmentManager(Ui_MainWindow):
     
 
     def showSubproject(self):
-        currentProject = self.project_list.currentItem().text()
-        subproject_list = self.projectDict[unicode(currentProject)][u'subprojects'].split(';')
-        self.drawList('subproject_list',subproject_list)
+        currentProjectItem = self.project_list.currentItem()
+        if currentProjectItem is not None:
+            currentProject = currentProjectItem.text()
+            subproject_list = self.projectDict[unicode(currentProject)][u'subprojects'].split(';')[:-1]
+            self.drawList('subproject_list',subproject_list)
+        else:
+            self.subproject_list.clear()
+        self.showTasks()
 
+        
+    def showTasks(self):
+        currentSubprojectItem = self.subproject_list.currentItem()
+        if currentSubprojectItem is not None:
+            currentSubproject = currentSubprojectItem.text()
+            tasks_list = self.subprojectDict[unicode(currentSubproject)]['tasks']
+            if len(tasks_list)>0:
+                tasks_list = tasks_list.split(';')[:-1]
+                self.drawList('task_list',tasks_list)
+            else:
+                self.task_list.clear()
+        else:
+            self.task_list.clear()
 
         
     def showSubprojectComobox(self):
         curProject = self.query_project.currentText()
         if curProject != '*':
-            curSubproject = self.projectDict[unicode(curProject)][u'subprojects'].split(';')
+            curSubproject = self.projectDict[unicode(curProject)][u'subprojects'].split(';')[:-1]
             self.drawComboBox('query_subproject',curSubproject)      
         else:
             self.drawComboBox('query_subproject',[])    
 
-    
     
 
     def drawList(self,listname='',l={}):
@@ -257,6 +310,7 @@ class DepartmentManager(Ui_MainWindow):
             item = QtGui.QListWidgetItem(key)
             listWidget.addItem(item)
 
+
             
     def drawList(self,listname='',l=[]):
         listWidget = self.findChild(QtGui.QListView,listname) 
@@ -264,6 +318,7 @@ class DepartmentManager(Ui_MainWindow):
         for temp in l:
             item = QtGui.QListWidgetItem(temp)
             listWidget.addItem(item)
+
             
             
     def drawComboBox(self,widgetname='',l=[]):
@@ -279,7 +334,6 @@ class DepartmentManager(Ui_MainWindow):
         tableWidget = self.findChild(QtGui.QTableWidget,tablename)
         numRows = len(tablelist)
         numCols = len(tableheader)
-        print tablelist
         tableWidget.setRowCount(numRows)
         tableWidget.setColumnCount(numCols)        
         tableWidget.setHorizontalHeaderLabels(tableheader)
