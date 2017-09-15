@@ -27,6 +27,12 @@ class DepartmentManager(Ui_MainWindow):
         curDate = QtCore.QDate.currentDate()
         self.query_fromdate.setDate(curDate)
         self.query_todate.setDate(curDate)
+        self.project_start_date.setDate(curDate)
+        self.project_end_date.setDate(curDate)
+        self.subproject_start_date.setDate(curDate)
+        self.subproject_end_date.setDate(curDate)
+        self.task_start_date.setDate(curDate)
+        self.task_end_date.setDate(curDate)
         self.projectDict = {}
         self.subprojectDict = {}
         self.tasksDict = {}
@@ -75,12 +81,17 @@ class DepartmentManager(Ui_MainWindow):
         
         self.connect(self.delete_project_btn,QtCore.SIGNAL('clicked()'),self.deleteProject)  
         self.connect(self.delete_subproject_btn,QtCore.SIGNAL('clicked()'),self.deleteSubproject)
+        self.connect(self.delete_task_btn,QtCore.SIGNAL('clicked()'),self.deleteTask)
         
         
         self.connect(self.add_member_btn,QtCore.SIGNAL('clicked()'),self.addMember)        
         self.connect(self.query,QtCore.SIGNAL('clicked()'),self.showQueryResult)
         self.connect(self.save_excel,QtCore.SIGNAL('clicked()'),self.saveExcel)
         
+        
+        self.project_list.itemClicked.connect(self.showProjectInfo)
+        self.subproject_list.itemClicked.connect(self.showSubprojectInfo)
+        self.task_list.itemClicked.connect(self.showTaskInfo)
         self.project_list.itemClicked.connect(self.showSubproject)
         self.subproject_list.itemClicked.connect(self.showTasks)
         self.query_project.currentIndexChanged.connect(self.showSubprojectComobox)
@@ -130,8 +141,6 @@ class DepartmentManager(Ui_MainWindow):
                 subproject_vars = [subproject,subproject_category,unicode(curProject),subproject_start_date,subproject_end_date,subproject_tasks,subproject_desc]
                 newSubprojectDict = self.department.addSubproject(subproject_vars)
                 if newSubprojectDict:
-                    #newItem = QtGui.QListWidgetItem(subproject)
-                    #self.subproject_list.addItem(newItem)
                     self.subproject_name.setText('')
                     self.subprojectDict[subproject] = newSubprojectDict
                     self.projectDict[unicode(curProject)][u'subprojects'] = self.projectDict[unicode(curProject)][u'subprojects'] + subproject + ";"
@@ -165,6 +174,23 @@ class DepartmentManager(Ui_MainWindow):
                     self.department.updateServer(table=u'subproject',varsList = [(u'tasks',self.subprojectDict[unicode(curSubproject)]['tasks'])],
                                                  conditionsList = [(u'subproject',unicode(curSubproject))])
                     self.showTasks()
+
+
+
+    def addMember(self):
+        newMemberName = self.member_name_line.text()
+        newMemberTitle = self.member_title_line.text()
+        memberId = '0'
+        if newMemberName is not None and newMemberTitle is not None and unicode(newMemberName) not in self.allMembers.keys():
+            member = [unicode(newMemberName),memberId,depdict[self.dep].decode('utf-8'),unicode(newMemberTitle)]
+            newMemberDict = self.department.addMember(member)
+            if newMemberDict:
+                newItem = QtGui.QListWidgetItem(newMemberName)
+                self.member_list.addItem(newItem)
+                self.member_name_line.setText('')
+                self.member_title_line.setText('')
+                self.allMembers[unicode(newMemberName)] = newMemberDict
+
         
     
     
@@ -208,21 +234,21 @@ class DepartmentManager(Ui_MainWindow):
                 
     
     def deleteTask(self):
-        pass
-    
-    
-    def addMember(self):
-        newMemberName = self.member_name_line.text()
-        newMemberTitle = self.member_title_line.text()
-        if newMemberName is not None and newMemberTitle is not None and unicode(newMemberName) not in self.allMembers:
-            member = [unicode(newMemberName),depdict[self.dep].decode('utf-8'),unicode(newMemberTitle)]
-            success = self.department.addMember(member)
+        curTaskItem = self.task_list.currentItem()
+        curRow = self.task_list.currentRow()
+        if curTaskItem is not None:
+            curTask = curTaskItem.text()
+            taskDict = {}
+            taskDict['task'] = unicode(curTask)
+            subproject = self.tasksDict[unicode(curTask)]['subproject']
+            success = self.department.deleteTask(taskDict,subproject)
             if success:
-                newItem = QtGui.QListWidgetItem(newMemberName)
-                self.member_list.addItem(newItem)
-                self.member_name_line.setText('')
-                self.member_title_line.setText('')
-                self.allMembers.append(unicode(newMemberName))
+                self.task_list.takeItem(curRow)
+                self.getAllProject()
+                self.getAllSubproject()
+                self.getAllTask()
+                self.showSubproject()
+                self.showTasks()
  
             
             
@@ -329,6 +355,29 @@ class DepartmentManager(Ui_MainWindow):
             for temp in l:
                 comboBox.addItem(temp)
                 
+                
+                
+    def showProjectInfo(self):
+        pass
+    
+    
+    
+    def showSubprojectInfo(self):
+        pass
+    
+    
+
+    def showTaskInfo(self):
+        curItem = self.task_list.currentItem()
+        if curItem is not None:
+            text = curItem.text()
+            temp = self.tasksDict[unicode(text)]
+            start_date = temp['start_date']
+            end_date = temp['finish_date']
+            desc = temp['description']
+            self.task_start_date.setDate(QtCore.QDate(start_date))
+            
+    
                 
     def drawTable(self,tablename='',tableheader=[],tablelist=[]):
         tableWidget = self.findChild(QtGui.QTableWidget,tablename)

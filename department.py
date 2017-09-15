@@ -250,15 +250,36 @@ class Department():
         conn.close()
         projectDict = {}
         projectDict[project] = dict(zip(projectTableList,result[1:]))
-        print 'project'
-        print projectDict[project]['subprojects']
-        print subprojectdict['subproject']+';'
         projectDict[project]['subprojects'] = projectDict[project]['subprojects'].replace(subprojectdict['subproject']+';','')
         varsList = [('subprojects',projectDict[project]['subprojects'])]
         conditionsList = [('project',project)]
         self.updateServer('project', varsList, conditionsList) 
         return 1
 
+
+
+    def deleteTask(self,taskDict,subproject):
+        print subproject
+        conn,cursor = self.connectToServer()
+        delete_task_statement = mysql_utility.sqldeletState('tasks',taskDict)
+        cursor.execute(delete_task_statement)
+        conn.commit()
+        query_subproject_statement = mysql_utility.sqlQuerysState('subproject',{'subproject':subproject})
+        cursor.execute(query_subproject_statement)
+        conn.commit()
+        result = cursor.fetchone()
+        cursor.close()
+        conn.close()
+        subprojectDict = {}
+        subprojectDict[subproject] = dict(zip(subprojectTableList,result[1:]))
+        print subprojectDict
+        subprojectDict[subproject]['tasks'] = subprojectDict[subproject]['tasks'].replace(taskDict['task']+';','')
+        print subprojectDict
+        varsList = [('tasks',subprojectDict[subproject]['tasks'])]
+        conditionsList = [('subproject',subproject)]
+        self.updateServer('subproject',varsList,conditionsList)
+        return 1
+        
 
 
     def getAllProjects(self):
