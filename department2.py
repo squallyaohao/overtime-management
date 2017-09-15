@@ -11,10 +11,10 @@ import MySQLdb as sql
 
 
 depDict = {0:'三维动画',1:'投标动画',2:'二维动画',3:'平面设计',4:'编导'}
-membersTableList = ['name','id','department','title'] 
-projectTableList = ['project','start_date','finish_date','subprojects','description']
-subprojectTableList = ['subproject','subproject_category','start_date','finish_date','tasks','subproject_description']
-tasksTableList = ['task','department','project','subproject','start_date','finish_date','progress','members','description']
+membersTableList = [u'id',u'department',u'title'] 
+projectTableList = [u'start_date',u'finish_date',u'subprojects',u'description']
+subprojectTableList = [u'subproject_category',u'start_date',u'finish_date',u'tasks',u'subproject_description']
+tasksTableList = [u'department',u'project',u'subproject',u'start_date',u'finish_date',u'progress',u'members',u'description']
 
 
 def initXML(path):
@@ -88,7 +88,7 @@ class Department():
             
             self.projectDict = {}
             self.subprojectDict = {}
-            self.taksDict = {}
+            self.tasksDict = {}
             self.allMembers = {}            
         
         
@@ -121,7 +121,6 @@ class Department():
         conn,cursor = self.connectToServer()
         insert_statement = mysql_utility.sqlInsertState(table,vars_list)
         print insert_statement
-
         cursor.execute(insert_statement)
         conn.commit()
         cursor.close()
@@ -135,6 +134,9 @@ class Department():
         cursor.execute(query_statement)
         conn.commit()
         result = cursor.fetchall()
+        for row in result:
+            tempDict[row[0]] = dict(zip(tableList,row[1:]))
+        return tempDict
     
     
     
@@ -155,31 +157,30 @@ class Department():
         
         
     
-    def getAllMembersFromServer(self,table=''):
-        conn,cursor = self.connectToServer()
-        query_statement = mysql_utility.sqlQuerysState(table)
-        cursor.execute(query_statement)
-        conn.commit()
-        result = cursor.fetchall()
-        if result is not None:
-            memberlist = []
-            for data in result:
-                memberlist.append(data[1])
-                print data[1]
-        self.memberList = memberlist
-        return self.memberList
+    def getMembersFromServer(self):
+        self.allMembers = self.tableQuery(table='members', tableList=membersTableList)
+        return self.allMembers
 
 
+    def getProjectsFromServer(self):
+        self.projectDict = self.tableQuery(table='project',tableList=projectTableList)
+        return self.projectDict
     
-    def getAllTasksFromeServer(self,table=''):
-        pass
+    def getSubprojectFromServer(self):
+        self.subprojectDict = self.tableQuery(table='subproject', tableList=subprojectTableList)
+        return self.subprojectDict
+    
+    
+    def getTasksFromeServer(self,table=''):
+        self.tasksDict = self.tableQuery(table='tasks', tableList=tasksTableList)
+        return self.tasksDict
 
     
     def addProject(self,project_vars=[]):
         success = self.tableInsert(table='project', vars_list=project_vars)
         return success
 
-    def addSubproject(sefl,subproject_vars=[]):
+    def addSubproject(self,subproject_vars=[]):
         success = self.tableInsert(table='subproject', vars_list=subproject_vars)
         return success
     
@@ -210,29 +211,7 @@ class Department():
         return self.projectList
         
         
-    def getProjectsFromServer(self,table=''):
-        projectDict = {}
-        conn,cursor = self.connectToServer()
-        query_statement = mysql_utility.sqlQuerysState(table)
-        cursor.execute(query_statement)
-        conn.commit()
-        result = cursor.fetchall()
-        if result is not None:
-            for data in result:
-                if projectDict.has_key(data[0]):
-                    if data[1] is not None and len(data[1])>0:
-                        projectDict[data[0]].append(data[1])
-                    else:
-                        projectDict[data[0]]=[]
-                else:
-                    if data[1] is not None and len(data[1])>0:
-                        projectDict[data[0]]=[data[1]]
-                    else:
-                        projectDict[data[0]]=[]                
-        cursor.close()
-        conn.close()
-        self.projectList = projectDict        
-        return projectDict
+
         
     
     def updateServer(self,table='',vars=[],conditions=[]): 

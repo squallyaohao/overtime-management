@@ -15,6 +15,20 @@ import random
 #===================================================================================================
 #Utility fuctions
 #===================================================================================================
+ 
+hostname = 'localhost'
+db = 'myfirstdb'
+user = 'root'
+pwd = '123456' 
+
+overtime_varslist = ['overtime',('date','date'),('name','varchar(10)'),('project','varchar(20)'),('subproject','varchar(20)'),('duration','tinyint'),('meal','varchar(10)'),('description','varchar(50)')]
+members_varslist = ['members',('name','varchar(10)'),('id','int'),('department','varchar(10)'),('title','varchar(10)')] 
+project_varlist = ['project',('project','varchar(20)'),('start_date','date'),('finish_date','date'),('subprojects','varchar(500)'),('description','varchar(200)')]
+subproject_varslist = ['subproject',('subproject','varchar(20)'),('subproject_category','varchar(10)'),('start_date','date'),('finish_date','date'),('tasks','varchar(500)'),('subproject_description','varchar(200)')]
+tasks_varslist = ['tasks',('task','varchar(50)'),('department','varchar(10)'),('project','varchar(20)'),('subproject','varchar(20)'),('start_date','date'),('finish_date','date'),('progress','float'),('members','varchar(200)'),('description','varchar(50)')]
+
+tableList = [overtime_varslist,members_varslist,project_varlist,tasks_varslist,subproject_varslist]
+
        
 #MySQL utility function
 #given a table name and a list,generate insert statement used to insert new data into the table
@@ -26,7 +40,6 @@ def sqlInsertState(table='',list=[]):
     for value in list:
         insert_statement = insert_statement + value + "','"
     insert_statement = insert_statement[:-2] + ");"   
-    #insert_statement = "insert into " + table + " values('" + list[0] + "','" + list[1] + "','" + list[2] + "','" + list[3] + "','" + list[4] + "','" + list[5] + "');"
     return insert_statement
 
 
@@ -99,7 +112,29 @@ def sqlQuerysState(table='',condition={}):
     print statement
     return statement
     
-        
+
+def createTableStatement(name='',varlist=[]):
+    statement = 'create table ' + name +'('
+    for var in varlist:
+        statement = statement + var[0] + ' ' + var[1] +','    
+    statement = statement[:-1]+');'
+    return statement
+
+def initDatabase():
+    conn = sql.connect(hostname,user,pwd,db,charset='utf8')
+    cursor = conn.cursor()
+    for table in tableList:
+        statement = createTableStatement(table[0],table[1:])
+        try:
+            cursor.execute(statement)
+            conn.commit()
+            print 'create table' + table[0]
+        except :
+            continue    
+    cursor.close()
+    conn.close()
+
+
 
 #===================================================================================================
 #Test fuctions
@@ -135,7 +170,9 @@ def initSQL(dbname='',table='',varlist=[]):
     conn.commit()
     cur.close()
     conn.close()
-    
+
+
+
     
         
 def updateSQL(dbname='',table='',varlist=[]):
@@ -151,7 +188,7 @@ def updateSQL(dbname='',table='',varlist=[]):
     cur.close()
     conn.close()
     
-    
+
 
 def deleteSQL(dbname='',table='',condition={}):
     conn = sql.connect(host='localhost',user ='root',passwd ='123456',db=dbname,charset='utf8')
@@ -162,6 +199,7 @@ def deleteSQL(dbname='',table='',condition={}):
     conn.commit()
     cur.close()
     conn.close()    
+
 
 
 
@@ -188,12 +226,15 @@ def querySQLPandas(dbname='',table='',condition={}):
 
 
 
+
+
 if __name__=='__main__':
-    varlist = overtimesheet()
-    initSQL('myfirstdb','overtime',varlist)
+    #varlist = overtimesheet()
+    #initSQL('myfirstdb','overtime',varlist)
     #updateSQL('myfirstdb','overtime',varlist)
     #con = {'date':'2017-07-09','name':'孙林'.decode('utf-8')}
     #deleteSQL('myfirstdb','overtime',con)
     #query_dict = {'date':['2017-07-08','2017-07-10']}
     #querySQL('myfirstdb','overtime',query_dict)
     #querySQLPandas('myfirstdb','overtime',query_dict)
+    initDatabase()

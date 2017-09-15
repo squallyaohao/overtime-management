@@ -7,7 +7,8 @@ from PyQt4 import QtGui
 from ui_department_manager import Ui_MainWindow
 from ui_querytable import Ui_QueryTable
 import xml.etree.ElementInclude as ET
-import department,member
+import department2 as department
+import member
 import pandas as pd
 import excelUtility
 
@@ -27,9 +28,11 @@ class DepartmentManager(Ui_MainWindow):
         self.query_fromdate.setDate(curDate)
         self.query_todate.setDate(curDate)
         self.projectDict = {}
-        self.taksDict = {}
-        self.allMembers = []
+        self.subprojectDict = {}
+        self.tasksDict = {}
+        self.allMembers = {}
         self.getAllProject()
+        self.getAllSubproject()
         self.getAllTask()
         self.getAllMembers()
         #intialize all widgets
@@ -42,22 +45,40 @@ class DepartmentManager(Ui_MainWindow):
         self.setConnections()
         
         
+    def getAllProject(self):
+        self.projectDict = self.department.getProjectsFromServer()        
+        
+    def getAllSubproject(self):
+        self.subprojectDict = self.department.getSubprojectFromServer()
+        
+    def getAllTask(self):
+        self.tasksDict = self.department.getTasksFromeServer()
+        
+    def getAllMembers(self):
+        self.allMembers = self.department.getMembersFromServer()
+            
+        
         
     def setConnections(self):
         self.connect(self.dep_edit,QtCore.SIGNAL('clicked()'),self.editDepartment)
         self.connect(self.dep_line,QtCore.SIGNAL('currentIndexChanged(int)'),self.confirmDepartment)
-        self.connect(self.add_project_btn,QtCore.SIGNAL('clicked()'),self.addProject)
-        self.connect(self.delete_project_btn,QtCore.SIGNAL('clicked()'),self.deleteProject)
-        self.connect(self.add_subproject_btn,QtCore.SIGNAL('clicked()'),self.addSubproject)
-        self.connect(self.delete_subproject_btn,QtCore.SIGNAL('clicked()'),self.deleteSubproject)
-        self.connect(self.project_name,QtCore.SIGNAL('returnPressed()'),self.addProject)
-        self.connect(self.subproject_name,QtCore.SIGNAL('returnPressed()'),self.addSubproject)
-        self.connect(self.add_member_btn,QtCore.SIGNAL('clicked()'),self.addMember)
         
-        self.query_project.currentIndexChanged.connect(self.showSubprojectComobox)
+        self.connect(self.add_project_btn,QtCore.SIGNAL('clicked()'),self.addProject)
+        self.connect(self.project_name,QtCore.SIGNAL('returnPressed()'),self.addProject)
+        self.connect(self.add_subproject_btn,QtCore.SIGNAL('clicked()'),self.addSubproject)
+        self.connect(self.subproject_name,QtCore.SIGNAL('returnPressed()'),self.addSubproject)
+        
+        self.connect(self.delete_project_btn,QtCore.SIGNAL('clicked()'),self.deleteProject)  
+        self.connect(self.delete_subproject_btn,QtCore.SIGNAL('clicked()'),self.deleteSubproject)
+        
+        
+        self.connect(self.add_member_btn,QtCore.SIGNAL('clicked()'),self.addMember)        
         self.connect(self.query,QtCore.SIGNAL('clicked()'),self.showQueryResult)
         self.connect(self.save_excel,QtCore.SIGNAL('clicked()'),self.saveExcel)
+        
         self.project_list.itemClicked.connect(self.showSubproject)
+        self.query_project.currentIndexChanged.connect(self.showSubprojectComobox)
+        
         #self.connect(self.project_list,QtCore.SIGNAL('doubleClicked()'),self.showSubproject)
  
         
@@ -72,63 +93,51 @@ class DepartmentManager(Ui_MainWindow):
         
     
     def addProject(self):
-        project = self.project_name.text()
-        project_start_date = self.project_start_date.date()
-        project_end_date = self.project_end_date.date()
-        project_desc = self.project_desc.toPlainText()
+        project = unicode(self.project_name.text())
+        project_start_date = unicode(self.project_start_date.text())
+        project_end_date = unicode(self.project_end_date.text())
+        project_subprojects = ''
+        project_desc = unicode(self.project_desc.toPlainText())
         if project not in self.projectDict.keys() and project is not None:
-            projectdict = {}
-            projectdict[unicode(project)]=''
-            success = self.department.addProject(projectdict)
+            project_vars = [project,project_start_date,project_end_date,project_subprojects,project_desc]
+            success = self.department.addProject(project_vars)
             if success:
                 newItem = QtGui.QListWidgetItem(project)
                 self.project_list.addItem(newItem)
-                self.projectDict[unicode(project)]=[]            
+                self.projectDict[unicode(project)]={}
                 self.project_name.setText('')
  
  
 
     def addSubproject(self):
         curProjectItem = self.project_list.currentItem()
-        subproject = self.subproject_name.text()
-        subproject.category = self.subproject_category.currentText()
-        subproject_start_date = self.subproject_start_date.date()
-        subproject_end_date = self.subproject_end_date.date()
-        subproject_start_desc = self.subproject_desc.toPlainText()
+        subproject = unicode(self.subproject_name.text())
+        subproject_category = unicode(self.subproject_category.currentText())
+        subproject_start_date = unicode(self.subproject_start_date.text())
+        subproject_end_date = unicode(self.subproject_end_date.text())
+        subproject_tasks = ''
+        subproject_desc = unicode(self.subproject_desc.toPlainText())
         if curProjectItem is not None :
             curProject = curProjectItem.text()
-            if subproject is not None and subproject not in self.projectDict[unicode(curProject)]:            
-                projectdict = {}
-                projectdict[unicode(curProject)]=unicode(subproject)
-                success = self.department.addProject(projectdict)
+            print '1'
+            if subproject is not None and subproject not in self.subprojectDict.keys():
+                print '2'
+                subproject_vars = [subproject,subproject_category,subproject_start_date,subproject_end_date,subproject_tasks,subproject_desc]
+                success = self.department.addSubproject(subproject_vars)
                 if success:
                     newItem = QtGui.QListWidgetItem(subproject)
                     self.subproject_list.addItem(newItem)
                     self.subproject_name.setText('')
-                    self.projectDict[unicode(curProject)].append(unicode(subproject))
+                    self.projectDict[unicode(curProject)][u'subprojects']+unicode(subproject)+";"
+                    self.subprojectDict[unicode(subproject)]={}
             
                 
     def addTask(self):
         task_name = self.task_name.text()
         task_start_date = self.task_start_date.date()
         task_end_date = self.task_end_date.date()
-        task_description = self.task_description.toPlainText
+        task_description = self.task_description.toPlainText()
         
-    
-    
-    def addMember(self):
-        newMemberName = self.member_name_line.text()
-        newMemberTitle = self.member_title_line.text()
-        if newMemberName is not None and newMemberTitle is not None and unicode(newMemberName) not in self.allMembers:
-            member = [unicode(newMemberName),depdict[self.dep].decode('utf-8'),unicode(newMemberTitle)]
-            success = self.department.addMember(member)
-            if success:
-                newItem = QtGui.QListWidgetItem(newMemberName)
-                self.member_list.addItem(newItem)
-                self.member_name_line.setText('')
-                self.allMembers.append(unicode(newMemberName))
-            
-            
     
     
     def deleteProject(self):
@@ -142,10 +151,9 @@ class DepartmentManager(Ui_MainWindow):
             success = self.department.deleteProject(projectdict)
             if success:
                 self.project_list.takeItem(curRow)
-                self.showSubproject()
-            
-    
-    
+                self.showSubproject()    
+ 
+ 
     
     def deleteSubproject(self):
         curProjectItem = self.project_list.currentItem()
@@ -160,7 +168,86 @@ class DepartmentManager(Ui_MainWindow):
             success = self.department.deleteProject(projectdict)
             if success:
                 self.subproject_list.takeItem(curSubprojectIndex)
-                self.projectDict[unicode(curProject)].remove(unicode(curSubproject))
+                self.projectDict[unicode(curProject)].remove(unicode(curSubproject)) 
+                
+    
+    def deleteTask(self):
+        pass
+    
+    
+    def addMember(self):
+        newMemberName = self.member_name_line.text()
+        newMemberTitle = self.member_title_line.text()
+        if newMemberName is not None and newMemberTitle is not None and unicode(newMemberName) not in self.allMembers:
+            member = [unicode(newMemberName),depdict[self.dep].decode('utf-8'),unicode(newMemberTitle)]
+            success = self.department.addMember(member)
+            if success:
+                newItem = QtGui.QListWidgetItem(newMemberName)
+                self.member_list.addItem(newItem)
+                self.member_name_line.setText('')
+                self.member_title_line.setText('')
+                self.allMembers.append(unicode(newMemberName))
+ 
+            
+            
+    def showQueryResult(self):
+        query_member = unicode(self.query_member.currentText())
+        query_fromdate = unicode(self.query_fromdate.text())
+        query_todate = unicode(self.query_todate.text())
+        query_project = unicode(self.query_project.currentText())
+        query_subproject = unicode(self.query_subproject.currentText())
+        result = self.department.queryOvertime(table='overtime', date=(query_fromdate,query_todate), member=query_member, 
+                                     project=query_project,subproject=query_subproject 
+                                     )
+        if result is not None:
+            self.drawTable(tablename='query_overtime_table',tableheader=overtimetablehead,tablelist=result)    
+    
+
+
+    def saveExcel(self):
+        path = QtGui.QFileDialog.getSaveFileName(caption = 'Save Excel',filter="Excel File (*.xls *.xlsx)")
+        if path is not None:
+            curTable = []
+            curTable.append(overtimetablehead)
+            rows = self.query_overtime_table.rowCount()
+            cols = self.query_overtime_table.columnCount()
+            for i in range(0,rows):
+                temp = []
+                for j in range(0,cols):
+                    item = self.query_overtime_table.item(i,j)               
+                    t = item.text()
+                    temp.append(unicode(t))
+                curTable.append(temp)        
+            #catch error if IOError
+            error = excelUtility.exportToExcel(path,curTable)
+            if isinstance(error,IOError):
+                messagebox = QtGui.QMessageBox(2,QtCore.QString(u'错误'),QtCore.QString(u'保存文件失败，请检查文件名称或是否处于打开状态！'),QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel)
+                messagebox.exec_()    
+            if error == 1:
+                messagebox = QtGui.QMessageBox(1,QtCore.QString(u''),QtCore.QString(u'文件保存成功！'),QtGui.QMessageBox.Yes)
+                messagebox.exec_() 
+        else:
+            messagebox = QtGui.QMessageBox(2,QtCore.QString(u'错误'),QtCore.QString(u'未指定文件保存路径！'),QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel)
+            messagebox.exec_()   
+        
+            
+    
+
+    def showSubproject(self):
+        currentProject = self.project_list.currentItem().text()
+        subproject_list = self.projectDict[unicode(currentProject)][u'subprojects'].split(';')
+        self.drawList('subproject_list',subproject_list)
+
+
+        
+    def showSubprojectComobox(self):
+        curProject = self.query_project.currentText()
+        if curProject != '*':
+            curSubproject = self.projectDict[unicode(curProject)][u'subprojects'].split(';')
+            self.drawComboBox('query_subproject',curSubproject)      
+        else:
+            self.drawComboBox('query_subproject',[])    
+
     
     
 
@@ -207,71 +294,17 @@ class DepartmentManager(Ui_MainWindow):
 
 
             
-    def showSubproject(self):
-        currentProject = self.project_list.currentItem().text()
-        subproject_list = self.projectDict[unicode(currentProject)]
-        self.drawList('subproject_list',subproject_list)
-        
-    def showSubprojectComobox(self):
-        curProject = self.query_project.currentText()
-        if curProject != '*':
-            curSubproject = self.projectDict[unicode(curProject)]
-            self.drawComboBox('query_subproject',curSubproject)      
-        else:
-            self.drawComboBox('query_subproject',[])
+
         
         
     
-    def getAllProject(self):
-        self.projectDict = self.department.getProjectsFromServer('project')
+
         
-    def getAllTask(self):
-        pass
-        
-    def getAllMembers(self):
-        self.allMembers = self.department.getAllMembersFromServer('members')
-        
-        
-    def showQueryResult(self):
-        query_member = unicode(self.query_member.currentText())
-        query_fromdate = unicode(self.query_fromdate.text())
-        query_todate = unicode(self.query_todate.text())
-        query_project = unicode(self.query_project.currentText())
-        query_subproject = unicode(self.query_subproject.currentText())
-        result = self.department.queryOvertime(table='overtime', date=(query_fromdate,query_todate), member=query_member, 
-                                     project=query_project,subproject=query_subproject 
-                                     )
-        if result is not None:
-            self.drawTable(tablename='query_overtime_table',tableheader=overtimetablehead,tablelist=result)
+
         
         
     
-    def saveExcel(self):
-        path = QtGui.QFileDialog.getSaveFileName(caption = 'Save Excel',filter="Excel File (*.xls *.xlsx)")
-        if path is not None:
-            curTable = []
-            curTable.append(overtimetablehead)
-            rows = self.query_overtime_table.rowCount()
-            cols = self.query_overtime_table.columnCount()
-            for i in range(0,rows):
-                temp = []
-                for j in range(0,cols):
-                    item = self.query_overtime_table.item(i,j)               
-                    t = item.text()
-                    temp.append(unicode(t))
-                curTable.append(temp)        
-            #catch error if IOError
-            error = excelUtility.exportToExcel(path,curTable)
-            if isinstance(error,IOError):
-                messagebox = QtGui.QMessageBox(2,QtCore.QString(u'错误'),QtCore.QString(u'保存文件失败，请检查文件名称或是否处于打开状态！'),QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel)
-                messagebox.exec_()    
-            if error == 1:
-                messagebox = QtGui.QMessageBox(1,QtCore.QString(u''),QtCore.QString(u'文件保存成功！'),QtGui.QMessageBox.Yes)
-                messagebox.exec_() 
-        else:
-            messagebox = QtGui.QMessageBox(2,QtCore.QString(u'错误'),QtCore.QString(u'未指定文件保存路径！'),QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel)
-            messagebox.exec_()   
-        
+
         
         
         
