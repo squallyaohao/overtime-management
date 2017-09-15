@@ -100,7 +100,7 @@
       <property name="frameShadow">
        <enum>QFrame::Sunken</enum>
       </property>
-      <widget class="QWidget" name="">
+      <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
          <x>4</x>
@@ -277,6 +277,12 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>20</height>
+               </size>
+              </property>
               <property name="maximumSize">
                <size>
                 <width>1000</width>
@@ -304,11 +310,18 @@
              </widget>
             </item>
             <item>
+             <widget class="QPushButton" name="pushButton_2">
+              <property name="text">
+               <string>更新项目</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QPushButton" name="delete_project_btn">
               <property name="minimumSize">
                <size>
                 <width>0</width>
-                <height>25</height>
+                <height>20</height>
                </size>
               </property>
               <property name="maximumSize">
@@ -530,6 +543,12 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>20</height>
+               </size>
+              </property>
               <property name="maximumSize">
                <size>
                 <width>1000</width>
@@ -553,6 +572,19 @@
                 <width>30</width>
                 <height>30</height>
                </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButton">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>更新子项目</string>
               </property>
              </widget>
             </item>
@@ -761,7 +793,7 @@
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
-                  <height>35</height>
+                  <height>20</height>
                  </size>
                 </property>
                 <property name="font">
@@ -785,7 +817,7 @@
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
-                  <height>35</height>
+                  <height>20</height>
                  </size>
                 </property>
                 <property name="font">
@@ -809,7 +841,7 @@
                 <property name="minimumSize">
                  <size>
                   <width>0</width>
-                  <height>35</height>
+                  <height>20</height>
                  </size>
                 </property>
                 <property name="font">

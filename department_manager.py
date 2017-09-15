@@ -11,9 +11,11 @@ import department as department
 import member
 import pandas as pd
 import excelUtility
+import datetime
 
 overtimetablehead = [u'日期',u'姓名',u'加班项目',u'加班展项',u'加班时长',u'加班餐',u'加班描述']
 depdict = {0:'三维动画',1:'投标动画',2:'二维动画',3:'平面设计',4:'编导'}
+category = {u'动画':0,u'游戏':1}
 
 
 class DepartmentManager(Ui_MainWindow):
@@ -121,7 +123,8 @@ class DepartmentManager(Ui_MainWindow):
             if newProjectDict:
                 newItem = QtGui.QListWidgetItem(project)
                 self.project_list.addItem(newItem)
-                self.projectDict[unicode(project)]=newProjectDict      
+                #self.projectDict[unicode(project)]=newProjectDict      
+                self.getAllProject()
                 self.project_name.setText('')
 
 
@@ -142,10 +145,12 @@ class DepartmentManager(Ui_MainWindow):
                 newSubprojectDict = self.department.addSubproject(subproject_vars)
                 if newSubprojectDict:
                     self.subproject_name.setText('')
-                    self.subprojectDict[subproject] = newSubprojectDict
                     self.projectDict[unicode(curProject)][u'subprojects'] = self.projectDict[unicode(curProject)][u'subprojects'] + subproject + ";"
                     self.department.updateServer(table=u'project', varsList=[(u'subprojects',self.projectDict[unicode(curProject)][u'subprojects'])], 
                                                 conditionsList=[(u'project',unicode(curProject))])
+                    #self.subprojectDict[subproject] = newSubprojectDict                    
+                    self.getAllProject()
+                    self.getAllSubproject()
                     self.showSubproject()
                     
             
@@ -358,12 +363,36 @@ class DepartmentManager(Ui_MainWindow):
                 
                 
     def showProjectInfo(self):
-        pass
+        curItem = self.project_list.currentItem()
+        if curItem is not None:
+            text = curItem.text()
+            temp = self.projectDict[unicode(text)]
+            start_date = temp['start_date']
+            print start_date
+            end_date = temp['finish_date']
+            print end_date
+            desc = temp['description']
+            self.project_start_date.setDate(QtCore.QDate(start_date.year,start_date.month,start_date.day))
+            self.project_end_date.setDate(QtCore.QDate(end_date.year,end_date.month,end_date.day))
+            self.project_desc.setPlainText(desc)
     
     
     
     def showSubprojectInfo(self):
-        pass
+        curItem = self.subproject_list.currentItem()
+        if curItem is not None:
+            text = curItem.text()
+            temp = self.subprojectDict[unicode(text)]
+            cate = temp[u'subproject_category']
+            cateIndex = category[cate]
+            print cateIndex
+            start_date = temp['start_date']
+            end_date = temp['finish_date']
+            desc = temp['subproject_description']
+            self.subproject_category.setCurrentIndex(cateIndex)
+            self.subproject_start_date.setDate(QtCore.QDate(start_date.year,start_date.month,start_date.day))
+            self.subproject_end_date.setDate(QtCore.QDate(end_date.year,end_date.month,end_date.day))
+            self.subproject_desc.setPlainText(desc)
     
     
 
@@ -375,7 +404,11 @@ class DepartmentManager(Ui_MainWindow):
             start_date = temp['start_date']
             end_date = temp['finish_date']
             desc = temp['description']
-            self.task_start_date.setDate(QtCore.QDate(start_date))
+            print desc
+            self.task_start_date.setDate(QtCore.QDate(start_date.year,start_date.month,start_date.day))
+            self.task_end_date.setDate(QtCore.QDate(end_date.year,end_date.month,end_date.day))
+            self.task_description.setPlainText(desc)
+            #self.task_end_date.setDate()
             
     
                 

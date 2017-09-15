@@ -29,18 +29,17 @@ class UI_ApplyOvertime(Ui_MemberMainWindow):
         self.query_todate.setDate(curDate)
         self.apply_date.setEnabled(False)
     
-        self.member.getProjectsFromServer(table='project')
-        projectList = self.member.getAllProjects()
-        for pro in projectList:
+        self.projectDict = self.member.getProjectsFromServer()
+        for pro in self.projectDict:
             self.apply_project.addItem(pro)
             self.query_project.addItem(pro)
         self.tabWidget.setCurrentIndex(0)
+
         
         self.result_window = Ui_QueryTable()
         
         self.setConnections()
-        
-
+    
         
     def setConnections(self):    
         self.connect(self.name_edit,QtCore.SIGNAL("clicked()"),self.editName)
@@ -50,6 +49,8 @@ class UI_ApplyOvertime(Ui_MemberMainWindow):
         self.connect(self.apply_overtime,QtCore.SIGNAL('clicked()'),self.applyForOvertime)
         self.connect(self.query,QtCore.SIGNAL('clicked()'),self.showQueryResult)
         self.result_window.updateSignal.connect(self.updateServer)
+        self.apply_project.currentIndexChanged.connect(self.showApplySubprojectCombobox)
+        self.query_project.currentIndexChanged.connect(self.showQuerySubprojectComobox)
         
         
         
@@ -75,22 +76,24 @@ class UI_ApplyOvertime(Ui_MemberMainWindow):
         
     def applyForOvertime(self):
         date = unicode(self.apply_date.text())
+        name = unicode(self.name_line.text())
         duration = unicode(self.apply_duration.text())
         meal = unicode(self.apply_meal.text())
         project = unicode(self.apply_project.currentText())
-        des = unicode(self.desc.toPlainText())
-        print des
-        self.member.applyOvertime('overtime', date, duration, project, 
-                                 meal,des )
+        subproject = unicode(self.apply_subproject.currentText())
+        desc = unicode(self.desc.toPlainText())
+        success = self.member.applyOvertime('overtime', [date,name,project,subproject,duration,meal,desc])
+        if not success:
+            print 'failed'
         
     
     def showQueryResult(self):
         query_dates = (unicode(self.query_fromdate.text()),unicode(self.query_todate.text()))
         query_project = unicode(self.query_project.currentText())
         result = self.member.queryOvertime(table='overtime', date=query_dates, project=query_project)
-        projectlist = self.member.getAllProjects()
+        projectlist = self.projectDict.keys()
         if len(result)>0:
-            self.result_window.drawTable(result,projectlist)
+            self.result_window.drawTable(result,self.projectDict)
             self.result_window.show()
         else:
             messagebox = QtGui.QMessageBox(2,QtCore.QString(u'提示'),QtCore.QString(u'没有查询到相关记录'),QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel)
@@ -104,7 +107,38 @@ class UI_ApplyOvertime(Ui_MemberMainWindow):
             messagebox = QtGui.QMessageBox(2,QtCore.QString(u'提示'),QtCore.QString(u'加班记录已更新成功！'),QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel)
             messagebox.exec_()
             
-                            
+            
+            
+    def drawComboBox(self,widgetname='',l=[]):
+        comboBox = self.findChild(QtGui.QComboBox,widgetname)
+        comboBox.clear()
+        comboBox.addItem('*')
+        if len(l)>0:
+            for temp in l:
+                if temp != '':
+                    comboBox.addItem(temp)
+
+
+    def showApplySubprojectCombobox(self):
+        curProject = self.apply_project.currentText()
+        if curProject != '*':
+            curSubproject = self.projectDict[unicode(curProject)][u'subprojects'].split(';')
+            print curSubproject
+            self.drawComboBox('apply_subproject',curSubproject)
+            self.apply_subproject.removeItem(0)
+        else:
+            self.drawComboBox('apply_subproject',[])    
+    
+    
+    
+    def showQuerySubprojectComobox(self):
+        curProject = self.query_project.currentText()
+        if curProject != '*':
+            curSubproject = self.projectDict[unicode(curProject)][u'subprojects'].split(';')            
+            self.drawComboBox('query_subproject',curSubproject)      
+        else:
+            self.drawComboBox('query_subproject',[])  
+            
 
 if __name__ =='__main__':
     app = QtGui.QApplication(sys.argv) 

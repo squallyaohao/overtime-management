@@ -8,9 +8,9 @@ import os.path
 import pandas as pd
 import xml.etree.ElementInclude as ET
 import MySQLdb as sql
-#import mysql_exceptions as sql_excep
 import time
 import random
+from db_structure import *
 
 #===================================================================================================
 #Utility fuctions
@@ -21,11 +21,11 @@ db = 'myfirstdb'
 user = 'root'
 pwd = '123456' 
 
-overtime_varslist = ['overtime',('date','date'),('name','varchar(10)'),('project','varchar(20)'),('subproject','varchar(20)'),('duration','tinyint'),('meal','varchar(10)'),('description','varchar(50)')]
-members_varslist = ['members',('name','varchar(10)'),('id','int'),('department','varchar(10)'),('title','varchar(10)')] 
-project_varlist = ['project',('project','varchar(20)'),('start_date','date'),('finish_date','date'),('subprojects','varchar(500)'),('description','varchar(200)')]
-subproject_varslist = ['subproject',('subproject','varchar(20)'),('subproject_category','varchar(10)'),('project','varchar(20)'),('start_date','date'),('finish_date','date'),('tasks','varchar(500)'),('subproject_description','varchar(200)')]
-tasks_varslist = ['tasks',('task','varchar(50)'),('department','varchar(10)'),('project','varchar(20)'),('subproject','varchar(20)'),('start_date','date'),('finish_date','date'),('progress','float'),('members','varchar(200)'),('description','varchar(50)')]
+#overtime_varslist = ['overtime',('date','date'),('name','varchar(10)'),('project','varchar(20)'),('subproject','varchar(20)'),('duration','tinyint'),('meal','varchar(10)'),('description','varchar(50)')]
+#members_varslist = ['members',('name','varchar(10)'),('id','int'),('department','varchar(10)'),('title','varchar(10)')] 
+#project_varlist = ['project',('project','varchar(20)'),('start_date','date'),('finish_date','date'),('subprojects','varchar(500)'),('description','varchar(200)')]
+#subproject_varslist = ['subproject',('subproject','varchar(20)'),('subproject_category','varchar(10)'),('project','varchar(20)'),('start_date','date'),('finish_date','date'),('tasks','varchar(500)'),('subproject_description','varchar(200)')]
+#tasks_varslist = ['tasks',('task','varchar(50)'),('department','varchar(10)'),('project','varchar(20)'),('subproject','varchar(20)'),('start_date','date'),('finish_date','date'),('progress','float'),('members','varchar(200)'),('description','varchar(50)')]
 
 tableList = [overtime_varslist,members_varslist,project_varlist,tasks_varslist,subproject_varslist]
 
@@ -39,7 +39,7 @@ def sqlInsertState(table='',list=[]):
     insert_statement = "insert into " + table + " values('"
     for value in list:
         insert_statement = insert_statement + value + "','"
-    insert_statement = insert_statement[:-2] + ");"   
+    insert_statement = insert_statement[:-2] + ");" 
     return insert_statement
 
 

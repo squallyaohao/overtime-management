@@ -8,13 +8,14 @@ import xml.etree.cElementTree as ET
 import time
 import mysql_utility
 import MySQLdb as sql
+from db_structure import *
 
 
 depDict = {0:'三维动画',1:'投标动画',2:'二维动画',3:'平面设计',4:'编导'}
-membersTableList = [u'id',u'department',u'title'] 
-projectTableList = [u'start_date',u'finish_date',u'subprojects',u'description']
-subprojectTableList = [u'subproject_category',u'start_date',u'finish_date',u'tasks',u'subproject_description']
-tasksTableList = [u'department',u'project',u'subproject',u'start_date',u'finish_date',u'progress',u'members',u'description']
+#membersTableList = [u'id',u'department',u'title'] 
+#projectTableList = [u'start_date',u'finish_date',u'subprojects',u'description']
+#subprojectTableList = [u'subproject_category',u'start_date',u'finish_date',u'tasks',u'subproject_description']
+#tasksTableList = [u'task_id',u'department',u'project',u'subproject',u'start_date',u'finish_date',u'progress',u'members',u'description']
 
 
 def initXML(path):
@@ -135,13 +136,10 @@ class Department():
         conn.commit()
         result = cursor.fetchall()
         for row in result:
-            tempDict[row[0]] = dict(zip(tableList,row[1:]))
+            tempDict[row[0]] = dict(zip(tableList[1:],row[1:]))
         return tempDict
     
     
-    
-
-        
         
         
     def deleteMember(self,name):
@@ -178,10 +176,11 @@ class Department():
     def addProject(self,project_vars=[]):
         success = self.tableInsert(table='project', vars_list=project_vars)
         if success:
-             newProjectDict = dict(zip(projectTableList, project_vars[1:]))
+             newProjectDict = dict(zip(projectTableList[1:], project_vars[1:]))
              return newProjectDict
         else:
              return 0        
+
 
     def addSubproject(self,subproject_vars=[]):
         success = self.tableInsert(table='subproject', vars_list=subproject_vars)
@@ -195,7 +194,7 @@ class Department():
     def addMember(self,member=[]):
         success = self.tableInsert(table='members', vars_list=member)
         if success:
-            newMemberDict = dict(zip(membersTableList,member[1:]))
+            newMemberDict = dict(zip(membersTableList[1:],member[1:]))
             return newMemberDict
         else :
             return 0            

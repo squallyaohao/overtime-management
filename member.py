@@ -10,6 +10,7 @@ import department
 import project
 import mysql_utility
 import MySQLdb as sql
+from db_structure import *
 
 
 depDict = {0:'三维动画',1:'投标动画',2:'二维动画',3:'平面设计',4:'编导'}
@@ -125,42 +126,42 @@ class Member():
     
     def getTitle(self):
         return self.title
+
+
+
     
-    
-    def getAllProjects(self):
-        return self.projectList
-    
-    
-    def getProjectsFromServer(self,table=''):
-        #update project list from sql server
+    def connectToServer(self):
         loginfile = open('hostname','r').read().split(' ')
         hostid = loginfile[0]
         database = loginfile[1]
         user = loginfile[2]
         pwd = loginfile[3]
         if hostid[:3] == codecs.BOM_UTF8:
-            hostid = hostid[3:]
-        print hostid+' '+database+' '+user+' '+pwd
+            hostid = hostid[3:] 
         conn = sql.connect(hostid,user,pwd,database,charset='utf8')
         cursor = conn.cursor()
+        return (conn,cursor)
+    
+
+
+    def tableQuery(self,table='',tableList=[]):
+        tempDict = {}
+        conn,cursor = self.connectToServer()
         query_statement = mysql_utility.sqlQuerysState(table)
         cursor.execute(query_statement)
         conn.commit()
-        temp = []
         result = cursor.fetchall()
-        for data in result:
-            temp.append(data[0])
-        cursor.close()
-        conn.close()
-        self.projectList = set(temp)
-        #write new project list into local xml file
-        xmltree = ET.parse(self.dataPath)
-        projectList = xmltree.getroot().find('ProjectList')
-        projectList.clear()
-        for pro in self.projectList:
-            newproject = ET.SubElement(projectList,'Project')
-            newproject.text = pro
-        xmltree.write(self.dataPath)
+        for row in result:
+            tempDict[row[0]] = dict(zip(tableList[1:],row[1:]))
+        return tempDict
+
+    
+    
+    
+
+    def getProjectsFromServer(self):
+        self.projectDict = self.tableQuery(table='project',tableList=projectTableList)
+        return self.projectDict
         
  
     
@@ -187,24 +188,23 @@ class Member():
                 projectList.remove(project)
         xmltree.write(self.dataPath)
     
+
     
-    def applyOvertime(self,table='',date='',duration=0,project='',meal='',description=''):
-        loginfile = open('hostname','r').read().split(' ')
-        hostid = loginfile[0]
-        database = loginfile[1]
-        user = loginfile[2]
-        pwd = loginfile[3]
-        if hostid[:3] == codecs.BOM_UTF8:
-            hostid = hostid[3:]
-        conn = sql.connect(hostid,user,pwd,database,charset='utf8')
-        cursor = conn.cursor()
-        #cursor.execute('delete from overtime;')
-        insert_statement = mysql_utility.sqlInsertState(table,[date,self.getName(),project,duration,meal,description])
-        print insert_statement
-        cursor.execute(insert_statement)
+    def applyOvertime(self,table='',varsList=[]):
+        conn,cursor = self.connectToServer()
+        query_statement = "select * from overtime where date='" + varsList[0] + "' and name='" + varsList[1] +"';"
+        cursor.execute(query_statement)
         conn.commit()
-        cursor.close()
-        conn.close()
+        result = cursor.fetchall()
+        if result is not None and len(result)>0:
+            return 0
+        else:
+            insert_statement = mysql_utility.sqlInsertState(table,varsList)
+            cursor.execute(insert_statement)
+            conn.commit()
+            cursor.close()
+            conn.close()
+            return 1
     
     
     def queryOvertime(self,table='',date=(),project=''):
@@ -228,17 +228,12 @@ class Member():
     
     
     def updateServer(self,table,curTable=[]):
-        loginfile = open('hostname','r').read().split(' ')
-        hostid = loginfile[0]
-        database = loginfile[1]
-        user = loginfile[2]
-        pwd = loginfile[3]
-        if hostid[:3] == codecs.BOM_UTF8:
-            hostid = hostid[3:]
-        conn = sql.connect(hostid,user,pwd,database,charset='utf8')
+        conn,cursor = self.connectToServer()
         cursor = conn.cursor()
         for row in curTable:
-            updatestatement = mysql_utility.sqlUpdateState(table,row)
+            varsList = zip(overtimeTableList[2:],row[2:])
+            conditionsList = zip(overtimeTableList[:2],row[:2])
+            updatestatement = mysql_utility.sqlUpdateState(table,varsList,conditionsList)
             print updatestatement
             cursor.execute(updatestatement)
             conn.commit()        

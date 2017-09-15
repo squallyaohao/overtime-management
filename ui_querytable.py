@@ -22,12 +22,14 @@ class Ui_QueryTable(Ui_Form):
         self.setupUi(self)
         self.connect(self.pushButton,QtCore.SIGNAL('clicked()'),self.saveExcel)
         self.connect(self.pushButton_2,QtCore.SIGNAL('clicked()'),self.updateQuery)
+        self.tableWidget.cellChanged.connect(self.projectChanged)
+        self.projectDict={}
         self.numRows = 0
         self.numCols = 0
         
                 
     #show query result    
-    def drawTable(self,result,projectlist):
+    def drawTable(self,result,projectdict):
         numRows = len(result)
         numCols = len(tablehead)
         self.numRows = numRows
@@ -35,29 +37,69 @@ class Ui_QueryTable(Ui_Form):
         self.tableWidget.setRowCount(numRows)
         self.tableWidget.setColumnCount(numCols)
         self.tableWidget.setHorizontalHeaderLabels(tablehead)
+        self.comboList = []
         #self.tableWidget.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         textFont = QtGui.QFont('Hei',11)
         #start draw table
+        self.projectDict= projectdict
+        projectlist = projectdict.keys()
+   
         for i,row in enumerate(result):
             for j,col in enumerate(row):
-                if j != 2:
+                if j != 2 and j != 3:
                     item = QtGui.QTableWidgetItem(unicode(col))
                     item.setTextAlignment(0x0004|0x0080)
                     item.setFont(textFont)
                     if j<2:
                         item.setFlags(QtCore.Qt.ItemIsEditable)                    
                     self.tableWidget.setItem(i,j, item) 
-                else:
+                elif j == 2:
                     comboItem = QtGui.QComboBox()
+                    name = 'combo_'+str(i)+'_'+str(j)
+                    self.comboList.append(name)    
+                    comboItem.setObjectName(name)
                     comboItem.addItem(col)
                     for pro in projectlist:
                         if col != pro:
                             comboItem.addItem(pro)
                     comboItem.setCurrentIndex(0)
+                    self.tableWidget.setCellWidget(i,j,comboItem)                    
+                else:
+                    comboItem = QtGui.QComboBox()
+                    comboItem.addItem(col)     
+                    precomboItem = self.tableWidget.cellWidget(i,j-1)
+                    project = unicode(precomboItem.currentText())
+                    subprojectlist = self.projectDict[project]['subprojects'].split(';')[:-1]
+                    for subpro in subprojectlist:
+                        if col != subpro:
+                            comboItem.addItem(subpro)
+                    comboItem.setCurrentIndex(0)
                     self.tableWidget.setCellWidget(i,j,comboItem)
+        self.setComboConnections()
         self.calcTotalDuration()
         
         
+    def setComboConnections(self):
+        for combo_name in self.comboList:
+            combo = self.findChild(QtGui.QComboBox,combo_name)
+            print combo
+            combo.currentIndexChanged.connect(lambda:self.projectChanged(combo_name))
+        
+        
+    def projectChanged(self,combo_name):
+        if type(combo_name)==type('a'):
+            row = int(combo_name.split('_')[1])
+            col = int(combo_name.split('_')[2])
+            projectCombo = self.tableWidget.cellWidget(row,col)
+            subprojectCombo = self.tableWidget.cellWidget(row,col+1)
+            project = unicode(projectCombo.currentText())
+            subprojectList = self.projectDict[project][u'subprojects'].split(';')
+            subprojectCombo.clear()
+            for subpro in subprojectList:
+                if len(subpro)>0: 
+                    subprojectCombo.addItem(subpro)
+        
+    
     
     def calcTotalDuration(self):
         total = 0
@@ -115,7 +157,7 @@ class Ui_QueryTable(Ui_Form):
         for i in range(rows):
             temp = []
             for j in range(cols):
-                if j!=2:
+                if j!=2 and j!=3:
                     value = self.tableWidget.item(i,j).text()
                     temp.append(unicode(value))
                 else:
