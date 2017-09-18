@@ -211,7 +211,7 @@ class Department():
         conn = sql.connect(hostid,user,pwd,database,charset='utf8')
         cursor = conn.cursor()
         delete_statment = mysql_utility.sqldeletState('project',projectdict)
-        print delete_statment
+        project delete_statment
         cursor.execute(delete_statment)
         conn.commit()
         cursor.close()
@@ -220,9 +220,9 @@ class Department():
         
         
     def getAllProjects(self):
-        print '项目列表： '.decode('utf-8')
+        project '项目列表： '.decode('utf-8')
         for pro in self.projectList:
-            print '\t'+pro.decode('utf-8')
+            project '\t'+pro.decode('utf-8')
         return self.projectList
         
         

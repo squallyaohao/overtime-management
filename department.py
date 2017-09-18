@@ -129,7 +129,7 @@ class Department():
     def tableQuery(self,table='',tableList=[]):
         tempDict = {}
         conn,cursor = self.connectToServer()
-        query_statement = mysql_utility.sqlQuerysState(table)
+        query_statement = mysql_utility.sqlQueryState(table)
         cursor.execute(query_statement)
         conn.commit()
         result = cursor.fetchall()
@@ -187,10 +187,10 @@ class Department():
     def addProject(self,project_vars=[]):
         success = self.tableInsert(table='project', vars_list=project_vars)
         if success:
-             newProjectDict = dict(zip(projectTableList, project_vars[1:]))
-             return newProjectDict
+            newProjectDict = dict(zip(projectTableList, project_vars[1:]))
+            return newProjectDict
         else:
-             return 0        
+            return 0        
 
     def addSubproject(self,subproject_vars=[]):
         success = self.tableInsert(table='subproject', vars_list=subproject_vars)
@@ -242,7 +242,7 @@ class Department():
         conn.commit()
         cursor.execute(delete_tasks_statement)
         conn.commit()     
-        query_project_statement = mysql_utility.sqlQuerysState('project',{'project':project})
+        query_project_statement = mysql_utility.sqlQueryState('project',{'project':project})
         cursor.execute(query_project_statement)
         conn.commit()
         result = cursor.fetchone()
@@ -264,7 +264,7 @@ class Department():
         delete_task_statement = mysql_utility.sqldeletState('tasks',taskDict)
         cursor.execute(delete_task_statement)
         conn.commit()
-        query_subproject_statement = mysql_utility.sqlQuerysState('subproject',{'subproject':subproject})
+        query_subproject_statement = mysql_utility.sqlQueryState('subproject',{'subproject':subproject})
         cursor.execute(query_subproject_statement)
         conn.commit()
         result = cursor.fetchone()
@@ -306,7 +306,7 @@ class Department():
         cursor = conn.cursor()
         query_condition = {'date':date,'name':member,'project':project,'subproject':subproject}
         #query_condition = {'date':date,'name':member,'project':project}
-        querystatement = mysql_utility.sqlQuerysState(table,query_condition)
+        querystatement = mysql_utility.sqlQueryState(table,query_condition)
         cursor.execute(querystatement)
         conn.commit()
         result = cursor.fetchall()

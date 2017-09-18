@@ -8,7 +8,9 @@ subprojectTableList = [u'subproject',u'subproject_category',u'start_date',u'fini
 tasksTableList = [u'task',u'task_id',u'department',u'project',u'subproject',u'start_date',u'finish_date',u'progress',u'members',u'description']
 overtimeTableList = [u'date',u'name',u'project',u'subproject',u'duration',u'meal',u'description']
 
-
+projectTableHeader = [u'项目名称',u'起始时间',u'结束时间',u'展项列表',u'项目描述'] 
+subprojectTableHeader =[u'展项名称',u'展项类型',u'起始时间',u'结束时间',u'任务列表',u'展项描述']
+tasksTableHeader = [u'任务名称',u'起始时间',u'结束时间',u'完成进度',u'参与人员',u'任务描述']
 #table values data sturcture
 overtime_varslist = ['overtime',('date','date'),('name','varchar(10)'),('project','varchar(20)'),('subproject','varchar(20)'),('duration','tinyint'),('meal','varchar(10)'),('description','varchar(50)')]
 members_varslist = ['members',('name','varchar(10)'),('id','int'),('department','varchar(10)'),('title','varchar(10)')] 
