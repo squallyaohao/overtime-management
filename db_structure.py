@@ -12,10 +12,116 @@ projectTableHeader = [u'项目名称',u'起始时间',u'结束时间',u'展项�
 subprojectTableHeader =[u'展项名称',u'展项类型',u'起始时间',u'结束时间',u'任务列表',u'展项描述']
 tasksTableHeader = [u'任务名称',u'起始时间',u'结束时间',u'完成进度',u'参与人员',u'任务描述']
 #table values data sturcture
-overtime_varslist = ['overtime',('date','date'),('name','varchar(10)'),('project','varchar(20)'),('subproject','varchar(20)'),('duration','tinyint'),('meal','varchar(10)'),('description','varchar(50)')]
-members_varslist = ['members',('name','varchar(10)'),('id','int'),('department','varchar(10)'),('title','varchar(10)')] 
-project_varlist = ['project',('project','varchar(20)'),('start_date','date'),('finish_date','date'),('subprojects','varchar(500)'),('description','varchar(200)')]
-subproject_varslist = ['subproject',('subproject','varchar(20)'),('subproject_category','varchar(10)'),('project','varchar(20)'),('start_date','date'),('finish_date','date'),('tasks','varchar(500)'),('subproject_description','varchar(200)')]
-tasks_varslist = ['tasks',('task','varchar(50)'),('department','varchar(10)'),('project','varchar(20)'),('subproject','varchar(20)'),('start_date','date'),('finish_date','date'),('progress','float'),('members','varchar(200)'),('description','varchar(50)')]
+
+
+
+
+TableHeaderModule= [('columnLabel','varchar(20)'),('columnIndex','int'),('valueType','varchar(15)')]
+
+
+proTabHeader = ['proTabHeader',
+                      (u'项目编号',u'0',u'varchar(10)'),
+                      (u'项目名称',u'1',u'varchar(20)'),
+                      (u'起始时间',u'2',u'date'),
+                      (u'结束时间',u'3',u'date'),
+                      (u'项目经理',u'4',u'varchar(10)'),
+                      (u'脚本负责',u'5',u'varchar(10)'), 
+                      (u'平面负责',u'6',u'varchar(10)'),
+                      (u'二维负责',u'7',u'varchar(10)'),
+                      (u'三维负责',u'8',u'varchar(10)'),
+                      (u'后期负责',u'9',u'varchar(10)'),
+                      (u'软件负责',u'10',u'varchar(10)'),
+                      (u'硬件负责',u'11',u'varchar(10)'),
+                      (u'项目说明',u'12',u'varchar(10)'),]
+
+
+subproTabHeader = ['subproTabHeader',
+                         (u'展项编号',u'0',u'varchar(10)'),
+                         (u'展项名称',u'1',u'varchar(20)'),
+                         (u'起始时间',u'2',u'date'),
+                         (u'结束时间',u'3',u'date'),
+                         (u'展项类型',u'4',u'varchar(10)'),
+                         (u'脚本负责',u'5',u'varchar(10)'), 
+                         (u'三维负责',u'6',u'varchar(10)'),
+                         (u'后期负责',u'7',u'varchar(10)'),
+                         (u'软件负责',u'8',u'varchar(10)'),
+                         (u'硬件负责',u'9',u'varchar(10)'),
+                         (u'展项说明',u'10',u'varchar(10)')]
+
+
+
+taskTabHeader = ['taskTabHeader',
+                   (u'任务编号',u'0',u'varchar(10)'),
+                   (u'任务名称',u'1',u'varchar(20)'),
+                   (u'起始时间',u'2',u'date'),
+                   (u'结束时间',u'3',u'date'),
+                   (u'任务说明',u'4',u'varchar(10)')]
+
+
+memberTabHeader = ['memberTabHeader',
+                   (u'姓名',u'0',u'varchar(10)'),
+                   (u'编号',u'1',u'varchar(10)'),
+                   (u'部门',u'2',u'varchar(10)'),
+                   (u'职务',u'3',u'varchar(10)'),]
+ 
+
+
+
+overtime_varslist = ['overtime',
+                     ('date','date'),
+                     ('name','varchar(10)'),
+                     ('project','varchar(20)'),
+                     ('subproject','varchar(20)'),
+                     ('duration','tinyint'),
+                     ('meal','varchar(10)'),
+                     ('description','varchar(50)')]
+
+
+
+
+members_varslist = ['members',
+                    ('name','varchar(10)'),
+                    ('id','int'),
+                    ('department','varchar(10)'),
+                    ('title','varchar(10)')] 
+
+
+
+
+project_varlist = ['project',
+                   ('project','varchar(20)'),
+                   ('start_date','date'),
+                   ('finish_date','date'),
+                   ('subprojects','varchar(500)'),
+                   ('description','varchar(200)')]
+
+
+
+
+subproject_varslist = ['subproject',
+                       ('subproject','varchar(20)'),
+                       ('subproject_category','varchar(10)'),
+                       ('project','varchar(20)'),
+                       ('start_date','date'),('finish_date','date'),
+                       ('tasks','varchar(500)'),
+                       ('subproject_description','varchar(200)')]
+
+
+
+
+tasks_varslist = ['tasks',
+                  ('task','varchar(50)'),
+                  ('department','varchar(10)'),
+                  ('project','varchar(20)'),
+                  ('subproject','varchar(20)'),
+                  ('start_date','date'),
+                  ('finish_date','date'),
+                  ('progress','float'),
+                  ('members','varchar(200)'),
+                  ('description','varchar(50)')]
+
+
+
+
 
 tableList = [overtime_varslist,members_varslist,project_varlist,tasks_varslist,subproject_varslist]

@@ -38,6 +38,20 @@ def sqlInsertState(table='',list=[]):
     return insert_statement
 
 
+def sqlInsertState(table='',varsdict={}):
+    print varsdict
+    insert_statement = "insert into " + table + "("
+    sortedKey = varsdict.keys()
+    sortedKey.sort()
+    for key in sortedKey:
+        insert_statement = insert_statement + key + ","
+    insert_statement = insert_statement[:-1] + ") values('" 
+    for key in sortedKey:
+        insert_statement = insert_statement + varsdict[key] + "','"
+    insert_statement = insert_statement[:-2] + ");"
+    print insert_statement
+    return insert_statement
+
 
 #MySQL utility function
 #given a table name and a list,generate update statement used to update old data into the table
@@ -68,47 +82,6 @@ def sqldeletState(table='',condition={}):
     return statement
 
 
-
-#MySQL utility function
-#def sqlQuerysState(table='',condition={}):
-    #if len(condition.keys())>0:
-        #statement = "select * from " + table + " where "
-        #timequery = ''
-        #namequery = ''    
-        #projectquery = ''
-        #subprojectquery = ''
-        ##query date
-        #if condition.has_key('date'):
-            #timequery = "(date>'" + condition['date'][0] + "' or date='" + condition['date'][0] + "') and (date<'" + condition['date'][1] + "' or date='" + condition['date'][1] + "') and "
-        
-        ##query name
-        #if condition.has_key('name'):
-            #if condition['name'] != '*':
-                #namequery = "name='" + condition['name'] + "' and "
-            #else:
-                #namequery = "name like '%' and "
-        
-        ##query project
-        #if condition.has_key('project'): 
-            #if condition['project'] != '*':
-                #projectquery = "project='" + condition['project'] + "' and "
-            #else:
-                #projectquery = "project like '%' and "
-        
-        ##query subproject
-        #if condition.has_key('subproject'): 
-            #if condition['subproject']!='*':
-                #subprojectquery = "subproject='" + condition['subproject'] + "' and "
-            #else:
-                #subprojectquery = "subproject like '%' and "
-            
-    
-        #statement = statement + timequery + namequery + projectquery + subprojectquery
-        #statement = statement[:-5] + ";"
-    #else:
-        #statement = "select * from " + table + ";"
-    ##print statement
-    #return statement
     
 
 
@@ -133,24 +106,72 @@ def sqlQueryState(table='',condition={}):
 
 
 
-def createTableStatement(name='',varlist=[]):
+
+def sqlCreateTableStatement(name='',varlist=[]):
     statement = 'create table ' + name +'('
     for var in varlist:
         statement = statement + var[0] + ' ' + var[1] +','    
     statement = statement[:-1]+');'
     return statement
 
+
+
 def initDatabase():
     conn = sql.connect(hostname,user,pwd,db,charset='utf8')
     cursor = conn.cursor()
-    for table in tableList:
-        statement = createTableStatement(table[0],table[1:])
-        try:
-            cursor.execute(statement)
-            conn.commit()
-            print 'create table' + table[0]
-        except :
-            continue    
+    #===create header module table===
+    #statement = createTableStatement('proTabHeader',TableHeaderModule)
+    #cursor.execute(statement)
+    #conn.commit()
+    #statement = createTableStatement('subproTabHeader',TableHeaderModule)
+    #cursor.execute(statement)
+    #conn.commit()
+    #statement = createTableStatement('taskTabHeader',TableHeaderModule)
+    #cursor.execute(statement)
+    #conn.commit()
+    #statement = sqlCreateTableStatement('memberTabHeader',TableHeaderModule)
+    #cursor.execute(statement)
+    #conn.commit()    
+    
+    #===insert columns into header tables===
+    #for headertable in [proTabHeader,subproTabHeader,taskTabHeader,memberTabHeader]:
+    #for headertable in [memberTabHeader]:
+        #table = headertable[0]
+        #for column in headertable[1:]:
+            #statement = sqlInsertState(table,column)
+            #cursor.execute(statement)
+            #conn.commit()
+    
+    #===create project table===
+    #varslist = []
+    #for data in proTabHeader[1:]:
+        #varslist.append([data[0],data[2]])
+    #statement = sqlCreateTableStatement('project', varslist)
+    #cursor.execute(statement)
+    #conn.commit()
+    
+    #varslist = []
+    #for data in subproTabHeader[1:]:
+        #varslist.append([data[0],data[2]])
+    #statement = sqlCreateTableStatement('subproject', varslist)
+    #cursor.execute(statement)
+    #conn.commit()    
+    
+    #varslist = []
+    #for data in taskTabHeader[1:]:
+        #varslist.append([data[0],data[2]])
+    #statement = sqlCreateTableStatement('task', varslist)
+    #cursor.execute(statement)
+    #conn.commit()
+
+    varslist = []
+    for data in memberTabHeader[1:]:
+        varslist.append([data[0],data[2]])
+    statement = sqlCreateTableStatement('member', varslist)
+    cursor.execute(statement)
+    conn.commit()    
+    
+    
     cursor.close()
     conn.close()
 
@@ -162,12 +183,5 @@ def initDatabase():
 
 
 if __name__=='__main__':
-    #initDatabase()
-    condition = {}
-    condition['date'] = ('2010-01-01','2012-02-02')
-    condition['count'] = ('1','2')
-    condition['name'] = 'lee'
-    condition['job'] = 'worker'
-    table = 'test'
-    statement = sqlQueryState(table,condition)
-    print statement
+    
+    initDatabase()
