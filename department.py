@@ -88,7 +88,7 @@ class Department():
             
             self.projectDict = {}
             self.subprojectDict = {}
-            self.tasksDict = {}
+            self.taskDict = {}
             self.allMembers = {}
         
         self.proTabHeader = self.getTableHeader(headertable='proTabHeader')
@@ -96,7 +96,8 @@ class Department():
         self.taskTabHeader = self.getTableHeader(headertable='taskTabHeader')
         self.memberTabHeader = self.getTableHeader(headertable='memberTabHeader')
 
-        
+
+       
     def setDepName(self,dep):
         self.department = dep
         xmltree = ET.parse(self.dataPath)
@@ -125,7 +126,7 @@ class Department():
     
     def tableInsert(self,table='',varsdict={}):
         conn,cursor = self.connectToServer()
-        insert_statement = mysql_utility.sqlInsertState(table,varsdict)
+        insert_statement = mysql_utility.sqlInsertState2(table,varsdict)
         cursor.execute(insert_statement)
         conn.commit()
         cursor.close()
@@ -140,12 +141,44 @@ class Department():
         cursor.execute(query_statement)
         conn.commit()
         result = cursor.fetchall()
-        for row in result:
-            tempDict[row[0]] = dict(zip(tabHeader,row))
+        if len(result) != 0:
+            for row in result:
+                tempDict[row[0]] = dict(zip(tabHeader,row))
         cursor.close()
         conn.close()
         return tempDict
     
+
+
+    def tableQuery2(self,table='',columns=[],condition={},tabHeader=[]):
+        tempDict = {}
+        conn,cursor = self.connectToServer()
+        statement = mysql_utility.sqlQueryState2(table,columns, 
+                                                condition)
+        cursor.execute(statement)
+        conn.commit()
+        result = cursor.fetchall()
+        if len(result) != 0:
+            for row in result:
+                tempDict[row[0]] = dict(zip(tabHeader,row))
+        cursor.close()
+        conn.close()
+        return tempDict
+    
+
+
+    def checkNotExist(self,table='',condition={}):
+        conn,cursor = self.connectToServer()
+        statement = mysql_utility.sqlQueryState(table,condition)
+        print statement
+        cursor.execute(statement)
+        conn.commit()
+        result = cursor.fetchall()
+        if len(result) == 0:
+            return 1
+        else:
+            return 0
+        
     
     def updateServer(self,table='',varsList=[],conditionsList=[]): 
         conn,cursor = self.connectToServer()
@@ -178,56 +211,103 @@ class Department():
         result = cursor.fetchall()
         headerList = []
         for row in result:
-            headerList.append(row)
+            headerList.append(row[0])
         return headerList
     
         
     def getMembersFromServer(self):
-        self.allMembers = self.tableQuery(table='member', tabHeader=memberTabHeader)
+        self.allMembers = self.tableQuery(table='member', tabHeader=self.memberTabHeader)
         return self.allMembers
 
 
     def getProjectsFromServer(self):
-        self.projectDict = self.tableQuery(table='project',tabHeader=proTabHeader)
+        self.projectDict = self.tableQuery(table='project',tabHeader=self.proTabHeader)
+        for key in self.projectDict.keys():
+            for col in self.projectDict[key].keys():
+                print col
         return self.projectDict
 
     
     def getSubprojectFromServer(self):
-        self.subprojectDict = self.tableQuery(table='subproject', tabHeader=subproTabHeader)
+        self.subprojectDict = self.tableQuery(table='subproject', tabHeader=self.subproTabHeader)
         return self.subprojectDict
     
     
     def getTaskFromeServer(self,table=''):
-        self.tasksDict = self.tableQuery(table='task', tabHeader=taskTabHeader)
-        return self.tasksDict
+        self.taskDict = self.tableQuery(table='task', tabHeader=self.taskTabHeader)
+        return self.taskDict
+
+
+
+    def buildTreeHierarchy(self):
+        self.hierTree = {}
+        for pro in self.projectDict.keys():
+            self.hierTree[pro]={}
+        for subpro in self.subprojectDict.keys():
+            proKey = subpro[0:3]
+            self.hierTree[proKey][subpro]=[]
+        for task in self.taskDict.keys():
+            proKey = task[0:3]
+            subKey = task[0:6]
+            self.hierTree[proKey][subKey].append(task)
+        return self.hierTree
+
+
+    def getHierTree(self):
+        return self.hierTree
 
     
     def addProject(self,project_vars={}):
-        totalProjects = len(self.projectDict.keys())
-        projectId = '%03d'%(totalProjects + 1)
-        project_vars[u'项目编号']=projectId
-        success = self.tableInsert(table='project', varsdict=project_vars)
-        if success:
-            return 1
+        ok = self.checkNotExist('project',{u'项目名称':project_vars[u'项目名称']})
+        if ok:
+            totalProjects = len(self.projectDict.keys())
+            projectId = '%03d'%(totalProjects + 1)
+            project_vars[u'项目编号']=projectId
+            success = self.tableInsert(table='project', varsdict=project_vars)
+            if success:
+                self.hierTree[projectId] = {}
+                self.projectDict[projectId] = project_vars
+                return (1,project_vars)
+            else:
+                return (2,project_vars)
         else:
-            return 0        
+            return (3,project_vars)
 
-    def addSubproject(self,subproject_vars=[]):
-        success = self.tableInsert(table='subproject', vars_list=subproject_vars)
-        if success:
-            newSubprojectDict = dict(zip(subprojecttabHeader, subproject_vars[1:]))
-            return newSubprojectDict
-        else:
-            return 0 
 
-    def addTask(self,task_vars=[]):
-        success = self.tableInsert(table='task',vars_list=task_vars)
-        if success:
-            newTaskDict = dict(zip(taskstabHeader,task_vars[1:]))
-            return newTaskDict
+    def addSubproject(self,subproject_vars={},projectId=u'001'):
+        ok = self.checkNotExist('subproject',{u'展项名称':subproject_vars[u'展项名称'],u'项目名称':subproject_vars[u'项目名称']})
+        if ok:
+            totalSubproject = len(self.hierTree[projectId].keys())
+            subprojectId = projectId + '%03d'%(totalSubproject+1)
+            subproject_vars[u'展项编号'] = subprojectId
+            success = self.tableInsert(table='subproject', varsdict=subproject_vars)
+            if success:
+                self.hierTree[projectId][subprojectId]=[]
+                self.subprojectDict[subprojectId] = subproject_vars
+                return (1,subproject_vars)
+            else:
+                return (2,subproject_vars)
         else:
-            return 0
-    
+            return (3,subproject_vars)
+
+
+    def addTask(self,task_vars={},projectId='',subprojectId=''):
+        ok = self.checkNotExist('task', {u'任务名称':task_vars[u'任务名称'],u'展项名称':task_vars[u'展项名称'],u'项目名称':task_vars[u'项目名称']})
+        if ok:
+            taskList = self.hierTree[projectId][subprojectId]
+            totalTask = len(taskList)
+            taskId = subprojectId+'%03d'%(totalTask+1)
+            task_vars[u'任务编号'] = taskId
+            success = self.tableInsert(table='task', varsdict=task_vars)
+            if success:
+                self.hierTree[projectId][subprojectId].append(taskId)
+                self.taskDict[taskId] = task_vars
+                return (1,task_vars)
+            else:
+                return (2,task_vars)
+        else:
+            return (3,task_vars)
+        
     
     def addMember(self,member=[]):
         success = self.tableInsert(table='members', vars_list=member)

@@ -30,7 +30,7 @@ tableList = [overtime_varslist,members_varslist,project_varlist,tasks_varslist,s
 #the list should contain a serial of data that match the format of the table 
 #in this case list should be like  ['date','name','project','duration','meal']
 #we use utf-8 to encode our database,so make sure every element in the list should be a unicode string
-def sqlInsertState(table='',list=[]):
+def sqlInsertState1(table='',list=()):
     insert_statement = "insert into " + table + " values('"
     for value in list:
         insert_statement = insert_statement + value + "','"
@@ -38,7 +38,7 @@ def sqlInsertState(table='',list=[]):
     return insert_statement
 
 
-def sqlInsertState(table='',varsdict={}):
+def sqlInsertState2(table='',varsdict={}):
     print varsdict
     insert_statement = "insert into " + table + "("
     sortedKey = varsdict.keys()
@@ -51,6 +51,7 @@ def sqlInsertState(table='',varsdict={}):
     insert_statement = insert_statement[:-2] + ");"
     print insert_statement
     return insert_statement
+
 
 
 #MySQL utility function
@@ -101,10 +102,31 @@ def sqlQueryState(table='',condition={}):
         statement = statement[:-5] + ";"
     else:
         statement = "select * from " + table + ";"    
-    print statement
     return statement
 
 
+def sqlQueryState2(table='',columns=[],condition={}):
+    columnList = ''
+    for col in columns:
+        columnList = columnList + col + ","
+    columnList = columnList[:-1]
+    if len(condition.keys())>0:
+        statement = "select " + columnList + " from " + table + " where "
+        for key in condition:
+            if type(condition[key]) == type((1,2)) and len(condition[key]) == 2:
+                statement = statement + "(" + key + ">'" + condition[key][0] + "' or " + key + "='" + condition[key][0] + \
+                "') and (" + \
+                key + "<'" + condition[key][1] + "' or "+ key + "='" + condition[key][1] + "') and "
+            else:
+                if condition[key] != '*':
+                    statement = statement + key + "='" + condition[key] + "' and "
+                else:
+                    statement = statement + key + " like '%' and "
+        statement = statement[:-5] + ";"
+    else:
+        statement = "select * from " + table + ";"    
+    print statement
+    return statement    
 
 
 def sqlCreateTableStatement(name='',varlist=[]):
@@ -120,49 +142,48 @@ def initDatabase():
     conn = sql.connect(hostname,user,pwd,db,charset='utf8')
     cursor = conn.cursor()
     #===create header module table===
-    #statement = createTableStatement('proTabHeader',TableHeaderModule)
-    #cursor.execute(statement)
-    #conn.commit()
-    #statement = createTableStatement('subproTabHeader',TableHeaderModule)
-    #cursor.execute(statement)
-    #conn.commit()
-    #statement = createTableStatement('taskTabHeader',TableHeaderModule)
-    #cursor.execute(statement)
-    #conn.commit()
-    #statement = sqlCreateTableStatement('memberTabHeader',TableHeaderModule)
-    #cursor.execute(statement)
-    #conn.commit()    
+    statement = sqlCreateTableStatement('proTabHeader',TableHeaderModule)
+    cursor.execute(statement)
+    conn.commit()
+    statement = sqlCreateTableStatement('subproTabHeader',TableHeaderModule)
+    cursor.execute(statement)
+    conn.commit()
+    statement = sqlCreateTableStatement('taskTabHeader',TableHeaderModule)
+    cursor.execute(statement)
+    conn.commit()
+    statement = sqlCreateTableStatement('memberTabHeader',TableHeaderModule)
+    cursor.execute(statement)
+    conn.commit()    
     
     #===insert columns into header tables===
-    #for headertable in [proTabHeader,subproTabHeader,taskTabHeader,memberTabHeader]:
-    #for headertable in [memberTabHeader]:
-        #table = headertable[0]
-        #for column in headertable[1:]:
-            #statement = sqlInsertState(table,column)
-            #cursor.execute(statement)
-            #conn.commit()
+    for headertable in [proTabHeader,subproTabHeader,taskTabHeader,memberTabHeader]:
+        table = headertable[0]
+        for column in headertable[1:]:
+            statement = sqlInsertState1(table,column)
+            cursor.execute(statement)
+            conn.commit()
     
     #===create project table===
-    #varslist = []
-    #for data in proTabHeader[1:]:
-        #varslist.append([data[0],data[2]])
-    #statement = sqlCreateTableStatement('project', varslist)
-    #cursor.execute(statement)
-    #conn.commit()
+    varslist = []
+    for data in proTabHeader[1:]:
+        varslist.append([data[0],data[2]])
+    statement = sqlCreateTableStatement('project', varslist)
+    cursor.execute(statement)
+    conn.commit()
     
-    #varslist = []
-    #for data in subproTabHeader[1:]:
-        #varslist.append([data[0],data[2]])
-    #statement = sqlCreateTableStatement('subproject', varslist)
-    #cursor.execute(statement)
-    #conn.commit()    
+    varslist = []
+    for data in subproTabHeader[1:]:
+        varslist.append([data[0],data[2]])
+    statement = sqlCreateTableStatement('subproject', varslist)
+    cursor.execute(statement)
+    conn.commit()    
     
-    #varslist = []
-    #for data in taskTabHeader[1:]:
-        #varslist.append([data[0],data[2]])
-    #statement = sqlCreateTableStatement('task', varslist)
-    #cursor.execute(statement)
-    #conn.commit()
+    varslist = []
+    for data in taskTabHeader[1:]:
+        varslist.append([data[0],data[2]])
+    statement = sqlCreateTableStatement('task', varslist)
+    cursor.execute(statement)
+    conn.commit()
 
     varslist = []
     for data in memberTabHeader[1:]:
@@ -183,5 +204,7 @@ def initDatabase():
 
 
 if __name__=='__main__':
+    
+    
     
     initDatabase()

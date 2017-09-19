@@ -69,12 +69,12 @@ class DepartmentManager(Ui_MainWindow):
         
 
     def buildTreeHierarchy(self):
-        for task in self.taskDict.keys():
-            pass
-            
-            
-            
+        self.hierTree = self.department.buildTreeHierarchy()
+
         
+    def getHierTree(self):
+        self.hierTree = self.department.getHierTree()
+                 
         
     def setConnections(self):
         self.connect(self.dep_edit,QtCore.SIGNAL('clicked()'),self.editDepartment)
@@ -84,8 +84,7 @@ class DepartmentManager(Ui_MainWindow):
         self.connect(self.btn_add_project,QtCore.SIGNAL('clicked()'),self.addProject)
         self.connect(self.btn_add_subproject,QtCore.SIGNAL('clicked()'),self.addSubproject)
         self.connect(self.btn_add_task,QtCore.SIGNAL('clicked()'),self.addTask)
-        
-        
+                
         self.connect(self.add_member_btn,QtCore.SIGNAL('clicked()'),self.addMember)        
         self.connect(self.query,QtCore.SIGNAL('clicked()'),self.showQueryResult)
         self.connect(self.save_excel,QtCore.SIGNAL('clicked()'),self.saveExcel)        
@@ -105,72 +104,69 @@ class DepartmentManager(Ui_MainWindow):
     
     def addProject(self):
         tempDict,ok = newProjectDialog.newProject()       
-        project_subprojects = ''
-        if tempDict[u'项目名称'] not in self.projectTree.keys() and tempDict[u'项目名称'] != '':
+        if tempDict[u'项目名称'] != '':
+            tempDict[u'完成度'] = str(0)
+            tempDict[u'项目状态'] = u'进行中'
             success = self.department.addProject(tempDict)
-            if success:
+            if success[0] == 1:
                 root = self.tree_project.topLevelItem(0)
                 newItem = newTreeWidgetItem(root)
-                newItem.setText(0,tempDict[u'项目名称'])
+                newItem.setText(0,success[1][u'项目名称'])
                 newItem.setLevel(1)
-                self.getAllProject()
-
-
+                self.getHierTree()
+            elif success[0] == 2:
+                print '添加项目失败'
+            else :
+                print '该项目已存在'
+            
 
 
     def addSubproject(self):
-        tempDict,ok = newSubprojectDialog.newSubproject(projectDict=self.projectDict)
-        subproject = tempDict[u'subproject']
-        subproject_tasks = ''
-        project = tempDict[u'project']
-        if project != '' :
-            subproject_list = self.projectDict[project][u'subprojects'].split(';')
-            if (subproject != '') and (subproject not in subproject_list):
-                subproject_vars = [subproject,tempDict[u'category'],project,tempDict[u'start_date'],tempDict[u'finish_date'],subproject_tasks,tempDict[u'description']]
-                newSubprojectDict = self.department.addSubproject(subproject_vars)
-                if newSubprojectDict:
-                    self.projectDict[project][u'subprojects'] = self.projectDict[project][u'subprojects'] + subproject + ";"
-                    self.department.updateServer(table=u'project', varsList=[(u'subprojects',self.projectDict[project][u'subprojects'])], 
-                                                conditionsList=[(u'project',project)])
-                    itemIter = QtGui.QTreeWidgetItemIterator(self.tree_project)
-                    while itemIter.value() is not None:
-                        if unicode(itemIter.value().text(0)) == project:
-                            newItem = newTreeWidgetItem(itemIter.value())
-                            newItem.setText(0,subproject)
-                            newItem.setLevel(2)
-                            break
-                        else:
-                            itemIter = itemIter.__iadd__(1)
-                    self.getAllProject()
-                    self.getAllSubproject()
-                    self.showSubprojectInfo(project)
+        tempDict,projectId,ok = newSubprojectDialog.newSubproject(projectDict=self.projectDict)
+        subproject = tempDict[u'展项名称']
+        project = tempDict[u'项目名称']
+        tempDict[u'完成度'] = str(0)
+        tempDict[u'展项状态'] = u'进行中'        
+        if project != '' and subproject != '':
+            success = self.department.addSubproject(tempDict,projectId)
+            if success[0] == 1:
+                itemIter = QtGui.QTreeWidgetItemIterator(self.tree_project)
+                while itemIter.value() is not None:
+                    if unicode(itemIter.value().text(0)) == project:
+                        newItem = newTreeWidgetItem(itemIter.value())
+                        newItem.setText(0,success[1][u'展项名称'])
+                        newItem.setLevel(2)
+                        self.getHierTree()
+                        break
+                    else:
+                        itemIter = itemIter.__iadd__(1)
+            elif success[0] == 2:
+                print '添加展项失败'
+            else:
+                print '展项已存在'            
                     
             
                 
     def addTask(self):
-        tempDict,ok = newTaskDialog.newTask(projectDict=self.projectDict)
-        task = tempDict[u'task']
-        project = tempDict[u'project']
-        subproject = tempDict[u'subproject']
-        department = depdict[self.dep]
-        progress = str(0.0)
-        membersList = ''
-        if project != '' and subproject != '':
-            tasks_list = self.subprojectDict[subproject][u'tasks'].split(';')
-            print tasks_list
-            if task != '' and task not in tasks_list:
-                task_vars = [task,department,project,subproject,tempDict[u'start_date'],tempDict[u'finish_date'],progress,membersList,tempDict[u'description']]
-                print task_vars
-                newTaskDict = self.department.addTask(task_vars)
-                if newTaskDict:
-                    self.taskDict[task] = newTaskDict
-                    self.subprojectDict[subproject][u'tasks'] = self.subprojectDict[subproject][u'tasks'] + task + ";"
-                    self.department.updateServer(table=u'subproject',varsList = [(u'tasks',self.subprojectDict[subproject]['tasks'])],
-                                                 conditionsList = [(u'subproject',subproject)])
-                    self.getAllProject()
-                    self.getAllSubproject()
-                    self.getAllTask()
-                    self.showTaskInfo(subproject)
+        tempDict,projectId,subprojectId,ok = newTaskDialog.newTask(projectDict=self.projectDict,subprojectDict=self.subprojectDict)
+        task = tempDict[u'任务名称']
+        project = tempDict[u'项目名称']
+        subproject = tempDict[u'展项名称']
+        tempDict[u'完成度'] = str(0)
+        tempDict[u'任务状态'] = u'进行中'
+        tempDict[u'参与人员'] = ''
+        if project != '' and subproject != '' and task != '':
+            success = self.department.addTask(tempDict,projectId,subprojectId)
+            if success[0] == 1:
+                self.getAllProject()
+                self.getAllSubproject()
+                self.getAllTask()
+                self.showTaskInfo(subproject)
+                self.getHierTree()
+            elif success[0] == 2:
+                print '添加任务失败'
+            else:
+                print '任务已存在'
                     
 
 
@@ -298,22 +294,23 @@ class DepartmentManager(Ui_MainWindow):
         root = newTreeWidgetItem(self.tree_project)
         root.setText(0,u'全部项目')
         root.setLevel(0)
-        for project in self.projectDict.keys():
+        projectIdList = self.hierTree.keys()
+        projectIdList.sort()
+        for projectId in projectIdList:
             projectItem = newTreeWidgetItem(root)
-            projectItem.setText(0,project)
+            projectItem.setText(0,self.projectDict[projectId][u'项目名称'])
             projectItem.setLevel(1)
-            #subprojectList = self.projectDict[project][u'subprojects'].split(';')
-            #if subprojectList is not None:
-                #for subproject in subprojectList:
-                    #if subproject != '':
-                        #subprojectItem =  newTreeWidgetItem(projectItem)
-                        #subprojectItem.setText(0,subproject)
-                        #subprojectItem.setLevel(2)
+            projectItem.setId(projectId)
+            subproIdList = self.hierTree[projectId].keys()
+            subproIdList.sort()
+            for subproId in subproIdList:            
+                subprojectItem =  newTreeWidgetItem(projectItem)
+                subprojectItem.setText(0,self.subprojectDict[subproId][u'展项名称'])
+                subprojectItem.setLevel(2)
+                subprojectItem.setId(subproId)
         self.tree_project.addTopLevelItem(root)
 
             
-    
-
 
         
     def showSubprojectComobox(self):
@@ -342,75 +339,69 @@ class DepartmentManager(Ui_MainWindow):
             self.showProjectInfo()
         elif level == 1:
             project = unicode(item.text(0))
-            self.showSubprojectInfo(unicode(project))
+            self.showSubprojectInfo(item)
         elif level == 2:
             subproject = unicode(item.text(0))
-            self.showTaskInfo(unicode(subproject))
+            self.showTaskInfo(item)
+
 
                 
     def showProjectInfo(self):
         self.label_tables.setText(u'项目详情')
-        self.table_prodetail.clear()
-        
+        self.table_prodetail.clear()        
         rows = len(self.projectDict.keys())
         self.table_prodetail.setRowCount(rows)
-        self.table_prodetail.setColumnCount(len(projectTableHeader))
-        self.table_prodetail.setHorizontalHeaderLabels(projectTableHeader)
-        
-        for i,row in enumerate(self.projectDict.keys()):
-            item = QtGui.QTableWidgetItem(row)
-            self.table_prodetail.setItem(i,0, item)
-            infolist = projectTableList[1:]
-            for j,col in enumerate(infolist):
+        self.table_prodetail.setColumnCount(len(self.department.proTabHeader))
+        self.table_prodetail.setHorizontalHeaderLabels(self.department.proTabHeader)
+        projectList = self.projectDict.keys()
+        projectList.sort()
+        for i,row in enumerate(projectList):
+            for j,col in enumerate(self.department.proTabHeader):
                 item = QtGui.QTableWidgetItem(unicode(self.projectDict[row][col]))
                 item.setTextAlignment(QtCore.Qt.AlignHCenter)
-                self.table_prodetail.setItem(i,j+1,item)
+                self.table_prodetail.setItem(i,j,item)
 
     
     
     
     def showSubprojectInfo(self,project):
-        self.label_tables.setText(u'展项详情: '+project)
+        projectName = project.text(0)
+        self.label_tables.setText(u'展项详情: '+projectName)
         self.table_prodetail.clear()
-        drawDict = {}
-        for subproject in self.subprojectDict.keys():
-            if self.subprojectDict[subproject][u'project'] == project:
-                drawDict[subproject] = self.subprojectDict[subproject]
-        rows = len(drawDict.keys())
+        projectId = project.getId()
+        subprojectIdList = self.hierTree[projectId].keys()
+        subprojectIdList.sort()
+        rows = len(subprojectIdList)
         self.table_prodetail.setRowCount(rows)
-        self.table_prodetail.setColumnCount(len(subprojectTableHeader))
-        self.table_prodetail.setHorizontalHeaderLabels(subprojectTableHeader)        
+        self.table_prodetail.setColumnCount(len(self.department.subproTabHeader))
+        self.table_prodetail.setHorizontalHeaderLabels(self.department.subproTabHeader)        
     
-        for i,row in enumerate(drawDict.keys()):
-            item = QtGui.QTableWidgetItem(row)
-            self.table_prodetail.setItem(i,0,item)
-            infolist = subprojectTableList[1:]
-            for j,col in enumerate(infolist):
-                item = QtGui.QTableWidgetItem(unicode(drawDict[row][col]))
+        for i,row in enumerate(subprojectIdList):
+            for j,col in enumerate(self.department.subproTabHeader):
+                item = QtGui.QTableWidgetItem(unicode(self.subprojectDict[row][col]))
                 item.setTextAlignment(QtCore.Qt.AlignHCenter)
-                self.table_prodetail.setItem(i,j+1,item)
+                self.table_prodetail.setItem(i,j,item)
+ 
  
  
 
     def showTaskInfo(self,subproject):
-        self.label_tables.setText(u'任务详情: '+subproject)
+        subprojectName = subproject.text(0)
+        self.label_tables.setText(u'任务详情: '+subprojectName)
         self.table_prodetail.clear()
-        drawDict = {}
-        for task in self.taskDict.keys():
-            if self.taskDict[task][u'subproject'] == subproject:
-                drawDict[task] = self.taskDict[task]                
-        rows = len(drawDict.keys())
+        subprojectId = subproject.getId()
+        projectId = subprojectId[0:3]
+        taskIdList = self.hierTree[projectId][subprojectId]
+        rows = len(taskIdList)
         self.table_prodetail.setRowCount(rows)
-        self.table_prodetail.setColumnCount(len(tasksTableHeader))
-        self.table_prodetail.setHorizontalHeaderLabels(tasksTableHeader)        
-        for i,row in enumerate(drawDict.keys()):
-            item = QtGui.QTableWidgetItem(row)
-            self.table_prodetail.setItem(i,0,item)
-            infolist = [u'start_date',u'finish_date',u'progress',u'members',u'description']
-            for j,col in enumerate(infolist):
-                item = QtGui.QTableWidgetItem(unicode(drawDict[row][col]))
+        self.table_prodetail.setColumnCount(len(self.department.taskTabHeader))
+        self.table_prodetail.setHorizontalHeaderLabels(self.department.taskTabHeader)        
+        for i,row in enumerate(taskIdList):
+            for j,col in enumerate(self.department.taskTabHeader):
+                item = QtGui.QTableWidgetItem(unicode(self.taskDict[row][col]))
                 item.setTextAlignment(QtCore.Qt.AlignHCenter)
-                self.table_prodetail.setItem(i,j+1,item)
+                self.table_prodetail.setItem(i,j,item)
+
 
     
                 
@@ -431,22 +422,25 @@ class DepartmentManager(Ui_MainWindow):
                 tableWidget.setItem(i,j,item)
 
 
-
-
               
 
 class newTreeWidgetItem(QtGui.QTreeWidgetItem):
     def __init__(self,parent=None):
         super(QtGui.QTreeWidgetItem,self).__init__(parent)
         self.level = 0
+        self.id = ''
         
     def setLevel(self,level):
         self.level = level
         
+    def setId(self,id=''):
+        self.id = id
+        
     def getLevel(self):
         return self.level
         
-    
+    def getId(self):
+        return self.id
 
 
 
@@ -499,7 +493,8 @@ class newSubprojectDialog(ui_newSubprojectDialog.Ui_Dialog):
         self.setupUi(self)
         projectList = projectDict.keys()
         for pro in projectList:
-            self.projectCombo.addItem(pro)
+            projectId = QtCore.QVariant(projectDict[pro][u'项目编号'])
+            self.projectCombo.addItem(projectDict[pro][u'项目名称'],projectId)
     
     @staticmethod
     def newSubproject(parent=None,projectDict={}):
@@ -508,6 +503,7 @@ class newSubprojectDialog(ui_newSubprojectDialog.Ui_Dialog):
         newSubprojectDict = {}
         subproject = unicode(dialog.subproject_name.text()) 
         project = unicode(dialog.projectCombo.currentText())
+        index = dialog.projectCombo.currentIndex()
         subproject_start_date = unicode(dialog.start_date.text())
         subproject_end_date = unicode(dialog.finish_date.text())
         subproject_category = unicode(dialog.category.currentText())
@@ -517,6 +513,7 @@ class newSubprojectDialog(ui_newSubprojectDialog.Ui_Dialog):
         software = unicode(dialog.software.text())
         hardware = unicode(dialog.hardware.text())
         subproject_desc = unicode(dialog.subproject_desc.toPlainText())
+        projectId = unicode(dialog.projectCombo.itemData(index).toString())
         newSubprojectDict[u'展项名称'] = subproject
         newSubprojectDict[u'项目名称'] = project
         newSubprojectDict[u'展项类型'] = subproject_category
@@ -528,33 +525,39 @@ class newSubprojectDialog(ui_newSubprojectDialog.Ui_Dialog):
         newSubprojectDict[u'后期负责'] = post
         newSubprojectDict[u'软件负责'] = software
         newSubprojectDict[u'硬件负责'] = hardware
-        return (newSubprojectDict,result==QtGui.QDialog.Accepted)        
+        return (newSubprojectDict,projectId,result==QtGui.QDialog.Accepted)        
         
         
         
 
 class newTaskDialog(ui_newTaskDialog.Ui_Dialog):
-    def __init__(self,parent=None,projectDict={}):
+    def __init__(self,parent=None,projectDict={},subprojectDict={}):
         super(ui_newTaskDialog.Ui_Dialog,self).__init__()
         self.setupUi(self)
         self.projectDict = projectDict
+        self.subprojectDict = subprojectDict
         projectList = self.projectDict.keys()
         for pro in projectList:
-            self.projectCombo.addItem(pro)
+            projectId = QtCore.QVariant(self.projectDict[pro][u'项目编号'])
+            self.projectCombo.addItem(projectDict[pro][u'项目名称'],projectId)
         self.showSubprojects()
         self.projectCombo.currentIndexChanged.connect(self.showSubprojects)
         
     def showSubprojects(self):
-        project = unicode(self.projectCombo.currentText())
-        subprojects = self.projectDict[project][u'subprojects'].split(';')
+        projectIndex = self.projectCombo.currentIndex()
+        projectId = unicode(self.projectCombo.itemData(projectIndex).toString())
+        subprojectList = []
+        for key in self.subprojectDict.keys():
+            if key.startswith(projectId):
+                subprojectList.append(key)
         self.subprojectCombo.clear()
-        for subpro in subprojects:
-            if subpro != '':
-                self.subprojectCombo.addItem(subpro)
+        for subpro in subprojectList:
+            subprojectId = QtCore.QVariant(self.subprojectDict[subpro][u'展项编号'])
+            self.subprojectCombo.addItem(self.subprojectDict[subpro][u'展项名称'],subprojectId)
         
     @staticmethod
-    def newTask(parent=None,projectDict={}):
-        dialog = newTaskDialog(parent,projectDict)
+    def newTask(parent=None,projectDict={},subprojectDict={}):
+        dialog = newTaskDialog(parent,projectDict,subprojectDict)
         result = dialog.exec_()
         newTaskDict = {}
         task = unicode(dialog.task_name.text())
@@ -563,13 +566,19 @@ class newTaskDialog(ui_newTaskDialog.Ui_Dialog):
         task_start_date = unicode(dialog.start_date.text())
         task_end_date = unicode(dialog.finish_date.text())
         task_desc = unicode(dialog.task_desc.toPlainText())
+        projectIndex = dialog.projectCombo.currentIndex()
+        subprojectIndex = dialog.subprojectCombo.currentIndex()
+        projectId = unicode(dialog.projectCombo.itemData(projectIndex).toString())
+        subprojectId = unicode(dialog.subprojectCombo.itemData(subprojectIndex).toString())
         newTaskDict[u'任务名称'] = task
         newTaskDict[u'项目名称'] = project
-        newTaskDict[u'展项名称'] =subproject 
+        newTaskDict[u'展项名称'] = subproject 
         newTaskDict[u'起始时间'] = task_start_date
         newTaskDict[u'结束时间'] = task_end_date
         newTaskDict[u'任务说明'] = task_desc
-        return (newTaskDict,result==QtGui.QDialog.Accepted)
+        print projectId
+        print subprojectId
+        return (newTaskDict,projectId,subprojectId,result==QtGui.QDialog.Accepted)
         
         
                 
