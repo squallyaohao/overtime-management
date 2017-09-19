@@ -90,11 +90,19 @@ class Department():
             self.subprojectDict = {}
             self.taskDict = {}
             self.allMembers = {}
-        
+
+            
         self.proTabHeader = self.getTableHeader(headertable='proTabHeader')
         self.subproTabHeader = self.getTableHeader(headertable='subproTabHeader')
         self.taskTabHeader = self.getTableHeader(headertable='taskTabHeader')
-        self.memberTabHeader = self.getTableHeader(headertable='memberTabHeader')
+        self.memberTabHeader = self.getTableHeader(headertable='memberTabHeader')            
+            
+        self.getProjectsFromServer()
+        self.getSubprojectFromServer()
+        self.getTaskFromeServer()
+        self.getMembersFromServer()
+        self.buildTreeHierarchy()
+
 
 
        
@@ -134,7 +142,7 @@ class Department():
         return 1
 
     
-    def tableQuery(self,table='',tabHeader=[]):
+    def queryServer(self,table='',tabHeader=[]):
         tempDict = {}
         conn,cursor = self.connectToServer()
         query_statement = mysql_utility.sqlQueryState(table)
@@ -150,7 +158,7 @@ class Department():
     
 
 
-    def tableQuery2(self,table='',columns=[],condition={},tabHeader=[]):
+    def queryServer2(self,table='',columns=[],condition={},tabHeader=[]):
         tempDict = {}
         conn,cursor = self.connectToServer()
         statement = mysql_utility.sqlQueryState2(table,columns, 
@@ -170,7 +178,6 @@ class Department():
     def checkNotExist(self,table='',condition={}):
         conn,cursor = self.connectToServer()
         statement = mysql_utility.sqlQueryState(table,condition)
-        print statement
         cursor.execute(statement)
         conn.commit()
         result = cursor.fetchall()
@@ -178,19 +185,41 @@ class Department():
             return 1
         else:
             return 0
+
         
     
     def updateServer(self,table='',varsList=[],conditionsList=[]): 
         conn,cursor = self.connectToServer()
         update_statement = mysql_utility.sqlUpdateState(table, varsList,conditionsList)
-        print update_statement
+        #print update_statement
         cursor.execute(update_statement)
         conn.commit()
         cursor.close()
         conn.close()
         return 1
-    
-     
+
+
+
+    def saveTable(self,table='',multiRow=[]):
+        conn,cursor = self.connectToServer()
+        headerLabels =''
+        if table == u'project':
+            headerLabels = self.proTabHeader
+        elif table == u'subprojet':
+            headerLabels = self.subproTabHeader
+        else:
+            headerLabels = self.taskTabHeader
+        for row in multiRow:
+            varsList = zip(headerLabels,row)
+            conditionList= varsList[0]
+            statement = mysql_utility.sqlUpdateState(table, varsList, [conditionList])
+            print statement
+            cursor.execute(statement)
+            conn.commit()
+        cursor.close()
+        conn.close()
+
+        
         
     def deleteMember(self,name):
         if name in self.memberList:
@@ -216,25 +245,25 @@ class Department():
     
         
     def getMembersFromServer(self):
-        self.allMembers = self.tableQuery(table='member', tabHeader=self.memberTabHeader)
+        self.allMembers = self.queryServer(table='member', tabHeader=self.memberTabHeader)
         return self.allMembers
 
 
     def getProjectsFromServer(self):
-        self.projectDict = self.tableQuery(table='project',tabHeader=self.proTabHeader)
-        for key in self.projectDict.keys():
-            for col in self.projectDict[key].keys():
-                print col
+        self.projectDict = self.queryServer(table='project',tabHeader=self.proTabHeader)
+        #for key in self.projectDict.keys():
+            #for col in self.projectDict[key].keys():
+                #print col
         return self.projectDict
 
     
     def getSubprojectFromServer(self):
-        self.subprojectDict = self.tableQuery(table='subproject', tabHeader=self.subproTabHeader)
+        self.subprojectDict = self.queryServer(table='subproject', tabHeader=self.subproTabHeader)
         return self.subprojectDict
     
     
-    def getTaskFromeServer(self,table=''):
-        self.taskDict = self.tableQuery(table='task', tabHeader=self.taskTabHeader)
+    def getTaskFromeServer(self):
+        self.taskDict = self.queryServer(table='task', tabHeader=self.taskTabHeader)
         return self.taskDict
 
 
@@ -309,84 +338,80 @@ class Department():
             return (3,task_vars)
         
     
-    def addMember(self,member=[]):
-        success = self.tableInsert(table='members', vars_list=member)
-        if success:
-            newMemberDict = dict(zip(memberstabHeader,member[1:]))
-            return newMemberDict
-        else :
-            return 0            
+    def addMember(self,member={}):
+        ok = self.checkNotExist(table='member', condition=member)
+        if ok:
+            allmembers = self.queryServer(table='member', tabHeader=self.memberTabHeader)
+            total = len(allmembers.keys())
+            memberId = '%04d'%(total+ 1)
+            member[u'编号'] = memberId
+            success = self.tableInsert(table='member', varsdict=member)
+            if success:
+                self.allMembers[memberId] = member
+                return (1,member)
+            else :
+                return (2,member)
+        else:
+            return (3,member)
     
         
-    def deleteProject(self,projectdict):
+    def deleteProject(self,projectId):
         conn,cursor = self.connectToServer()
-        delete_project_statment = mysql_utility.sqldeletState('project',projectdict)
-        delete_subproject_statement = mysql_utility.sqldeletState('subproject', projectdict)
-        delete_tasks_statement = mysql_utility.sqldeletState('task',projectdict)
-        cursor.execute(delete_project_statment)
-        conn.commit()
-        cursor.execute(delete_subproject_statement)
-        conn.commit()
-        cursor.execute(delete_tasks_statement)
-        conn.commit()
+        deleteDict = self.hierTree[projectId]
+        del_statments = []
+        del_statments.append(mysql_utility.sqldeletState(table='project', condition={u'项目编号':projectId}))
+        for subproId in deleteDict.keys():
+            del_statments.append(mysql_utility.sqldeletState(table='subproject', condition={u'展项编号':subproId}))
+            for taskId in deleteDict[subproId]:
+                del_statments.append(mysql_utility.sqldeletState(table='task', condition={u'任务编号':taskId}))
+        for statement in del_statments:
+            cursor.execute(statement)
+            conn.commit()
         cursor.close()
         conn.close()
+        self.hierTree.pop(projectId)
         return 1
 
 
-    def deleteSubproject(self,subprojectdict,project):
+    def deleteSubproject(self,subprojectId):
         conn,cursor = self.connectToServer()
-        delete_subproject_statement = mysql_utility.sqldeletState('subproject',subprojectdict)
-        delete_tasks_statement = mysql_utility.sqldeletState('task',subprojectdict)
-        cursor.execute(delete_subproject_statement)
-        conn.commit()
-        cursor.execute(delete_tasks_statement)
-        conn.commit()     
-        query_project_statement = mysql_utility.sqlQueryState('project',{'project':project})
-        cursor.execute(query_project_statement)
-        conn.commit()
-        result = cursor.fetchone()
+        projectId = subprojectId[0:3]
+        deleteDict = self.hierTree[projectId][subprojectId]
+        del_statments = []
+        del_statments.append(mysql_utility.sqldeletState(table='subproject', condition={u'展项编号':subprojectId}))
+        for taskId in deleteDict:
+            del_statments.append(mysql_utility.sqldeletState(table='task', condition={u'任务编号':taskId}))
+        for statement in del_statments:
+            cursor.execute(statement)
+            conn.commit()
         cursor.close()
         conn.close()
-        projectDict = {}
-        projectDict[project] = dict(zip(projecttabHeader,result[1:]))
-        projectDict[project]['subprojects'] = projectDict[project]['subprojects'].replace(subprojectdict['subproject']+';','')
-        varsList = [('subprojects',projectDict[project]['subprojects'])]
-        conditionsList = [('project',project)]
-        self.updateServer('project', varsList, conditionsList) 
+        self.hierTree[projectId].pop(subprojectId)
         return 1
 
 
 
-    def deleteTask(self,taskDict,subproject):
-        print subproject
+    def deleteTask(self,taskId):
         conn,cursor = self.connectToServer()
-        delete_task_statement = mysql_utility.sqldeletState('task',taskDict)
-        cursor.execute(delete_task_statement)
+        projectId = taskId[0:3]
+        subprojectId = taskId[0:6]
+        del_statement = mysql_utility.sqldeletState(table='task', condition={u'任务编号':taskId})
+        cursor.execute(del_statement)
         conn.commit()
-        query_subproject_statement = mysql_utility.sqlQueryState('subproject',{'subproject':subproject})
-        cursor.execute(query_subproject_statement)
-        conn.commit()
-        result = cursor.fetchone()
         cursor.close()
         conn.close()
-        subprojectDict = {}
-        subprojectDict[subproject] = dict(zip(subprojecttabHeader,result[1:]))
-        print subprojectDict
-        subprojectDict[subproject]['tasks'] = subprojectDict[subproject]['tasks'].replace(taskDict['task']+';','')
-        print subprojectDict
-        varsList = [('tasks',subprojectDict[subproject]['tasks'])]
-        conditionsList = [('subproject',subproject)]
-        self.updateServer('subproject',varsList,conditionsList)
+        print 'aaa'
+        print self.hierTree[projectId][subprojectId]
+        self.hierTree[projectId][subprojectId].remove(taskId)
         return 1
         
 
 
-    def getAllProjects(self):
-        print '项目列表： '.decode('utf-8')
-        for pro in self.projectList:
-            print '\t'+pro.decode('utf-8')
-        return self.projectList
+    #def getAllProjects(self):
+        #print '项目列表： '.decode('utf-8')
+        #for pro in self.projectList:
+            #print '\t'+pro.decode('utf-8')
+        #return self.projectList
         
         
 

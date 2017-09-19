@@ -58,7 +58,7 @@ def sqlInsertState2(table='',varsdict={}):
 #given a table name and a list,generate update statement used to update old data into the table
 #the list should contain a serial of data that match the format of the table 
 #in this case list should be like ['date','name','project','duration','meal']
-def sqlUpdateState(table='',varsList='',conditionList=''):
+def sqlUpdateState(table='',varsList=[],conditionList=[]):
     statement = "update " + table + " set "
     for var in varsList:
         statement = statement + var[0] +"='" + var[1] + "', "
@@ -80,6 +80,7 @@ def sqldeletState(table='',condition={}):
     for key in keys:
         statement = statement + key + "='" + condition[key] +"' and "
     statement = statement[:-5] + ';'
+    print statement
     return statement
 
 
@@ -105,6 +106,8 @@ def sqlQueryState(table='',condition={}):
     return statement
 
 
+
+
 def sqlQueryState2(table='',columns=[],condition={}):
     columnList = ''
     for col in columns:
@@ -127,6 +130,8 @@ def sqlQueryState2(table='',columns=[],condition={}):
         statement = "select * from " + table + ";"    
     print statement
     return statement    
+
+
 
 
 def sqlCreateTableStatement(name='',varlist=[]):
@@ -198,13 +203,23 @@ def initDatabase():
 
 
 
+def dropTables():
+    conn = sql.connect(hostname,user,pwd,db,charset='utf8')
+    cursor = conn.cursor()    
+    tableList = [u'project',u'proTabHeader','subproject',u'subproTabHeader',u'task',u'taskTabHeader',u'member',u'memberTabHeader']
+    for table in tableList:
+        statement = "drop table if exists "+table+";"
+        cursor.execute(statement)
+        conn.commit()
+    cursor.close()
+    conn.close()
+
+
 #===================================================================================================
 
 
 
 
 if __name__=='__main__':
-    
-    
-    
+    dropTables()
     initDatabase()
