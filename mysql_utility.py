@@ -49,7 +49,6 @@ def sqlInsertState2(table='',varsdict={}):
     for key in sortedKey:
         insert_statement = insert_statement + varsdict[key] + "','"
     insert_statement = insert_statement[:-2] + ");"
-    print insert_statement
     return insert_statement
 
 
@@ -66,7 +65,6 @@ def sqlUpdateState(table='',varsList=[],conditionList=[]):
     for condition in conditionList:
         statement = statement + condition[0] + "='" + condition[1] + "' and "
     statement = statement[:-5] + ";"
-    #print statement
     return statement
 
 
@@ -80,7 +78,6 @@ def sqldeletState(table='',condition={}):
     for key in keys:
         statement = statement + key + "='" + condition[key] +"' and "
     statement = statement[:-5] + ';'
-    print statement
     return statement
 
 
@@ -128,7 +125,6 @@ def sqlQueryState2(table='',columns=[],condition={}):
         statement = statement[:-5] + ";"
     else:
         statement = "select * from " + table + ";"    
-    print statement
     return statement    
 
 

@@ -31,15 +31,6 @@ class DepartmentManager(Ui_MainWindow):
         curDate = QtCore.QDate.currentDate()
         self.query_fromdate.setDate(curDate)
         self.query_todate.setDate(curDate)
-        #self.department.projectDict = {}
-        #self.department.subprojectDict = {}
-        #self.department.taskDict = {}
-        #self.department.allMembers = {}
-        #self.getAllProject()
-        #self.getAllSubproject()
-        #self.getAllTask()
-        #self.getAllMembers()
-        #self.buildTreeHierarchy()
         self.tree_project.setColumnCount(1)
         self.tree_project.setHeaderLabel(u'项目名称')
         self.drawProjectTree()
@@ -47,9 +38,12 @@ class DepartmentManager(Ui_MainWindow):
         memberIdList = self.department.allMembers.keys()
         memberIdList.sort()
         memberList = []
+        
+        #initialize query_member combobox
         for memberId in memberIdList:
             memberList.append(self.department.allMembers[memberId][u'姓名'])
         self.drawComboBox('query_member',memberList)
+        #initialize query_project combobox
         projectIdList = self.department.projectDict.keys()
         projectIdList.sort()
         projectList = []
@@ -57,33 +51,17 @@ class DepartmentManager(Ui_MainWindow):
             projectList.append(self.department.projectDict[projectId][u'项目名称'])
         self.drawComboBox('query_project', projectList)
         self.query_overtime_table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        
+        self.table_prodetail.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.table_prodetail.customContextMenuRequested.connect(self.showContextMenu)
+        
         #set up connections
         self.setConnections()
         
         
-    #def getAllProject(self):
-        #self.department.projectDict = self.department.getProjectsFromServer()
 
         
-    #def getAllSubproject(self):
-        #self.department.subprojectDict = self.department.getSubprojectFromServer()
-
-        
-    #def getAllTask(self):
-        #self.department.taskDict = self.department.getTaskFromeServer()
-
-        
-    #def getAllMembers(self):
-        #self.department.allMembers = self.department.getMembersFromServer()
-        
-        
-
-    #def buildTreeHierarchy(self):
-        #self.department.hierTree = self.department.buildTreeHierarchy()
-
-        
-    #def getHierTree(self):
-        #self.department.hierTree = self.department.getHierTree()
+ 
                  
         
     def setConnections(self):
@@ -129,7 +107,7 @@ class DepartmentManager(Ui_MainWindow):
                 newItem.setText(0,success[1][u'项目名称'])
                 newItem.setLevel(1)
                 newItem.setId(success[1][u'项目编号'])
-                self.getHierTree()
+                self.department.getHierTree()
             elif success[0] == 2:
                 print '添加项目失败'
             else :
@@ -153,7 +131,7 @@ class DepartmentManager(Ui_MainWindow):
                         newItem.setText(0,success[1][u'展项名称'])
                         newItem.setLevel(2)
                         newItem.setId(success[1][u'展项编号'])
-                        self.getHierTree()
+                        self.department.getHierTree()
                         self.showSubprojectInfo(projectId)
                         break
                     else:
@@ -245,9 +223,6 @@ class DepartmentManager(Ui_MainWindow):
                 self.project_list.takeItem(curRow)
                 self.subproject_list.clear()
                 self.task_list.clear()
-                self.getAllProject()
-                self.getAllSubproject()
-                self.getAllTask()
                 self.showSubproject()
                 self.showTasks()
  
@@ -265,9 +240,6 @@ class DepartmentManager(Ui_MainWindow):
             if success:
                 self.subproject_list.takeItem(curRow)
                 self.task_list.clear()
-                self.getAllProject()
-                self.getAllSubproject()
-                self.getAllTask()
                 self.showSubproject()
                 self.showTasks()
                 
@@ -283,9 +255,6 @@ class DepartmentManager(Ui_MainWindow):
             success = self.department.deleteTask(taskDict,subproject)
             if success:
                 self.task_list.takeItem(curRow)
-                self.getAllProject()
-                self.getAllSubproject()
-                self.getAllTask()
                 self.showSubproject()
                 self.showTasks()
  
@@ -525,9 +494,84 @@ class DepartmentManager(Ui_MainWindow):
         self.department.saveTable(tableName,rows)
 
             
-        
+    
 
+    def showContextMenu(self):
+        table_name = self.table_prodetail.getTableName()
+        cur_row = self.table_prodetail.currentRow()
+        if table_name == u'task' and cur_row>=0:
+            taskId = unicode(self.table_prodetail.item(cur_row,0).text())
+            colIndex = self.department.taskTabHeader.index(u'参与人员')
+            item = self.table_prodetail.item(cur_row,colIndex)
+            curText = unicode(item.text())
+            #get current member list,use '[:-1]' beacuse string's 'split' method always keey the '' at the end of the returned list
+            assignedMember = curText.split(';')[:-1]
+            menu = QtGui.QMenu('任务分配')
+            submenu = menu.addMenu(u'任务指派给')
+            submenu2 = menu.addMenu(u'取消指派')
+            self.signalMap = QtCore.QSignalMapper(self)
+            self.signalMap2 = QtCore.QSignalMapper(self)
+            
+            #build assign action list and filter all the member who are already participate
+            #compare the number of the current involved member and the total member,so we can know if there are still someones who can be assigned
+            if len(assignedMember) < len( self.department.allMembers.keys()):
+                for member in self.department.allMembers:
+                    name = self.department.allMembers[member][u'姓名']
+                    if name not in assignedMember:
+                        action = QtGui.QAction(name,submenu)
+                        self.signalMap.setMapping(action,name)
+                        action.triggered.connect(self.signalMap.map)
+                        submenu.addAction(action)
+            else:
+                action = QtGui.QAction(u'空',submenu)
+                action.setDisabled(True)
+                submenu.addAction(action)
+                
+            #build un-assign action list,if assignedMember is an empty list,that means no one is participating
+            if len(assignedMember) != 0: 
+                for name in assignedMember:              
+                    if name in assignedMember and name != '':
+                        action = QtGui.QAction(name,submenu2)
+                        self.signalMap2.setMapping(action,name)
+                        action.triggered.connect(self.signalMap2.map)
+                        submenu2.addAction(action)
+            else:
+                action = QtGui.QAction(u'空',submenu)
+                action.setDisabled(True)
+                submenu2.addAction(action)      
+            self.signalMap.mapped[QtCore.QString].connect(self.taskAssign)
+            self.signalMap2.mapped[QtCore.QString].connect(self.taskUnassign)
+            menu.exec_(QtGui.QCursor.pos())
+        else:
+            pass
               
+              
+    def taskAssign(self,name):
+        cur_row = self.table_prodetail.currentRow()
+        taskId = unicode(self.table_prodetail.item(cur_row,0).text())
+        colIndex = self.department.taskTabHeader.index(u'参与人员')
+        item = self.table_prodetail.item(cur_row,colIndex)
+        curText = unicode(item.text())           
+        curText = curText + unicode(name) + ';'
+        success = self.department.updateServer('task', [(u'参与人员',curText)], [(u'任务编号',taskId)])
+        if success:
+            item.setText(curText)
+
+                
+        
+    def taskUnassign(self,name):
+        name =unicode(name)
+        cur_row = self.table_prodetail.currentRow()
+        taskId = unicode(self.table_prodetail.item(cur_row,0).text())
+        colIndex = self.department.taskTabHeader.index(u'参与人员')
+        item = self.table_prodetail.item(cur_row,colIndex)
+        curText = unicode(item.text())
+        curText = curText.replace(name+u';','')
+        success = self.department.updateServer('task', [(u'参与人员',curText)], [(u'任务编号',taskId)])
+        if success:
+            item.setText(curText)
+
+
 
 class newTreeWidgetItem(QtGui.QTreeWidgetItem):
     def __init__(self,parent=None):

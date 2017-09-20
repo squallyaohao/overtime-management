@@ -303,7 +303,7 @@ class Department():
             return (3,project_vars)
 
 
-    def addSubproject(self,subproject_vars={},projectId=u'001'):
+    def addSubproject(self,subproject_vars={},projectId=''):
         ok = self.checkNotExist('subproject',{u'展项名称':subproject_vars[u'展项名称'],u'项目名称':subproject_vars[u'项目名称']})
         if ok:
             totalSubproject = len(self.hierTree[projectId].keys())
@@ -370,6 +370,7 @@ class Department():
         cursor.close()
         conn.close()
         self.hierTree.pop(projectId)
+        self.projectDict.pop(projectId)
         return 1
 
 
@@ -387,6 +388,7 @@ class Department():
         cursor.close()
         conn.close()
         self.hierTree[projectId].pop(subprojectId)
+        self.subprojectDict.pop(subprojectId)
         return 1
 
 
@@ -403,6 +405,7 @@ class Department():
         print 'aaa'
         print self.hierTree[projectId][subprojectId]
         self.hierTree[projectId][subprojectId].remove(taskId)
+        self.taskDict.pop(taskId)
         return 1
         
 

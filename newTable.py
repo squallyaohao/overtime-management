@@ -18,3 +18,12 @@ class NewTable(QTableWidget):
         
     def getTableName(self):
         return self.tableName
+    
+    def mousePressEvent(self,event):
+        button = event.button()
+        if button == Qt.LeftButton:
+            self.setSelectionBehavior(QAbstractItemView.SelectItems)
+            super(QTableWidget,self).mousePressEvent(event)
+        elif button == Qt.RightButton:
+            self.setSelectionBehavior(QAbstractItemView.SelectRows)
+            super(QTableWidget,self).mousePressEvent(event)
