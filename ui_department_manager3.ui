@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1138</width>
-    <height>804</height>
+    <width>1140</width>
+    <height>809</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -27,8 +27,8 @@
   </property>
   <property name="maximumSize">
    <size>
-    <width>1138</width>
-    <height>804</height>
+    <width>1920</width>
+    <height>1080</height>
    </size>
   </property>
   <property name="font">
@@ -65,6 +65,12 @@
       <height>746</height>
      </rect>
     </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
     <property name="font">
      <font>
       <family>Microsoft YaHei UI</family>
@@ -81,7 +87,7 @@
      <enum>QTabWidget::Triangular</enum>
     </property>
     <property name="currentIndex">
-     <number>2</number>
+     <number>0</number>
     </property>
     <property name="iconSize">
      <size>
@@ -103,56 +109,12 @@
       <property name="geometry">
        <rect>
         <x>15</x>
-        <y>50</y>
+        <y>25</y>
         <width>1086</width>
-        <height>666</height>
+        <height>686</height>
        </rect>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout">
-         <item>
-          <widget class="QLabel" name="label_32">
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>项目列表</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QTreeWidget" name="tree_project">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>250</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <column>
-            <property name="text">
-             <string notr="true">1</string>
-            </property>
-           </column>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="delete_2">
-           <property name="text">
-            <string>删除项目</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
        <item>
         <widget class="QTabWidget" name="tabWidget_2">
          <property name="font">
@@ -178,13 +140,50 @@
           <widget class="QWidget" name="layoutWidget">
            <property name="geometry">
             <rect>
-             <x>10</x>
-             <y>15</y>
-             <width>806</width>
+             <x>5</x>
+             <y>10</y>
+             <width>1066</width>
              <height>32</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QLabel" name="label_32">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="font">
+               <font>
+                <pointsize>11</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>项目列表</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_8">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
             <item>
              <widget class="QLabel" name="label_tables">
               <property name="text">
@@ -224,15 +223,47 @@
             <rect>
              <x>5</x>
              <y>60</y>
-             <width>806</width>
-             <height>576</height>
+             <width>1066</width>
+             <height>591</height>
             </rect>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_2">
+           <layout class="QHBoxLayout" name="horizontalLayout_20">
             <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <layout class="QVBoxLayout" name="verticalLayout">
+              <item>
+               <widget class="QTreeWidget" name="tree_project">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>250</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <column>
+                 <property name="text">
+                  <string notr="true">1</string>
+                 </property>
+                </column>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="delete_2">
+                <property name="text">
+                 <string>删除项目</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_2">
               <property name="spacing">
-               <number>1</number>
+               <number>6</number>
               </property>
               <item>
                <widget class="QTableWidget" name="table_prodetail">
@@ -247,36 +278,39 @@
                 </attribute>
                </widget>
               </item>
-             </layout>
-            </item>
-            <item>
-             <layout class="QHBoxLayout" name="horizontalLayout_19">
               <item>
-               <widget class="QLabel" name="label_4">
-                <property name="minimumSize">
-                 <size>
-                  <width>500</width>
-                  <height>0</height>
-                 </size>
+               <layout class="QHBoxLayout" name="horizontalLayout_19">
+                <property name="spacing">
+                 <number>6</number>
                 </property>
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btn_exportExcel">
-                <property name="text">
-                 <string>导出Excel</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QPushButton" name="btn_save">
-                <property name="text">
-                 <string>保存修改</string>
-                </property>
-               </widget>
+                <item>
+                 <widget class="QLabel" name="label_4">
+                  <property name="minimumSize">
+                   <size>
+                    <width>500</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string/>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="btn_exportExcel">
+                  <property name="text">
+                   <string>导出Excel</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="btn_save">
+                  <property name="text">
+                   <string>保存修改</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </item>
              </layout>
             </item>
@@ -292,7 +326,7 @@
             <rect>
              <x>5</x>
              <y>60</y>
-             <width>806</width>
+             <width>1056</width>
              <height>571</height>
             </rect>
            </property>
@@ -300,7 +334,7 @@
           <widget class="QWidget" name="layoutWidget">
            <property name="geometry">
             <rect>
-             <x>650</x>
+             <x>900</x>
              <y>20</y>
              <width>160</width>
              <height>28</height>
@@ -1191,7 +1225,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1138</width>
+     <width>1140</width>
      <height>23</height>
     </rect>
    </property>
