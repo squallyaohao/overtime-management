@@ -79,7 +79,8 @@ memberTabHeader = ['memberTabHeader',
                    (u'姓名',u'0',u'varchar(10)'),
                    (u'编号',u'1',u'varchar(10)'),
                    (u'部门',u'2',u'varchar(10)'),
-                   (u'职务',u'3',u'varchar(10)'),]
+                   (u'职务',u'3',u'varchar(10)'),
+                   (u'任务',u'4',u'text')]
  
 
 

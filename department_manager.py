@@ -33,6 +33,7 @@ class DepartmentManager(Ui_MainWindow):
         self.query_todate.setDate(curDate)
         self.tree_project.setColumnCount(1)
         self.tree_project.setHeaderLabel(u'项目名称')
+        self.assigned_task.setHeaderLabel(u'任务列表')
         self.drawProjectTree()
         self.drawMemberList()
         memberIdList = self.department.allMembers.keys()
@@ -76,10 +77,12 @@ class DepartmentManager(Ui_MainWindow):
         self.connect(self.btn_save,QtCore.SIGNAL('clicked()'),self.saveTable)
         self.connect(self.btn_exportExcel,QtCore.SIGNAL('clicked()'),self.exportProjectToExcel)
                 
-        self.connect(self.add_member_btn,QtCore.SIGNAL('clicked()'),self.addMember)        
+        self.connect(self.add_member_btn,QtCore.SIGNAL('clicked()'),self.addMember)
+                
         self.connect(self.query,QtCore.SIGNAL('clicked()'),self.showQueryResult)
         self.connect(self.save_excel,QtCore.SIGNAL('clicked()'),self.exportOvertimeToExcel)        
         self.tree_project.itemDoubleClicked.connect(self.showInfo)
+        self.member_list.itemDoubleClicked.connect(self.showMemberTasks)
         
 
         
@@ -263,9 +266,34 @@ class DepartmentManager(Ui_MainWindow):
     def drawMemberList(self):
         for member in self.department.allMembers.keys():
             name = self.department.allMembers[member][u'姓名']
+            memberId = self.department.allMembers[member][u'编号']
+            data = QtCore.QVariant(name)
             item = QtGui.QListWidgetItem(name)
+            #item.setData(data)
             self.member_list.addItem(item)
- 
+
+
+
+
+    def showMemberTasks(self,item):
+        self.assigned_task.clear()
+        member = unicode(item.text())
+        taskList = self.department.allMembers[member][u'任务'].split(';')[:-1]
+        for taskId in taskList:
+            projectId = taskId[0:3]
+            subprojectId = taskId[0:6]
+            project = self.department.projectDict[projectId][u'项目名称']
+            subproject = self.department.subprojectDict[subprojectId][u'展项名称']
+            task = self.department.taskDict[taskId][u'任务名称']
+            projectItem = QtGui.QTreeWidgetItem(self.assigned_task)
+            projectItem.setText(0,project)
+            subprojectItem = QtGui.QTreeWidgetItem(projectItem)
+            subprojectItem.setText(0,subproject)
+            taskItem = QtGui.QTreeWidgetItem(subprojectItem)
+            taskItem.setText(0,task)
+            self.assigned_task.addTopLevelItem(projectItem)
+            self.assigned_task.expandAll()
+            
             
             
     def showQueryResult(self):
@@ -398,7 +426,8 @@ class DepartmentManager(Ui_MainWindow):
                 
     def showProjectInfo(self):
         self.label_tables.setText(u'项目详情')
-        self.table_prodetail.clear()        
+        self.table_prodetail.clear()
+        self.table_prodetail.setTextElideMode(QtCore.Qt.ElideNone)
         rows = len(self.department.projectDict.keys())
         self.table_prodetail.setTableName(u'project')
         self.table_prodetail.setRowCount(rows)
@@ -408,12 +437,19 @@ class DepartmentManager(Ui_MainWindow):
         projectList.sort()
         for i,row in enumerate(projectList):
             for j,col in enumerate(self.department.proTabHeader):
-                item = QtGui.QTableWidgetItem(unicode(self.department.projectDict[row][col]))
+                text = unicode(self.department.projectDict[row][col])
+                item = QtGui.QTableWidgetItem(text)
                 item.setTextAlignment(QtCore.Qt.AlignHCenter)
+                font = item.font()
+                pointSize = font.pixelSize()
+                letterSpacing = font.letterSpacing()
+                contextWidth = len(text)*pointSize + (len(text)-1)*letterSpacing
+                columnWidth = self.table_prodetail.columnWidth(j)
+                if columnWidth<contextWidth:
+                    self.table_prodetail.setColumnWidth(j,contextWidth+20)                 
                 if j==0:
                     item.setFlags(QtCore.Qt.ItemIsEditable)                
                 self.table_prodetail.setItem(i,j,item)
-
     
     
     
@@ -425,15 +461,23 @@ class DepartmentManager(Ui_MainWindow):
         subprojectIdList = self.department.hierTree[projectId].keys()
         subprojectIdList.sort()
         rows = len(subprojectIdList)
+        self.table_prodetail.setTextElideMode(QtCore.Qt.ElideNone)
         self.table_prodetail.setTableName(u'subproject')
         self.table_prodetail.setRowCount(rows)
         self.table_prodetail.setColumnCount(len(self.department.subproTabHeader))
         self.table_prodetail.setHorizontalHeaderLabels(self.department.subproTabHeader)        
-    
         for i,row in enumerate(subprojectIdList):
             for j,col in enumerate(self.department.subproTabHeader):
-                item = QtGui.QTableWidgetItem(unicode(self.department.subprojectDict[row][col]))
+                text = unicode(self.department.subprojectDict[row][col])
+                item = QtGui.QTableWidgetItem(text)
                 item.setTextAlignment(QtCore.Qt.AlignHCenter)
+                font = item.font()
+                pointSize = font.pixelSize()
+                letterSpacing = font.letterSpacing()
+                contextWidth = len(text)*pointSize + (len(text)-1)*letterSpacing
+                columnWidth = self.table_prodetail.columnWidth(j)
+                if columnWidth<contextWidth:
+                    self.table_prodetail.setColumnWidth(j,contextWidth+20)                                 
                 if j==0:
                     item.setFlags(QtCore.Qt.ItemIsEditable)
                 self.table_prodetail.setItem(i,j,item)
@@ -447,18 +491,29 @@ class DepartmentManager(Ui_MainWindow):
         projectId = subprojectId[0:3]
         taskIdList = self.department.hierTree[projectId][subprojectId]
         rows = len(taskIdList)
+        self.table_prodetail.setTextElideMode(QtCore.Qt.ElideNone)
         self.table_prodetail.setTableName(u'task')
         self.table_prodetail.setRowCount(rows)
         self.table_prodetail.setColumnCount(len(self.department.taskTabHeader))
         self.table_prodetail.setHorizontalHeaderLabels(self.department.taskTabHeader)        
         for i,row in enumerate(taskIdList):
             for j,col in enumerate(self.department.taskTabHeader):
-                item = QtGui.QTableWidgetItem(unicode(self.department.taskDict[row][col]))
+                text = unicode(self.department.taskDict[row][col])
+                item = QtGui.QTableWidgetItem(text)
                 item.setTextAlignment(QtCore.Qt.AlignHCenter)
+                font = item.font()
+                pointSize = font.pointSize()
+                letterSpacing = font.letterSpacing()
+                contextWidth = len(text)*pointSize + (len(text)-1)*letterSpacing
+                print contextWidth
+                columnWidth = self.table_prodetail.columnWidth(j)
+                print 'column{0}:  {1}  {2}'.format(j,columnWidth,contextWidth)
+                if columnWidth<contextWidth:
+                    self.table_prodetail.setColumnWidth(j,contextWidth+20)                    
                 if j==0:
                     item.setFlags(QtCore.Qt.ItemIsEditable)                
                 self.table_prodetail.setItem(i,j,item)
-
+        
 
     
                 
@@ -517,9 +572,11 @@ class DepartmentManager(Ui_MainWindow):
             if len(assignedMember) < len( self.department.allMembers.keys()):
                 for member in self.department.allMembers:
                     name = self.department.allMembers[member][u'姓名']
-                    if name not in assignedMember:
-                        action = QtGui.QAction(name,submenu)
-                        self.signalMap.setMapping(action,name)
+                    memberId = self.department.allMembers[member][u'编号']
+                    name_id = name + '(' + memberId + ')'
+                    if name_id not in assignedMember:
+                        action = QtGui.QAction(name_id,submenu)
+                        self.signalMap.setMapping(action,name_id)
                         action.triggered.connect(self.signalMap.map)
                         submenu.addAction(action)
             else:
@@ -529,10 +586,10 @@ class DepartmentManager(Ui_MainWindow):
                 
             #build un-assign action list,if assignedMember is an empty list,that means no one is participating
             if len(assignedMember) != 0: 
-                for name in assignedMember:              
-                    if name in assignedMember and name != '':
-                        action = QtGui.QAction(name,submenu2)
-                        self.signalMap2.setMapping(action,name)
+                for name_id in assignedMember:              
+                    if name_id != '':
+                        action = QtGui.QAction(name_id,submenu2)
+                        self.signalMap2.setMapping(action,name_id)
                         action.triggered.connect(self.signalMap2.map)
                         submenu2.addAction(action)
             else:
@@ -552,23 +609,24 @@ class DepartmentManager(Ui_MainWindow):
         colIndex = self.department.taskTabHeader.index(u'参与人员')
         item = self.table_prodetail.item(cur_row,colIndex)
         curText = unicode(item.text())           
-        curText = curText + unicode(name) + ';'
-        success = self.department.updateServer('task', [(u'参与人员',curText)], [(u'任务编号',taskId)])
+        name = unicode(name)
+        success = self.department.assignTask(curText,name,taskId)
         if success:
+            curText = curText + name + ';'
             item.setText(curText)
 
                 
         
     def taskUnassign(self,name):
-        name =unicode(name)
         cur_row = self.table_prodetail.currentRow()
         taskId = unicode(self.table_prodetail.item(cur_row,0).text())
         colIndex = self.department.taskTabHeader.index(u'参与人员')
         item = self.table_prodetail.item(cur_row,colIndex)
         curText = unicode(item.text())
-        curText = curText.replace(name+u';','')
-        success = self.department.updateServer('task', [(u'参与人员',curText)], [(u'任务编号',taskId)])
+        name =unicode(name)
+        success = self.department.unassignTask(curText,name,taskId)
         if success:
+            curText = curText.replace(name+';','')
             item.setText(curText)
 
 

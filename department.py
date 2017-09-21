@@ -402,13 +402,39 @@ class Department():
         conn.commit()
         cursor.close()
         conn.close()
-        print 'aaa'
         print self.hierTree[projectId][subprojectId]
         self.hierTree[projectId][subprojectId].remove(taskId)
         self.taskDict.pop(taskId)
         return 1
         
 
+
+    def assignTask(self,curmembers,member,taskId):
+        curmembers = curmembers + member + ';'
+        success = self.updateServer('task', [(u'参与人员',curmembers)], [(u'任务编号',taskId)])
+        memberId = member.split('(')[1].split(')')[0]
+        memberName = member.split('(')[0]
+        memberTask = self.allMembers[memberName][u'任务']
+        if memberTask is not None:
+            memberTask = memberTask + taskId + ';'
+        else:
+            memberTask = taskId + ';'
+        self.allMembers[memberName][u'任务'] = memberTask
+        success = self.updateServer('member',[(u'任务',memberTask)],[(u'编号',memberId)])
+        return 1
+        
+        
+        
+    def unassignTask(self,curmembers,member,taskId):
+        curmembers = curmembers.replace(member+u';','')
+        success = self.updateServer('task', [(u'参与人员',curmembers)], [(u'任务编号',taskId)])
+        memberId = member.split('(')[1].split(')')[0]
+        memberName = member.split('(')[0]
+        memberTask = self.allMembers[memberName][u'任务']
+        memberTask = memberTask.replace(taskId+';','')
+        self.allMembers[memberName][u'任务'] = memberTask
+        success = self.updateServer('member',[(u'任务',memberTask)],[(u'编号',memberId)])
+        return 1
 
     #def getAllProjects(self):
         #print '项目列表： '.decode('utf-8')
