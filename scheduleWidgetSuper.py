@@ -170,6 +170,7 @@ class Ui_Form(QtGui.QWidget):
         self.schedule.horizontalHeader().setHighlightSections(False)
         self.schedule.verticalHeader().setVisible(False)
         self.schedule.verticalHeader().setStretchLastSection(False)
+        self.schedule.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         self.verticalLayout.addWidget(self.schedule)
         self.horizontalLayout.addLayout(self.verticalLayout)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
