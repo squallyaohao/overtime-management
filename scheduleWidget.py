@@ -40,11 +40,12 @@ class scheduleWidget(scheduleWidgetSuper.Ui_Form):
         self.scrollBar3.valueChanged.connect(self.synchronize)
 
         
-        startPos = 1400*0.2
-        barWidth = 1400*0.5
-        barHeight = 25*0.7
-        barYStart = 25*0.3
-        item = scheduleBar(QRect(startPos,barYStart,barWidth,barHeight))
+        rowStartX = self.schedule.columnViewportPosition(0) 
+        rowStartY = self.schedule.rowViewportPosition(0)
+        cellWidth = self.schedule.columnWidth(0)*self.schedule.columnSpan(0,0)
+        rowHeight = self.schedule.rowHeight(0)
+        rect = QRect(rowStartX,rowStartY,cellWidth,rowHeight)
+        item = scheduleBar(rect,0.2,0.7,Qt.red)
         self.schedule.setCellWidget(0,0, item)
     
     def synchronize(self,x):
@@ -56,16 +57,39 @@ class scheduleWidget(scheduleWidgetSuper.Ui_Form):
 
 
 class scheduleBar(QWidget):
-    def __init__(self,rect,parent=None):
+    def __init__(self,rect,startPos,endPos,color,parent=None):
         super(QWidget,self).__init__(parent)
+        rectLeft = rect.left()
+        rectWidth = rect.width()
+        rectTop = rect.top()
+        rectHeight = rect.height()
+        barLeft = rectLeft + rectWidth*startPos
+        barWidth = rectWidth * (endPos - startPos)
+        barTop = rectTop + rectHeight*0.25
+        barHeight = rectHeight*0.5
         self.rect = rect
-        
+        self.bar = QRect(barLeft,barTop,barWidth,barHeight)
+        self.color = color
         
     def paintEvent(self,e):
         p = QPainter()
         p.begin(self)
-        p.setBrush(Qt.green)
-        p.drawRect(self.rect)
+        p.setBrush(self.color)        
+        p.drawRect(self.bar)
+        startLineTopx = self.bar.left()
+        startLineTopy = self.rect.top()
+        startLineBottomx = self.bar.left()
+        startLineBottomy = self.rect.bottom()
+        endLineTopx = endLineBottomx = self.bar.right()
+        endLineTopy = self.rect.top() 
+        endLineBottomy = self.rect.bottom()
+        pen = QPen()
+        pen.setColor(Qt.black)
+        pen.setStyle(Qt.SolidLine)
+        pen.setWidth(5)
+        p.setPen(pen)
+        p.drawLine(startLineTopx,startLineTopy,startLineBottomx,startLineBottomy)
+        p.drawLine(endLineTopx,endLineTopy, endLineBottomx,endLineBottomy)
         p.end()
         
         
