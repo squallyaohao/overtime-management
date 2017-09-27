@@ -11,9 +11,7 @@ class mainwidow(QMainWindow):
         
         self.setGeometry(100,100,1200,800)
         newwidget = scheduleWidget.scheduleWidget()
-        
-        
-        
+       
         self.setCentralWidget(newwidget)
         
         
