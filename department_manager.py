@@ -4,7 +4,7 @@
 import sys,os,os.path
 from PyQt4 import QtCore
 from PyQt4 import QtGui
-from ui_department_manager3 import Ui_MainWindow
+from ui_department_manager4 import Ui_MainWindow
 from ui_querytable import Ui_QueryTable
 import xml.etree.ElementInclude as ET
 import department as department
@@ -14,6 +14,7 @@ import pandas as pd
 import excelUtility
 import datetime
 from db_structure import *
+import random
 
 overtimetablehead = [u'日期',u'姓名',u'加班项目',u'加班展项',u'加班时长',u'加班餐',u'加班描述']
 depdict = {0:u'三维动画',1:u'投标动画',2:u'二维动画',3:u'平面设计',4:u'编导'}
@@ -56,11 +57,19 @@ class DepartmentManager(Ui_MainWindow):
         self.table_prodetail.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.table_prodetail.customContextMenuRequested.connect(self.showContextMenu)
         
-        #set up connections
+      
+        self.scrollBar1 = self.period1_table.horizontalScrollBar()
+        self.scrollBar2 = self.period2_table.horizontalScrollBar()
+        self.scrollBar3 = self.schedule_table.horizontalScrollBar()
+        
         self.setConnections()
         
+        self.setUpTables()
+        self.drawTree()
+        self.expandItem()
+        self.collapsItem()        
         
-
+        self.setConnections()
         
  
                  
@@ -84,9 +93,101 @@ class DepartmentManager(Ui_MainWindow):
         self.tree_project.itemDoubleClicked.connect(self.showInfo)
         self.member_list.itemDoubleClicked.connect(self.showMemberTasks)
         
+        self.scrollBar3.valueChanged.connect(self.synchronize)
+        self.entry_list.itemExpanded.connect(self.collapsSchedule)
+        self.entry_list.itemCollapsed.connect(self.collapsSchedule)        
+        
+
+    def synchronize(self,x):
+        self.scrollBar1.setValue(x)
+        self.scrollBar2.setValue(x)    
+        
+        
+    def setUpTables(self):
+        self.period1_table.setColumnCount(14)
+        for i in range(14):
+            self.period1_table.setColumnWidth(i,100)
+            
+        self.period2_table.setColumnCount(14)
+        for i in range(14):
+            self.period2_table.setColumnWidth(i,100)        
+            
+        self.schedule_table.setColumnCount(14)
+        for i in range(14):
+            self.schedule_table.setColumnWidth(i,100)
+            
+        rowCounts = self.schedule_table.rowCount()
+        for i in range(rowCounts):
+            self.schedule_table.setSpan(i,0,1,14) 
+
+
+    def drawSchedule(self,row_index,start_date,end_date,progress):
+        cellWidth = self.schedule_table.columnWidth(0)*self.schedule_table.columnSpan(0,0)
+        rowHeight = self.schedule_table.rowHeight(row_index)
+        rect = QtCore.QRect(0,0,cellWidth,rowHeight)
+        item = scheduleBar(rect,start_date,end_date,QtCore.Qt.green,progress)
+        self.schedule_table.setCellWidget(row_index,0,item)    
 
         
- 
+        
+       
+    def drawTree(self):
+        headItem = self.entry_list.headerItem()
+        headItem.setSizeHint(0,QtCore.QSize(100,50))
+        iterator = QtGui.QTreeWidgetItemIterator(self.entry_list)
+        i=0
+        while iterator.value() is not None:
+            item = iterator.value()            
+            item.setSizeHint(0,QtCore.QSize(100,30))
+            start_date = i/10.0
+            end_date = (i+1)/10.0
+            progress = random.uniform(0,1.0)
+            self.drawSchedule(i,start_date,end_date,progress)
+            data = QtCore.QVariant(i)
+            item.setData(0,QtCore.Qt.UserRole,data)
+            #item.setExpanded(True)
+            #self.entry_list.itemExpanded.emit(item)
+            i = i+1
+            iterator = iterator.__iadd__(1)
+
+
+
+    def expandItem(self):
+        iterator = QtGui.QTreeWidgetItemIterator(self.entry_list)
+        while iterator.value() is not None:
+            item = iterator.value()            
+            item.setExpanded(True)
+            #self.entry_list.itemExpanded.emit(item)
+            iterator = iterator.__iadd__(1)
+    
+    
+    def collapsItem(self):
+        iterator = QtGui.QTreeWidgetItemIterator(self.entry_list)
+        while iterator.value() is not None:
+            item = iterator.value()            
+            item.setExpanded(False)
+            #self.entry_list.itemExpanded.emit(item)
+            iterator = iterator.__iadd__(1)        
+            
+    
+    def collapsSchedule(self,item):
+        self.entry_list.selectAll()
+        sl = self.entry_list.selectedIndexes()
+        self.entry_list.clearSelection()
+        showList =[]
+        for s in sl:
+            item = self.entry_list.itemFromIndex(s)
+            row_index = item.data(0,QtCore.Qt.UserRole).toInt()[0]
+            showList.append(row_index)
+        
+        rowCount = self.schedule_table.rowCount()
+        for row in range(rowCount):
+            self.schedule_table.hideRow(row)
+        for row in showList:
+            self.schedule_table.showRow(row)
+        
+               
+        
         
     def editDepartment(self):
         self.dep_line.setEnabled(True)
@@ -787,7 +888,55 @@ class newTaskDialog(ui_newTaskDialog.Ui_Dialog):
         print subprojectId
         return (newTaskDict,projectId,subprojectId,result==QtGui.QDialog.Accepted)
         
+
+
+
+class scheduleBar(QtGui.QWidget):
+    def __init__(self,rect,startPos,endPos,color,progress,parent=None):
+        super(QtGui.QWidget,self).__init__(parent)
+        self.startPos = startPos
+        self.endPos = endPos
+        self.progress = progress
+        rectLeft = rect.left()
+        rectWidth = rect.width()
+        rectTop = rect.top()
+        rectHeight = rect.height()
+        barLeft = rectLeft + rectWidth*startPos
+        barWidth = rectWidth * (endPos - startPos)
+        barTop = rectTop + rectHeight*0.25
+        barHeight = rectHeight*0.5
+        self.rect = rect
+        self.bar = QtCore.QRect(barLeft,barTop,barWidth,barHeight)
+        self.color = color
+        progressBarWidth = barWidth*(progress)
+        self.progressBar = QtCore.QRect(barLeft,barTop,progressBarWidth,barHeight)      
+
+    def __getitem__(self):
+        return scheduleBar(self.rect, self.startPos, self.endPos, self.color, self.progress, 
+                          )
         
+    def paintEvent(self,e):
+        p = QtGui.QPainter()
+        p.begin(self)
+        p.setBrush(self.color)        
+        p.drawRect(self.bar)
+        p.setBrush(QtCore.Qt.blue)
+        p.drawRect(self.progressBar)
+        startLineTopx = self.bar.left()
+        startLineTopy = self.rect.top()
+        startLineBottomx = self.bar.left()
+        startLineBottomy = self.rect.bottom()
+        endLineTopx = endLineBottomx = self.bar.right()
+        endLineTopy = self.rect.top() 
+        endLineBottomy = self.rect.bottom()
+        pen = QtGui.QPen()
+        pen.setColor(QtCore.Qt.black)
+        pen.setStyle(QtCore.Qt.SolidLine)
+        pen.setWidth(5)
+        p.setPen(pen)
+        p.drawLine(startLineTopx,startLineTopy,startLineBottomx,startLineBottomy)
+        p.drawLine(endLineTopx,endLineTopy, endLineBottomx,endLineBottomy)
+        p.end()        
                 
         
 if __name__ == '__main__':

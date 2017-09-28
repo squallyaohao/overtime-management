@@ -4,6 +4,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 import scheduleWidgetSuper
 import random,copy
+import department_manager
 
 
 class scheduleWidget(scheduleWidgetSuper.Ui_Form):
@@ -18,6 +19,8 @@ class scheduleWidget(scheduleWidgetSuper.Ui_Form):
         self.setConnections()
         self.setUpTables()
         self.drawTree()
+        self.expandItem()
+        self.collapsItem()
         
         self.itemList=[]
 
@@ -69,16 +72,34 @@ class scheduleWidget(scheduleWidgetSuper.Ui_Form):
             self.drawSchedule(i,start_date,end_date,progress)
             data = QVariant(i)
             item.setData(0,Qt.UserRole,data)
-            item.setExpanded(False)
-            self.entry_list.itemExpanded.emit(item)
+            #item.setExpanded(True)
+            #self.entry_list.itemExpanded.emit(item)
             i = i+1
             iterator = iterator.__iadd__(1)
 
+    
+    def expandItem(self):
+        iterator = QTreeWidgetItemIterator(self.entry_list)
+        while iterator.value() is not None:
+            item = iterator.value()            
+            item.setExpanded(True)
+            #self.entry_list.itemExpanded.emit(item)
+            iterator = iterator.__iadd__(1)
+    
+    
+    def collapsItem(self):
+        iterator = QTreeWidgetItemIterator(self.entry_list)
+        while iterator.value() is not None:
+            item = iterator.value()            
+            item.setExpanded(False)
+            #self.entry_list.itemExpanded.emit(item)
+            iterator = iterator.__iadd__(1)        
             
     
     def collapsSchedule(self,item):
         self.entry_list.selectAll()
         sl = self.entry_list.selectedIndexes()
+        self.entry_list.clearSelection()
         showList =[]
         for s in sl:
             item = self.entry_list.itemFromIndex(s)
@@ -90,7 +111,7 @@ class scheduleWidget(scheduleWidgetSuper.Ui_Form):
             self.schedule.hideRow(row)
         for row in showList:
             self.schedule.showRow(row)
-        self.entry_list.clearSelection()
+        
         
 
     def setConnections(self):
