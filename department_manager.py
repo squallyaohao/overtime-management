@@ -57,7 +57,8 @@ class DepartmentManager(Ui_MainWindow):
         self.table_prodetail.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.table_prodetail.customContextMenuRequested.connect(self.showContextMenu)
         
-      
+
+        self.period1_table.column
         self.scrollBar1 = self.period1_table.horizontalScrollBar()
         self.scrollBar2 = self.period2_table.horizontalScrollBar()
         self.scrollBar3 = self.schedule_table.horizontalScrollBar()
@@ -65,11 +66,11 @@ class DepartmentManager(Ui_MainWindow):
         self.setConnections()
         
         self.setUpTables()
-        self.drawTree()
+        self.drawEntryTree()
         self.expandItem()
         self.collapsItem()        
         
-        self.setConnections()
+
         
  
                  
@@ -103,52 +104,112 @@ class DepartmentManager(Ui_MainWindow):
         self.scrollBar2.setValue(x)    
         
         
+    def getDuration(self,period='Year'):
+        if period == 'Year':
+            return (u'2017年',u'2018年')
+        if period == 'Month':
+            return (u'七月',u'八月',u'九月',u'十月',u'十一月',u'十二月',u'一月',u'二月',u'三月')
+        if period == 'Week':
+            pass
+        if period == 'Day':
+            pass
+        
+        
     def setUpTables(self):
-        self.period1_table.setColumnCount(14)
-        for i in range(14):
-            self.period1_table.setColumnWidth(i,100)
+        period = unicode(self.period_combo.currentText())
+        if period == u'月':
+            defaultWidth = 100
+            tableWidth = self.period1_table.geometry().width()
+            Years = self.getDuration('Year')
+            Months = self.getDuration('Month')
+            self.period1_table.setColumnCount(len(Years))
+            self.period2_table.setColumnCount(len(Months))
+            self.schedule_table.setColumnCount(len(Months))
+            if len(Months)*defaultWidth < tableWidth:
+                defaultWidth = tableWidth/len(Months)
+            monthInYear = []
+            temp = []
+            for month in Months:
+                temp.append(month)
+                if month == u'十二月':
+                    monthInYear.append(temp)
+                    temp=[]
+            monthInYear.append(temp)
             
-        self.period2_table.setColumnCount(14)
-        for i in range(14):
-            self.period2_table.setColumnWidth(i,100)        
+            for i in range(len(Years)):
+                columnWidth = len(monthInYear[i])*defaultWidth
+                self.period1_table.setColumnWidth(i,columnWidth)
+            self.period1_table.setHorizontalHeaderLabels(Years)
             
-        self.schedule_table.setColumnCount(14)
-        for i in range(14):
-            self.schedule_table.setColumnWidth(i,100)
+            for i in range(len(Months)):
+                self.period2_table.setColumnWidth(i,defaultWidth)
+            self.period2_table.setHorizontalHeaderLabels(Months)
+                
+            for i in range(len(Months)):
+                self.schedule_table.setColumnWidth(i,defaultWidth)
             
-        rowCounts = self.schedule_table.rowCount()
-        for i in range(rowCounts):
-            self.schedule_table.setSpan(i,0,1,14) 
+        if period == u'周':
+            pass
+        if period == u'日':
+            pass
+            
+        #rowCounts = self.schedule_table.rowCount()
+        #for i in range(rowCounts):
+            #self.schedule_table.setSpan(i,0,1,14) 
 
 
-    def drawSchedule(self,row_index,start_date,end_date,progress):
-        cellWidth = self.schedule_table.columnWidth(0)*self.schedule_table.columnSpan(0,0)
+    def drawSchedule(self,row_index,start_date,end_date,progress,level):
+        cols = self.schedule_table.columnCount()
+        self.schedule_table.setSpan(row_index,0,1,cols)
+        cellWidth = self.schedule_table.columnWidth(0)*cols
         rowHeight = self.schedule_table.rowHeight(row_index)
         rect = QtCore.QRect(0,0,cellWidth,rowHeight)
-        item = scheduleBar(rect,start_date,end_date,QtCore.Qt.green,progress)
+        item = scheduleBar(rect,start_date,end_date,QtCore.Qt.green,progress,level)
         self.schedule_table.setCellWidget(row_index,0,item)    
 
-        
-        
+                
        
-    def drawTree(self):
+    def drawEntryTree(self):
+        self.entry_list.clear()
         headItem = self.entry_list.headerItem()
-        headItem.setSizeHint(0,QtCore.QSize(100,50))
-        iterator = QtGui.QTreeWidgetItemIterator(self.entry_list)
+        headItem.setSizeHint(0,QtCore.QSize(100,50))        
+        projectIdList = self.department.hierTree.keys()
+        projectIdList.sort()
         i=0
-        while iterator.value() is not None:
-            item = iterator.value()            
-            item.setSizeHint(0,QtCore.QSize(100,30))
-            start_date = i/10.0
-            end_date = (i+1)/10.0
-            progress = random.uniform(0,1.0)
-            self.drawSchedule(i,start_date,end_date,progress)
+        for projectId in projectIdList:
+            projectItem = newTreeWidgetItem(self.entry_list)
+            projectItem.setSizeHint(0,QtCore.QSize(100,30))
+            projectItem.setText(0,self.department.projectDict[projectId][u'项目名称'])
+            projectItem.setLevel(1)
+            projectItem.setId(projectId)
             data = QtCore.QVariant(i)
-            item.setData(0,QtCore.Qt.UserRole,data)
-            #item.setExpanded(True)
-            #self.entry_list.itemExpanded.emit(item)
-            i = i+1
-            iterator = iterator.__iadd__(1)
+            projectItem.setData(0,QtCore.Qt.UserRole,data)
+            self.drawSchedule(i,i/10.0,(i+1)/10.0,0.3,1)
+            i = i + 1
+            subproIdList = self.department.hierTree[projectId].keys()
+            subproIdList.sort()
+            for subproId in subproIdList:            
+                subprojectItem =  newTreeWidgetItem(projectItem)
+                subprojectItem.setSizeHint(0,QtCore.QSize(100,30))
+                subprojectItem.setText(0,self.department.subprojectDict[subproId][u'展项名称'])
+                subprojectItem.setLevel(2)
+                subprojectItem.setId(subproId)
+                data = QtCore.QVariant(i)
+                subprojectItem.setData(0,QtCore.Qt.UserRole,data)
+                self.drawSchedule(i,i/10.0,(i+1)/10.0,0.3,2)
+                i = i + 1
+                taskList = self.department.hierTree[projectId][subproId]
+                for task in taskList:
+                    taskItem = newTreeWidgetItem(subprojectItem)
+                    taskItem.setSizeHint(0,QtCore.QSize(100,30))
+                    taskItem.setText(0,self.department.taskDict[task][u'任务名称'])
+                    taskItem.setLevel(3)
+                    taskItem.setId(task)
+                    data = QtCore.QVariant(i)
+                    taskItem.setData(0,QtCore.Qt.UserRole,data)
+                    self.drawSchedule(i,i/10.0,(i+1)/10.0,0.3,3)
+                    i = i + 1
+            self.tree_project.addTopLevelItem(projectItem)
 
 
 
@@ -455,6 +516,7 @@ class DepartmentManager(Ui_MainWindow):
 
 
     def drawProjectTree(self):
+        self.tree_project.clear()
         root = newTreeWidgetItem(self.tree_project)
         root.setText(0,u'全部项目')
         root.setLevel(0)
@@ -638,6 +700,7 @@ class DepartmentManager(Ui_MainWindow):
 
     def saveTable(self):
         tableName = self.table_prodetail.getTableName()
+        print tableName
         numRows = self.table_prodetail.rowCount()
         numCols = self.table_prodetail.columnCount()
         rows= []
@@ -884,41 +947,53 @@ class newTaskDialog(ui_newTaskDialog.Ui_Dialog):
         newTaskDict[u'起始时间'] = task_start_date
         newTaskDict[u'结束时间'] = task_end_date
         newTaskDict[u'任务说明'] = task_desc
-        print projectId
-        print subprojectId
         return (newTaskDict,projectId,subprojectId,result==QtGui.QDialog.Accepted)
         
 
 
 
 class scheduleBar(QtGui.QWidget):
-    def __init__(self,rect,startPos,endPos,color,progress,parent=None):
+    def __init__(self,rect,startPos,endPos,color,progress,level,parent=None):
         super(QtGui.QWidget,self).__init__(parent)
         self.startPos = startPos
         self.endPos = endPos
         self.progress = progress
+        self.level = level
         rectLeft = rect.left()
         rectWidth = rect.width()
         rectTop = rect.top()
         rectHeight = rect.height()
         barLeft = rectLeft + rectWidth*startPos
         barWidth = rectWidth * (endPos - startPos)
-        barTop = rectTop + rectHeight*0.25
-        barHeight = rectHeight*0.5
+        if self.level == 1:
+            yscale = 1
+        elif self.level == 2:
+            yscale = 0.7
+        else:
+            yscale = 0.5
+        barHeight = rectHeight*0.5 * yscale
+        barTop = rectTop + (rectHeight-barHeight)*0.5
+        
         self.rect = rect
         self.bar = QtCore.QRect(barLeft,barTop,barWidth,barHeight)
         self.color = color
         progressBarWidth = barWidth*(progress)
         self.progressBar = QtCore.QRect(barLeft,barTop,progressBarWidth,barHeight)      
 
-    def __getitem__(self):
-        return scheduleBar(self.rect, self.startPos, self.endPos, self.color, self.progress, 
-                          )
         
     def paintEvent(self,e):
         p = QtGui.QPainter()
+        pen = QtGui.QPen()
         p.begin(self)
-        p.setBrush(self.color)        
+        if self.level == 1:
+            bgColor = QtGui.QColor(255,255,255,125)
+        elif self.level == 2:
+            bgColor = QtGui.QColor(220,220,220,125)
+        else:
+            bgColor = QtGui.QColor(180,180,180,125)
+        p.setBrush(bgColor)
+        p.drawRect(self.rect)
+        p.setBrush(self.color)
         p.drawRect(self.bar)
         p.setBrush(QtCore.Qt.blue)
         p.drawRect(self.progressBar)
@@ -929,7 +1004,6 @@ class scheduleBar(QtGui.QWidget):
         endLineTopx = endLineBottomx = self.bar.right()
         endLineTopy = self.rect.top() 
         endLineBottomy = self.rect.bottom()
-        pen = QtGui.QPen()
         pen.setColor(QtCore.Qt.black)
         pen.setStyle(QtCore.Qt.SolidLine)
         pen.setWidth(5)

@@ -205,7 +205,7 @@ class Department():
         headerLabels =''
         if table == u'project':
             headerLabels = self.proTabHeader
-        elif table == u'subprojet':
+        elif table == u'subproject':
             headerLabels = self.subproTabHeader
         else:
             headerLabels = self.taskTabHeader
@@ -213,9 +213,15 @@ class Department():
             varsList = zip(headerLabels,row)
             conditionList= varsList[0]
             statement = mysql_utility.sqlUpdateState(table, varsList, [conditionList])
-            print statement
             cursor.execute(statement)
             conn.commit()
+            for key,value in varsList:
+                if table == u'project':
+                    self.projectDict[varsList[0][1]][key]=value
+                elif table == u'subproject':
+                    self.subprojectDict[varsList[0][1]][key]=value
+                else:
+                    self.taskDict[varsList[0][1]][key]=value
         cursor.close()
         conn.close()
 

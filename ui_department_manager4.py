@@ -2,13 +2,13 @@
 
 # Form implementation generated from reading ui file 'D:\Dev\overtime-management\ui_department_manager4.ui'
 #
-# Created: Fri Sep 29 00:55:06 2017
+# Created: Fri Sep 29 20:37:36 2017
 #      by: PyQt4 UI code generator 4.11.3
 #
 # WARNING! All changes made in this file will be lost!
 
 from PyQt4 import QtCore, QtGui
-from newTable import *
+from newTable import * 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -126,7 +126,7 @@ class Ui_MainWindow(QtGui.QMainWindow):
         self.horizontalLayout_6.addWidget(self.btn_add_task)
         self.horizontalLayout.addLayout(self.horizontalLayout_6)
         self.layoutWidget2 = QtGui.QWidget(self.tab_2)
-        self.layoutWidget2.setGeometry(QtCore.QRect(5, 45, 1066, 606))
+        self.layoutWidget2.setGeometry(QtCore.QRect(5, 50, 1066, 601))
         self.layoutWidget2.setObjectName(_fromUtf8("layoutWidget2"))
         self.horizontalLayout_20 = QtGui.QHBoxLayout(self.layoutWidget2)
         self.horizontalLayout_20.setMargin(0)
@@ -197,20 +197,20 @@ class Ui_MainWindow(QtGui.QMainWindow):
         self.label_19.setSizePolicy(sizePolicy)
         self.label_19.setObjectName(_fromUtf8("label_19"))
         self.horizontalLayout_9.addWidget(self.label_19)
-        self.comboBox = QtGui.QComboBox(self.layoutWidget_2)
+        self.period_combo = QtGui.QComboBox(self.layoutWidget_2)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.comboBox.sizePolicy().hasHeightForWidth())
-        self.comboBox.setSizePolicy(sizePolicy)
-        self.comboBox.setMinimumSize(QtCore.QSize(100, 0))
-        self.comboBox.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.comboBox.setModelColumn(0)
-        self.comboBox.setObjectName(_fromUtf8("comboBox"))
-        self.comboBox.addItem(_fromUtf8(""))
-        self.comboBox.addItem(_fromUtf8(""))
-        self.comboBox.addItem(_fromUtf8(""))
-        self.horizontalLayout_9.addWidget(self.comboBox)
+        sizePolicy.setHeightForWidth(self.period_combo.sizePolicy().hasHeightForWidth())
+        self.period_combo.setSizePolicy(sizePolicy)
+        self.period_combo.setMinimumSize(QtCore.QSize(100, 0))
+        self.period_combo.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.period_combo.setModelColumn(0)
+        self.period_combo.setObjectName(_fromUtf8("comboBox"))
+        self.period_combo.addItem(_fromUtf8(""))
+        self.period_combo.addItem(_fromUtf8(""))
+        self.period_combo.addItem(_fromUtf8(""))
+        self.horizontalLayout_9.addWidget(self.period_combo)
         self.verticalLayout_4.addLayout(self.horizontalLayout_9)
         self.horizontalLayout_21 = QtGui.QHBoxLayout()
         self.horizontalLayout_21.setSpacing(1)
@@ -225,11 +225,11 @@ class Ui_MainWindow(QtGui.QMainWindow):
         self.entry_list.setSizeIncrement(QtCore.QSize(0, 0))
         self.entry_list.setBaseSize(QtCore.QSize(10, 0))
         font = QtGui.QFont()
-        font.setPointSize(9)
+        font.setPointSize(11)
         self.entry_list.setFont(font)
         self.entry_list.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.entry_list.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
-        self.entry_list.setAlternatingRowColors(True)
+        self.entry_list.setAlternatingRowColors(False)
         self.entry_list.setSelectionMode(QtGui.QAbstractItemView.NoSelection)
         self.entry_list.setIndentation(20)
         self.entry_list.setRootIsDecorated(True)
@@ -259,6 +259,7 @@ class Ui_MainWindow(QtGui.QMainWindow):
         self.period1_table.setLineWidth(1)
         self.period1_table.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.period1_table.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.period1_table.setHorizontalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
         self.period1_table.setAutoScrollMargin(16)
         self.period1_table.setWordWrap(True)
         self.period1_table.setCornerButtonEnabled(False)
@@ -281,6 +282,7 @@ class Ui_MainWindow(QtGui.QMainWindow):
         self.period2_table.setMidLineWidth(0)
         self.period2_table.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
         self.period2_table.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.period2_table.setHorizontalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
         self.period2_table.setAutoScrollMargin(1)
         self.period2_table.setColumnCount(10)
         self.period2_table.setObjectName(_fromUtf8("period2_table"))
@@ -301,9 +303,10 @@ class Ui_MainWindow(QtGui.QMainWindow):
         self.schedule_table.setFrameShadow(QtGui.QFrame.Sunken)
         self.schedule_table.setAutoScroll(False)
         self.schedule_table.setAutoScrollMargin(16)
-        self.schedule_table.setAlternatingRowColors(True)
+        self.schedule_table.setHorizontalScrollMode(QtGui.QAbstractItemView.ScrollPerPixel)
+        self.schedule_table.setAlternatingRowColors(False)
         self.schedule_table.setShowGrid(False)
-        self.schedule_table.setGridStyle(QtCore.Qt.SolidLine)
+        self.schedule_table.setGridStyle(QtCore.Qt.DashLine)
         self.schedule_table.setRowCount(10)
         self.schedule_table.setColumnCount(10)
         self.schedule_table.setObjectName(_fromUtf8("schedule_table"))
@@ -681,7 +684,7 @@ class Ui_MainWindow(QtGui.QMainWindow):
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(0)
-        self.tabWidget_2.setCurrentIndex(0)
+        self.tabWidget_2.setCurrentIndex(1)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -696,9 +699,9 @@ class Ui_MainWindow(QtGui.QMainWindow):
         self.btn_save.setText(_translate("MainWindow", "保存修改", None))
         self.tabWidget_2.setTabText(self.tabWidget_2.indexOf(self.tab_2), _translate("MainWindow", "详细信息", None))
         self.label_19.setText(_translate("MainWindow", "显示周期", None))
-        self.comboBox.setItemText(0, _translate("MainWindow", "月", None))
-        self.comboBox.setItemText(1, _translate("MainWindow", "周", None))
-        self.comboBox.setItemText(2, _translate("MainWindow", "日", None))
+        self.period_combo.setItemText(0, _translate("MainWindow", "月", None))
+        self.period_combo.setItemText(1, _translate("MainWindow", "周", None))
+        self.period_combo.setItemText(2, _translate("MainWindow", "日", None))
         self.entry_list.headerItem().setText(0, _translate("MainWindow", "项目列表", None))
         __sortingEnabled = self.entry_list.isSortingEnabled()
         self.entry_list.setSortingEnabled(False)

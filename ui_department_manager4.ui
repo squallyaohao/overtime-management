@@ -126,7 +126,7 @@
           <enum>QTabWidget::Triangular</enum>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tab_2">
           <property name="font">
@@ -357,7 +357,7 @@
                </widget>
               </item>
               <item>
-               <widget class="QComboBox" name="comboBox">
+               <widget class="QComboBox" name="period_combo">
                 <property name="sizePolicy">
                  <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                   <horstretch>0</horstretch>
@@ -428,7 +428,7 @@
                 </property>
                 <property name="font">
                  <font>
-                  <pointsize>9</pointsize>
+                  <pointsize>11</pointsize>
                  </font>
                 </property>
                 <property name="verticalScrollBarPolicy">
@@ -658,10 +658,10 @@
                    <number>16</number>
                   </property>
                   <property name="alternatingRowColors">
-                   <bool>true</bool>
+                   <bool>false</bool>
                   </property>
                   <property name="showGrid">
-                   <bool>false</bool>
+                   <bool>true</bool>
                   </property>
                   <property name="gridStyle">
                    <enum>Qt::SolidLine</enum>
