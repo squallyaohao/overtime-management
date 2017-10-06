@@ -147,7 +147,7 @@ class Member():
     def tableQuery(self,table='',tableList=[]):
         tempDict = {}
         conn,cursor = self.connectToServer()
-        query_statement = mysql_utility.sqlQuerysState(table)
+        query_statement = mysql_utility.sqlQueryState(table)
         cursor.execute(query_statement)
         conn.commit()
         result = cursor.fetchall()

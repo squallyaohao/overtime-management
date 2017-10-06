@@ -5,7 +5,7 @@ import sys
 import os,os.path
 import codecs
 import xml.etree.cElementTree as ET
-import time
+import time,datetime
 import mysql_utility
 import MySQLdb as sql
 from db_structure import *
@@ -216,6 +216,9 @@ class Department():
             cursor.execute(statement)
             conn.commit()
             for key,value in varsList:
+                if key.find(u'时间')>=0:
+                    temp = value.split('-')
+                    value = datetime.date(int(temp[0]),int(temp[1]),int(temp[2]))
                 if table == u'project':
                     self.projectDict[varsList[0][1]][key]=value
                 elif table == u'subproject':
@@ -257,9 +260,6 @@ class Department():
 
     def getProjectsFromServer(self):
         self.projectDict = self.queryServer(table='project',tabHeader=self.proTabHeader)
-        #for key in self.projectDict.keys():
-            #for col in self.projectDict[key].keys():
-                #print col
         return self.projectDict
 
     
@@ -285,11 +285,49 @@ class Department():
             proKey = task[0:3]
             subKey = task[0:6]
             self.hierTree[proKey][subKey].append(task)
+        self.calcProgress()
         return self.hierTree
 
 
     def getHierTree(self):
         return self.hierTree
+
+
+
+    def calcProgress(self):
+        for pro in self.hierTree.keys():
+            proProgress = 0.0
+            subproList = self.hierTree[pro].keys()
+            if len(subproList)>0:
+                for subpro in subproList:
+                    subproProgress= 0.0
+                    taskList = self.hierTree[pro][subpro]
+                    if len(taskList)>0:
+                        for task in taskList:
+                            progress = float(self.taskDict[task][u'完成度'])
+                            subproProgress = subproProgress + progress
+                        subproProgress = subproProgress / len(taskList)
+                    self.subprojectDict[subpro][u'完成度']=str(subproProgress) 
+                    proProgress = proProgress + subproProgress
+                proProgress = proProgress/len(subproList)
+            self.projectDict[pro][u'完成度']=str(proProgress)
+            
+    
+    def updateProgress(self,projectId):
+        proProgress = 0.0
+        subproList = self.hierTree[projectId].keys()
+        for subpro in subproList:
+            subproProgress = 0.0
+            taskList = self.hierTree[projectId][subpro]
+            for task in taskList:
+                progress = float(self.taskDict[task][u'完成度'])
+                subproProgress = subproProgress + progress
+            subproProgress = subproProgress / len(taskList)
+            self.subprojectDict[subpro][u'完成度']=str(subproProgress) 
+            proProgress = proProgress + subproProgress
+        proProgress = proProgress/len(subproList)
+        self.projectDict[projectId][u'完成度']=str(proProgress)        
+        
 
     
     def addProject(self,project_vars={}):
@@ -408,7 +446,6 @@ class Department():
         conn.commit()
         cursor.close()
         conn.close()
-        print self.hierTree[projectId][subprojectId]
         self.hierTree[projectId][subprojectId].remove(taskId)
         self.taskDict.pop(taskId)
         return 1
@@ -442,13 +479,7 @@ class Department():
         success = self.updateServer('member',[(u'任务',memberTask)],[(u'编号',memberId)])
         return 1
 
-    #def getAllProjects(self):
-        #print '项目列表： '.decode('utf-8')
-        #for pro in self.projectList:
-            #print '\t'+pro.decode('utf-8')
-        #return self.projectList
-        
-        
+    
 
         
 
