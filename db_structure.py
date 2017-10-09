@@ -75,6 +75,7 @@ taskTabHeader = ['taskTabHeader',
 
 
 
+
 memberTabHeader = ['memberTabHeader',
                    (u'编号',u'0',u'varchar(10)'),
                    (u'姓名',u'1',u'varchar(10)'),

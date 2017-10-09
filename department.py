@@ -329,6 +329,7 @@ class Department():
         self.projectDict[projectId][u'完成度']=str(proProgress)        
         
 
+
     
     def addProject(self,project_vars={}):
         ok = self.checkNotExist('project',{u'项目名称':project_vars[u'项目名称']})

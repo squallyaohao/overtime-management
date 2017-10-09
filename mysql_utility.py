@@ -164,6 +164,7 @@ def initDatabase():
             cursor.execute(statement)
             conn.commit()
     
+    
     #===create project table===
     varslist = []
     for data in proTabHeader[1:]:

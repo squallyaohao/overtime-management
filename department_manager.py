@@ -79,6 +79,7 @@ class DepartmentManager(Ui_MainWindow):
         
         self.drawComboBox('combo_scheduleProjectFilter', projectList)
 
+
                          
         
     def setConnections(self):
