@@ -143,49 +143,49 @@ def initDatabase():
     conn = sql.connect(hostname,user,pwd,db,charset='utf8')
     cursor = conn.cursor()
     #===create header module table===
-    statement = sqlCreateTableStatement('proTabHeader',TableHeaderModule)
-    cursor.execute(statement)
-    conn.commit()
-    statement = sqlCreateTableStatement('subproTabHeader',TableHeaderModule)
-    cursor.execute(statement)
-    conn.commit()
-    statement = sqlCreateTableStatement('taskTabHeader',TableHeaderModule)
-    cursor.execute(statement)
-    conn.commit()
-    statement = sqlCreateTableStatement('memberTabHeader',TableHeaderModule)
-    cursor.execute(statement)
-    conn.commit()
+    #statement = sqlCreateTableStatement('proTabHeader',TableHeaderModule)
+    #cursor.execute(statement)
+    #conn.commit()
+    #statement = sqlCreateTableStatement('subproTabHeader',TableHeaderModule)
+    #cursor.execute(statement)
+    #conn.commit()
+    #statement = sqlCreateTableStatement('taskTabHeader',TableHeaderModule)
+    #cursor.execute(statement)
+    #conn.commit()
+    #statement = sqlCreateTableStatement('memberTabHeader',TableHeaderModule)
+    #cursor.execute(statement)
+    #conn.commit()
     
     #===insert columns into header tables===
-    for headertable in [proTabHeader,subproTabHeader,taskTabHeader,memberTabHeader]:
-        table = headertable[0]
-        for column in headertable[1:]:
-            statement = sqlInsertState1(table,column)
-            cursor.execute(statement)
-            conn.commit()
+    #for headertable in [proTabHeader,subproTabHeader,taskTabHeader,memberTabHeader]:
+        #table = headertable[0]
+        #for column in headertable[1:]:
+            #statement = sqlInsertState1(table,column)
+            #cursor.execute(statement)
+            #conn.commit()
     
     
     #===create project table===
-    varslist = []
-    for data in proTabHeader[1:]:
-        varslist.append([data[0],data[2]])
-    statement = sqlCreateTableStatement('project', varslist)
-    cursor.execute(statement)
-    conn.commit()
+    #varslist = []
+    #for data in proTabHeader[1:]:
+        #varslist.append([data[0],data[2]])
+    #statement = sqlCreateTableStatement('project', varslist)
+    #cursor.execute(statement)
+    #conn.commit()
     
-    varslist = []
-    for data in subproTabHeader[1:]:
-        varslist.append([data[0],data[2]])
-    statement = sqlCreateTableStatement('subproject', varslist)
-    cursor.execute(statement)
-    conn.commit()    
+    #varslist = []
+    #for data in subproTabHeader[1:]:
+        #varslist.append([data[0],data[2]])
+    #statement = sqlCreateTableStatement('subproject', varslist)
+    #cursor.execute(statement)
+    #conn.commit()    
     
-    varslist = []
-    for data in taskTabHeader[1:]:
-        varslist.append([data[0],data[2]])
-    statement = sqlCreateTableStatement('task', varslist)
-    cursor.execute(statement)
-    conn.commit()
+    #varslist = []
+    #for data in taskTabHeader[1:]:
+        #varslist.append([data[0],data[2]])
+    #statement = sqlCreateTableStatement('task', varslist)
+    #cursor.execute(statement)
+    #conn.commit()
 
     varslist = []
     for data in memberTabHeader[1:]:
@@ -203,7 +203,8 @@ def initDatabase():
 def dropTables():
     conn = sql.connect(hostname,user,pwd,db,charset='utf8')
     cursor = conn.cursor()    
-    tableList = [u'project',u'proTabHeader','subproject',u'subproTabHeader',u'task',u'taskTabHeader',u'member',u'memberTabHeader']
+    tableList = [u'member']
+    #tableList = [u'project',u'proTabHeader','subproject',u'subproTabHeader',u'task',u'taskTabHeader',u'member',u'memberTabHeader']
     for table in tableList:
         statement = "drop table if exists "+table+";"
         cursor.execute(statement)

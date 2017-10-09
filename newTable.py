@@ -65,10 +65,28 @@ class NewTable(QTableWidget):
                     self.setColumnWidth(curIndex.column(),self.columnsWidth[curIndex.column()])
                 elif isinstance(curWidget,QLineEdit):
                     value = curWidget.text()
-                    item = QTableWidgetItem(value)
+                    font = curWidget.font()
+                    size1 = font.pixelSize()
+                    size2 = font.pointSize()
+                    if size1>size2:
+                        size = size1
+                    else:
+                        size = size2
+                    item = QTableWidgetItem(value)                 
                     item.setTextAlignment(Qt.AlignHCenter)                    
                     self.setItem(curIndex.row(), curIndex.column(), item)
+                    letterSpacing = 1
+                    contextWidth = len(value)*size + (len(value)-1)*letterSpacing
+                    columnWidth = self.columnWidth(curIndex.column())
+                    if columnWidth<contextWidth:
+                        columnWidth = contextWidth + 30
+                    self.setColumnWidth(curIndex.column(),columnWidth)
+                    print contextWidth
             self.myReturnPressed.emit(curIndex.row(),curIndex.column())
+            
+    def adjustColumnWidth(self,row,col):
+        pass
+        
 
 
                     

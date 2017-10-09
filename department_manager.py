@@ -39,22 +39,24 @@ class DepartmentManager(Ui_MainWindow):
         self.assigned_task.setHeaderLabel(u'任务列表')
         self.drawProjectTree()
         self.drawMemberList()
+        
+        #initialize query_member combobox
         memberIdList = self.department.allMembers.keys()
         memberIdList.sort()
         memberList = []
-        
-        #initialize query_member combobox
         for memberId in memberIdList:
-            memberList.append(self.department.allMembers[memberId][u'姓名'])
+            memberList.append((self.department.allMembers[memberId][u'姓名'],memberId))
         self.drawComboBox('query_member',memberList)
+        self.drawComboBox('combo_scheduleMemberFilter',memberList)
+        
         #initialize query_project combobox
         projectIdList = self.department.projectDict.keys()
         projectIdList.sort()
         projectList = []
         for projectId in projectIdList:
-            projectList.append(self.department.projectDict[projectId][u'项目名称'])
+            projectList.append((self.department.projectDict[projectId][u'项目名称'],projectId))
         self.drawComboBox('query_project', projectList)
-        
+        self.drawComboBox('combo_scheduleProjectFilter', projectList)
 
         self.query_overtime_table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         
@@ -77,7 +79,7 @@ class DepartmentManager(Ui_MainWindow):
         self.tabWidget.setCurrentIndex(0)
         self.tabWidget_2.setCurrentIndex(0)
         
-        self.drawComboBox('combo_scheduleProjectFilter', projectList)
+        
 
 
                          
@@ -86,6 +88,10 @@ class DepartmentManager(Ui_MainWindow):
         self.connect(self.dep_edit,QtCore.SIGNAL('clicked()'),self.editDepartment)
         self.connect(self.dep_line,QtCore.SIGNAL('currentIndexChanged(int)'),self.confirmDepartment)
         self.connect(self.query_project,QtCore.SIGNAL('currentIndexChanged(int)'),self.showSubprojectComobox)
+        self.connect(self.combo_scheduleProjectFilter,QtCore.SIGNAL('currentIndexChanged(int)'),self.showScheduleSubprojectComobox)
+        self.connect(self.combo_scheduleSubprojectFilter,QtCore.SIGNAL('currentIndexChanged(int)'),self.drawEntryTree)
+        self.connect(self.combo_scheduleMemberFilter,QtCore.SIGNAL('currentIndexChanged(int)'),self.drawEntryTree)
+        self.connect(self.check_scheduleShowDetail,QtCore.SIGNAL('stateChanged(int)'),self.showScheduleDetail)
         
         self.connect(self.btn_add_project,QtCore.SIGNAL('clicked()'),self.addProject)
         self.connect(self.btn_add_subproject,QtCore.SIGNAL('clicked()'),self.addSubproject)
@@ -224,8 +230,7 @@ class DepartmentManager(Ui_MainWindow):
                 self.period1_table.setColumnWidth(i,columnWidth)
                 labels.append(str(year)+u'年')
             self.period1_table.setHorizontalHeaderLabels(labels)
- 
-            
+             
             labels = []
             for i in range(len(Months)):
                 month = Months[i]
@@ -233,9 +238,7 @@ class DepartmentManager(Ui_MainWindow):
                 columnWidth = daysInMonth*defaultWidth
                 self.period2_table.setColumnWidth(i,columnWidth)
                 labels.append(monthDict[month.month()])
-            self.period2_table.setHorizontalHeaderLabels(labels)
-
-            
+            self.period2_table.setHorizontalHeaderLabels(labels)            
             self.schedule_table.setColumnWidth(0,totalWidth)
             
         if period == u'周':
@@ -320,7 +323,7 @@ class DepartmentManager(Ui_MainWindow):
         
 
 
-    def drawScheduleItem(self,row_index,start_date,end_date,progress,status,level):
+    def drawScheduleItem(self,row_index,start_date,end_date,progress,status,level,detail,showDetial):
         currentDate = QtCore.QDate.currentDate()
         daysToToday = self.left_date.daysTo(currentDate)
         totalDays = self.left_date.daysTo(self.right_date)
@@ -331,7 +334,7 @@ class DepartmentManager(Ui_MainWindow):
         cellWidth = self.schedule_table.columnWidth(0)
         rowHeight = self.schedule_table.rowHeight(0)
         rect = QtCore.QRect(0,0,cellWidth,rowHeight)
-        item = scheduleBar(rect,start_date,end_date,cur_pos,QtCore.Qt.green,progress,status,level)
+        item = scheduleBar(rect,start_date,end_date,cur_pos,QtCore.Qt.green,progress,status,level,detail,showDetial)
         self.schedule_table.setCellWidget(row_index,0,item)    
 
    
@@ -348,6 +351,7 @@ class DepartmentManager(Ui_MainWindow):
         
     
     def drawSchedule(self):
+        showDetial = self.check_scheduleShowDetail.isChecked()
         self.schedule_table.clear()
         self.schedule_table.setRowCount(0)
         iterator = QtGui.QTreeWidgetItemIterator(self.entry_list)
@@ -366,19 +370,26 @@ class DepartmentManager(Ui_MainWindow):
                 start_date = self.department.projectDict[Id][u'起始时间']
                 end_date = self.department.projectDict[Id][u'结束时间']
                 progress = float(self.department.projectDict[Id][u'完成度'])
-                status = self.department.projectDict[Id][u'项目状态']                
+                status = self.department.projectDict[Id][u'项目状态']
+                detail = {}
+                detail[u'项目说明'] = unicode(self.department.projectDict[Id][u'项目说明'])
             elif level == 2:
                 subproject = self.department.subprojectDict[Id]
                 start_date = self.department.subprojectDict[Id][u'起始时间']
                 end_date = self.department.subprojectDict[Id][u'结束时间']
                 progress = float(self.department.subprojectDict[Id][u'完成度'])
-                status = self.department.subprojectDict[Id][u'展项状态']                       
+                status = self.department.subprojectDict[Id][u'展项状态']
+                detail = {}
+                detail[u'展项说明'] = unicode(self.department.subprojectDict[Id][u'展项说明'])
             elif level == 3:
                 task = self.department.taskDict[Id]
                 start_date = self.department.taskDict[Id][u'起始时间']
                 end_date = self.department.taskDict[Id][u'结束时间']
                 progress = float(self.department.taskDict[Id][u'完成度'])
                 status = self.department.taskDict[Id][u'任务状态']
+                detail = {}
+                detail[u'参与人员'] = unicode(self.department.taskDict[Id][u'参与人员'])
+                detail[u'任务说明'] = unicode(self.department.taskDict[Id][u'任务说明'])
             else:
                 self.drawNullItem(row_index)
                 iterator = iterator.__iadd__(1)
@@ -395,7 +406,7 @@ class DepartmentManager(Ui_MainWindow):
             elif isinstance(end_date,datetime.date):
                 end_date = QtCore.QDate(end_date.year,end_date.month,end_date.day)
             
-            self.drawScheduleItem(row_index, start_date, end_date, progress, status, level)
+            self.drawScheduleItem(row_index, start_date, end_date, progress, status, level,detail,showDetial)
             iterator = iterator.__iadd__(1)
 
       
@@ -403,59 +414,163 @@ class DepartmentManager(Ui_MainWindow):
     def drawEntryTree(self):
         self.entry_list.clear()
         headItem = self.entry_list.headerItem()
-        headItem.setSizeHint(0,QtCore.QSize(100,50))        
-        projectIdList = self.department.hierTree.keys()
-        projectIdList.sort()
-        i=0
-        for projectId in projectIdList:
-            projectItem = newTreeWidgetItem(self.entry_list)
-            projectItem.setSizeHint(0,QtCore.QSize(100,30))
-            font = QtGui.QFont()
-            font.setPixelSize(17)
-            projectItem.setFont(0,font)
-            projectItem.setText(0,self.department.projectDict[projectId][u'项目名称'])
-            projectItem.setLevel(1)
-            projectItem.setId(projectId)
-            data = QtCore.QVariant(i)
-            projectItem.setData(0,QtCore.Qt.UserRole,data)
-            i = i + 1
-            subproIdList = self.department.hierTree[projectId].keys()
-            subproIdList.sort()
-            for subproId in subproIdList:            
-                subprojectItem =  newTreeWidgetItem(projectItem)
-                subprojectItem.setSizeHint(0,QtCore.QSize(100,30))
+        headItem.setSizeHint(0,QtCore.QSize(100,50))
+        projectFilter = self.combo_scheduleProjectFilter.currentText()
+        subprojectFilter = self.combo_scheduleSubprojectFilter.currentText()
+        memberFilter = self.combo_scheduleMemberFilter.currentText()
+        if memberFilter == QtCore.QString('*'):
+            if projectFilter != QtCore.QString('*') and projectFilter != '':
+                index = self.combo_scheduleProjectFilter.currentIndex()
+                projectId = unicode(self.combo_scheduleProjectFilter.itemData(index).toString())
+                projectIdList = [projectId]
+            else:
+                projectIdList = self.department.hierTree.keys()
+                projectIdList.sort()
+            i=0
+            for projectId in projectIdList:
+                projectItem = newTreeWidgetItem(self.entry_list)
+                projectItem.setSizeHint(0,QtCore.QSize(100,30))
                 font = QtGui.QFont()
-                font.setPixelSize(15)
-                subprojectItem.setFont(0,font)                
-                subprojectItem.setText(0,self.department.subprojectDict[subproId][u'展项名称'])
-                subprojectItem.setLevel(2)
-                subprojectItem.setId(subproId)
+                font.setPixelSize(17)
+                projectItem.setFont(0,font)
+                projectItem.setText(0,self.department.projectDict[projectId][u'项目名称'])
+                projectItem.setLevel(1)
+                projectItem.setId(projectId)
                 data = QtCore.QVariant(i)
-                subprojectItem.setData(0,QtCore.Qt.UserRole,data)
+                projectItem.setData(0,QtCore.Qt.UserRole,data)
                 i = i + 1
-                taskList = self.department.hierTree[projectId][subproId]
-                taskList.sort()
-                for task in taskList:
-                    taskItem = newTreeWidgetItem(subprojectItem)
-                    taskItem.setSizeHint(0,QtCore.QSize(100,30))
+                if subprojectFilter != QtCore.QString('*') and subprojectFilter != '':
+                    index = self.combo_scheduleSubprojectFilter.currentIndex()
+                    subprojectId = unicode(self.combo_scheduleSubprojectFilter.itemData(index).toString())
+                    subproIdList = [subprojectId]
+                else:
+                    subproIdList = self.department.hierTree[projectId].keys()
+                    subproIdList.sort()
+                for subproId in subproIdList:            
+                    subprojectItem =  newTreeWidgetItem(projectItem)
+                    subprojectItem.setSizeHint(0,QtCore.QSize(100,30))
                     font = QtGui.QFont()
-                    font.setPixelSize(13)
-                    taskItem.setFont(0,font)                    
-                    taskItem.setText(0,self.department.taskDict[task][u'任务名称'])
-                    taskItem.setLevel(3)
-                    taskItem.setId(task)
+                    font.setPixelSize(15)
+                    subprojectItem.setFont(0,font)                
+                    subprojectItem.setText(0,self.department.subprojectDict[subproId][u'展项名称'])
+                    subprojectItem.setLevel(2)
+                    subprojectItem.setId(subproId)
                     data = QtCore.QVariant(i)
-                    taskItem.setData(0,QtCore.Qt.UserRole,data)
+                    subprojectItem.setData(0,QtCore.Qt.UserRole,data)
                     i = i + 1
-            self.tree_project.addTopLevelItem(projectItem)
-            nullItem = newTreeWidgetItem(self.entry_list)
-            nullItem.setSizeHint(0,QtCore.QSize(100,30))
-            nullItem.setText(0,u'')
-            nullItem.setLevel(0)
-            data = QtCore.QVariant(i)
-            nullItem.setData(0,QtCore.Qt.UserRole,data)
-            self.tree_project.addTopLevelItem(nullItem)
-            i=i+1
+                    taskList = self.department.hierTree[projectId][subproId]
+                    taskList.sort()
+                    for task in taskList:
+                        taskItem = newTreeWidgetItem(subprojectItem)
+                        taskItem.setSizeHint(0,QtCore.QSize(100,30))
+                        font = QtGui.QFont()
+                        font.setPixelSize(13)
+                        taskItem.setFont(0,font)                    
+                        taskItem.setText(0,self.department.taskDict[task][u'任务名称'])
+                        taskItem.setLevel(3)
+                        taskItem.setId(task)
+                        data = QtCore.QVariant(i)
+                        taskItem.setData(0,QtCore.Qt.UserRole,data)
+                        i = i + 1
+                self.tree_project.addTopLevelItem(projectItem)
+                nullItem = newTreeWidgetItem(self.entry_list)
+                nullItem.setSizeHint(0,QtCore.QSize(100,30))
+                nullItem.setText(0,u'')
+                nullItem.setLevel(0)
+                data = QtCore.QVariant(i)
+                nullItem.setData(0,QtCore.Qt.UserRole,data)
+                self.tree_project.addTopLevelItem(nullItem)
+                i=i+1
+                
+        else:
+            index = self.combo_scheduleMemberFilter.currentIndex()
+            memberID = unicode(self.combo_scheduleMemberFilter.itemData(index).toString())
+            taskList = self.department.allMembers[memberID][u'任务'].split(';')[:-1]
+            index = self.combo_scheduleProjectFilter.currentIndex()
+            projectId = unicode(self.combo_scheduleProjectFilter.itemData(index).toString())
+            index = self.combo_scheduleSubprojectFilter.currentIndex()
+            subprojectId = unicode(self.combo_scheduleSubprojectFilter.itemData(index).toString())                
+            memberTaskTree = {}
+            
+            for task in taskList:
+                projectId = task[0:3]
+                subproId = task[0:6]
+                if not memberTaskTree.has_key(projectId):
+                    memberTaskTree[projectId]={}
+                if not memberTaskTree[projectId].has_key(subproId):
+                    memberTaskTree[projectId][subproId]=[]
+                memberTaskTree[projectId][subproId].append(task)
+            print memberTaskTree
+
+            if projectFilter != QtCore.QString('*') and projectFilter != '':
+                if not memberTaskTree.has_key(projectId):
+                    memberTaskTree = {}
+                elif subprojectFilter != QtCore.QString('*') and subprojectFilter != '':
+                    if not memberTaskTree[projectId].has_key(subprojectId):
+                        memberTaskTree = {}
+                    else:
+                        taskList = memberTaskTree[projectId][subprojectId]
+                        memberTaskTree = {}
+                        memberTaskTree[projectId] = {}
+                        memberTaskTree[projectId][subprojectId] = taskList
+                else:
+                    subproDict = memberTaskTree[projectId]
+                    memberTaskTree = {}
+                    memberTaskTree[projectId] = subproDict
+            
+            projectIdList = memberTaskTree.keys()
+            projectIdList.sort()
+            i = 0
+            for projectId in projectIdList:
+                projectItem = newTreeWidgetItem(self.entry_list)
+                projectItem.setSizeHint(0,QtCore.QSize(100,30))
+                font = QtGui.QFont()
+                font.setPixelSize(17)
+                projectItem.setFont(0,font)
+                projectItem.setText(0,self.department.projectDict[projectId][u'项目名称'])
+                projectItem.setLevel(1)
+                projectItem.setId(projectId)
+                data = QtCore.QVariant(i)
+                projectItem.setData(0,QtCore.Qt.UserRole,data)
+                i = i + 1
+                subproIdList = memberTaskTree[projectId].keys()
+                subproIdList.sort()
+                for subproId in subproIdList:            
+                    subprojectItem =  newTreeWidgetItem(projectItem)
+                    subprojectItem.setSizeHint(0,QtCore.QSize(100,30))
+                    font = QtGui.QFont()
+                    font.setPixelSize(15)
+                    subprojectItem.setFont(0,font)                
+                    subprojectItem.setText(0,self.department.subprojectDict[subproId][u'展项名称'])
+                    subprojectItem.setLevel(2)
+                    subprojectItem.setId(subproId)
+                    data = QtCore.QVariant(i)
+                    subprojectItem.setData(0,QtCore.Qt.UserRole,data)
+                    i = i + 1
+                    taskList = memberTaskTree[projectId][subproId]
+                    taskList.sort()
+                    for task in taskList:
+                        taskItem = newTreeWidgetItem(subprojectItem)
+                        taskItem.setSizeHint(0,QtCore.QSize(100,30))
+                        font = QtGui.QFont()
+                        font.setPixelSize(13)
+                        taskItem.setFont(0,font)                    
+                        taskItem.setText(0,self.department.taskDict[task][u'任务名称'])
+                        taskItem.setLevel(3)
+                        taskItem.setId(task)
+                        data = QtCore.QVariant(i)
+                        taskItem.setData(0,QtCore.Qt.UserRole,data)
+                        i = i + 1
+                self.tree_project.addTopLevelItem(projectItem)
+                nullItem = newTreeWidgetItem(self.entry_list)
+                nullItem.setSizeHint(0,QtCore.QSize(100,30))
+                nullItem.setText(0,u'')
+                nullItem.setLevel(0)
+                data = QtCore.QVariant(i)
+                nullItem.setData(0,QtCore.Qt.UserRole,data)
+                self.tree_project.addTopLevelItem(nullItem)
+                i=i+1
+         
         self.expandItem()
         self.setUpTables()
         self.drawSchedule()
@@ -495,7 +610,40 @@ class DepartmentManager(Ui_MainWindow):
             #scheduleBar = self.schedule_table.cellWidget(row,0)
             #scheduleBar.repaint()
             self.schedule_table.showRow(row)
+    
+    
+    def showScheduleSubprojectComobox(self):        
+        curProject = self.combo_scheduleProjectFilter.currentText()
+        if curProject != '*':
+            index = self.combo_scheduleProjectFilter.currentIndex()
+            curProjectId = unicode(self.combo_scheduleProjectFilter.itemData(index).toString())        
+            subprojectIdList = self.department.hierTree[curProjectId].keys()
+            subprojectList = []            
+            for subprojectId in subprojectIdList:
+                subprojectList.append((self.department.subprojectDict[subprojectId][u'展项名称'],subprojectId))
+            self.drawComboBox('combo_scheduleSubprojectFilter', subprojectList)
+            self.drawEntryTree()
+        else:
+            self.drawComboBox('combo_scheduleSubprojectFilter', [])    
+            self.drawEntryTree()
                 
+                
+    def showScheduleDetail(self,checked):
+        rows = self.schedule_table.rowCount()
+        if checked>0:
+            show = True
+        else:
+            show = False
+        for row in range(rows):
+            widget = self.schedule_table.cellWidget(row,0)
+            if isinstance(widget,scheduleBar):
+                widget.setShowDetial(show)
+                widget.repaint()
+
+            
+            
+        
+
         
     def editDepartment(self):
         self.dep_line.setEnabled(True)
@@ -525,8 +673,6 @@ class DepartmentManager(Ui_MainWindow):
                 self.drawEntryTree()
                 self.query_project.addItem(success[1][u'项目名称'])
                 self.combo_scheduleProjectFilter.addItem(success[1][u'项目名称'])
-                #self.drawComboBox('query_project',self.department.projectDict.keys())
-                #self.drawComboBox('combo_scheduleProjectFilter',self.department.projectDict.keys())
             elif success[0] == 2:
                 print '添加项目失败'
             else :
@@ -814,6 +960,7 @@ class DepartmentManager(Ui_MainWindow):
                 subprojectItem.setId(subproId)
                 subprojectItem.setExpanded(True)
                 taskList = self.department.hierTree[projectId][subproId]
+                taskList.sort()
                 for task in taskList:
                     taskItem = newTreeWidgetItem(subprojectItem)
                     font = QtGui.QFont()
@@ -825,25 +972,20 @@ class DepartmentManager(Ui_MainWindow):
                     taskItem.setExpanded(True)
         self.tree_project.addTopLevelItem(root)
 
-            
 
-        
+
     def showSubprojectComobox(self):
         curProject = self.query_project.currentText()
-        if curProject != '*':
-            curProjectId = ''
-            for projectId in self.department.projectDict.keys():
-                if self.department.projectDict[projectId][u'项目名称'] == unicode(curProject):
-                    curProjectId = projectId
-                    break
+        if curProject != '*':            
+            index = self.query_project.currentIndex()
+            curProjectId = unicode(self.query_project.itemData(index).toString())
             subprojectIdList = self.department.hierTree[curProjectId].keys()
             subprojectList = []
             for subprojectId in subprojectIdList:
-                subprojectList.append(self.department.subprojectDict[subprojectId][u'展项名称'])
-                self.drawComboBox('query_subproject',subprojectList)
+                subprojectList.append((self.department.subprojectDict[subprojectId][u'展项名称'],subprojectId))
+            self.drawComboBox('query_subproject',subprojectList)
         else:
-            self.drawComboBox('query_subproject',[])    
-
+            self.drawComboBox('query_subproject',[])                
             
             
     def drawComboBox(self,widgetname='',l=[]):
@@ -852,7 +994,8 @@ class DepartmentManager(Ui_MainWindow):
         comboBox.addItem('*')
         if len(l)>0:
             for temp in l:
-                comboBox.addItem(temp)
+                data = QtCore.QVariant(temp[1])
+                comboBox.addItem(temp[0],temp[1])
 
 
                 
@@ -887,16 +1030,20 @@ class DepartmentManager(Ui_MainWindow):
                 item = QtGui.QTableWidgetItem(text)
                 item.setTextAlignment(QtCore.Qt.AlignHCenter)
                 font = item.font()
-                pointSize = font.pixelSize()
+                size1 = font.pixelSize()
+                size2 = font.pointSize()
+                if size1>size2:
+                    size = size1
+                else:
+                    size = size2
                 letterSpacing = font.letterSpacing()
-                contextWidth = len(text)*pointSize + (len(text)-1)*letterSpacing
+                contextWidth = len(text)*size + (len(text)-1)*letterSpacing
                 columnWidth = self.table_prodetail.columnWidth(j)
                 if columnWidth<contextWidth:
-                    columnWidth = contextWidth + 20
-                    self.table_prodetail.setColumnWidth(j,columnWidth)                 
+                    columnWidth = contextWidth + 20                                     
                 if j==0 or col==u'完成度':
                     item.setFlags(QtCore.Qt.ItemIsEditable)
-                
+                self.table_prodetail.setColumnWidth(j,columnWidth)
                 self.table_prodetail.columnsWidth.append(columnWidth)
                 self.table_prodetail.setItem(i,j,item)
     
@@ -920,13 +1067,18 @@ class DepartmentManager(Ui_MainWindow):
                 item = QtGui.QTableWidgetItem(text)
                 item.setTextAlignment(QtCore.Qt.AlignHCenter)
                 font = item.font()
-                pointSize = font.pixelSize()
+                size1 = font.pixelSize()
+                size2 = font.pointSize()
+                if size1>size2:
+                    size = size1
+                else:
+                    size = size2
                 letterSpacing = font.letterSpacing()
-                contextWidth = len(text)*pointSize + (len(text)-1)*letterSpacing
+                contextWidth = len(text)*size + (len(text)-1)*letterSpacing
                 columnWidth = self.table_prodetail.columnWidth(j)
                 if columnWidth<contextWidth:
                     columnWidth = contextWidth + 20
-                    self.table_prodetail.setColumnWidth(j,columnWidth)                                   
+                self.table_prodetail.setColumnWidth(j,columnWidth)                                   
                 if j==0 or col==u'完成度':
                     item.setFlags(QtCore.Qt.ItemIsEditable)
                 self.table_prodetail.columnsWidth.append(columnWidth)
@@ -953,13 +1105,18 @@ class DepartmentManager(Ui_MainWindow):
                 item = QtGui.QTableWidgetItem(text)
                 item.setTextAlignment(QtCore.Qt.AlignHCenter)
                 font = item.font()
-                pointSize = font.pointSize()
+                size1 = font.pixelSize()
+                size2 = font.pointSize()
+                if size1>size2:
+                    size = size1
+                else:
+                    size = size2
                 letterSpacing = font.letterSpacing()
-                contextWidth = len(text)*pointSize + (len(text)-1)*letterSpacing
+                contextWidth = len(text)*size + (len(text)-1)*letterSpacing
                 columnWidth = self.table_prodetail.columnWidth(j)
                 if columnWidth<contextWidth:
                     columnWidth = contextWidth + 20
-                    self.table_prodetail.setColumnWidth(j,columnWidth)                  
+                self.table_prodetail.setColumnWidth(j,columnWidth)                  
                 if j==0:
                     item.setFlags(QtCore.Qt.ItemIsEditable)
                 self.table_prodetail.columnsWidth.append(columnWidth)
@@ -1361,7 +1518,7 @@ class newTaskDialog(ui_newTaskDialog.Ui_Dialog):
 
 
 class scheduleBar(QtGui.QWidget):
-    def __init__(self,rect,startPos,endPos,curPos,color,progress,status,level,parent=None):
+    def __init__(self,rect,startPos,endPos,curPos,color,progress,status,level,detail,showDetial,parent=None):
         super(QtGui.QWidget,self).__init__(parent)
         self.rect = rect
         self.startPos = startPos
@@ -1372,6 +1529,8 @@ class scheduleBar(QtGui.QWidget):
         self.level = level
         self.color = color
         self.progressColor = color
+        self.detail = detail
+        self.showDetail = showDetial
 
         
     def setRect(self,rect):
@@ -1411,6 +1570,15 @@ class scheduleBar(QtGui.QWidget):
     def setStatus(self,status):
         self.status = status
 
+    def setShowDetial(self,show):
+        self.showDetail = show
+        
+    def detailToString(self):
+        s =u'完成度：{:.2%}   '.format(self.progress)
+        for key in self.detail.keys():
+            temp = key + ':' + self.detail[key] + ' '*3
+            s= s + unicode(temp)
+        return s
         
     def paintEvent(self,e):
         rectLeft = self.rect.left()
@@ -1478,13 +1646,14 @@ class scheduleBar(QtGui.QWidget):
         pen.setWidth(2)
         p.setPen(pen)
         p.drawLine(todayPos,startLineTopy,todayPos,startLineBottomy)
-        font = QtGui.QFont()
-        font.setPixelSize(10)
-        text = u'完成度：{0}%'.format(self.progress*100)
-        textPos = QtCore.QPoint(endLineTopx+10,endLineBottomy-5)
-        pen.setColor(self.progressColor)
-        p.setPen(pen)
-        p.drawText(textPos,text)
+        if self.showDetail:
+            font = QtGui.QFont()
+            font.setPixelSize(10)
+            textPos = QtCore.QPoint(endLineTopx+10,endLineBottomy-5)
+            pen.setColor(self.progressColor)
+            p.setPen(pen)
+            text = self.detailToString()
+            p.drawText(textPos,text)
         p.end()
 
 

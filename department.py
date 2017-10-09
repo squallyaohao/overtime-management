@@ -310,7 +310,7 @@ class Department():
                     self.subprojectDict[subpro][u'完成度']=str(subproProgress) 
                     proProgress = proProgress + subproProgress
                 proProgress = proProgress/len(subproList)
-            self.projectDict[pro][u'完成度']=str(proProgress)
+            self.projectDict[pro][u'完成度']=u'{:.2f}'.format(proProgress)
             
     
     def updateProgress(self,projectId):
@@ -394,7 +394,7 @@ class Department():
                 if member.has_key(key):
                     continue
                 else:
-                    member[key] = 'NULL'
+                    member[key] = ''
             success = self.tableInsert(table='member', varsdict=member)
             if success:
                 self.allMembers[memberId] = member
@@ -462,32 +462,37 @@ class Department():
     def assignTask(self,curmembers,member,taskId):
         curmembers = curmembers + member + ';'
         success = self.updateServer('task', [(u'参与人员',curmembers)], [(u'任务编号',taskId)])
-        memberId = unicode(member.split('(')[1].split(')')[0])
-        memberName = unicode(member.split('(')[0])
-        #print memberId
-        #print memberName
-        #print self.allMembers
-        memberTask = self.allMembers[memberId][u'任务']
-        if memberTask is not None:
-            memberTask = memberTask + taskId + ';'
-        else:
-            memberTask = taskId + ';'
-        self.allMembers[memberId][u'任务'] = memberTask
-        success = self.updateServer('member',[(u'任务',memberTask)],[(u'编号',memberId)])
-        return 1
+        if success:
+            self.taskDict[taskId][u'参与人员'] = curmembers
+            memberId = unicode(member.split('(')[1].split(')')[0])
+            memberName = unicode(member.split('(')[0])
+            memberTask = self.allMembers[memberId][u'任务']
+            if memberTask is not None:
+                memberTask = memberTask + taskId + ';'
+            else:
+                memberTask = taskId + ';'
+            self.allMembers[memberId][u'任务'] = memberTask
+            success = self.updateServer('member',[(u'任务',memberTask)],[(u'编号',memberId)])
+            return 1
+        else :
+            return 0
         
         
         
     def unassignTask(self,curmembers,member,taskId):
         curmembers = curmembers.replace(member+u';','')
         success = self.updateServer('task', [(u'参与人员',curmembers)], [(u'任务编号',taskId)])
-        memberId = member.split('(')[1].split(')')[0]
-        memberName = member.split('(')[0]
-        memberTask = self.allMembers[memberId][u'任务']
-        memberTask = memberTask.replace(taskId+';','')
-        self.allMembers[memberId][u'任务'] = memberTask
-        success = self.updateServer('member',[(u'任务',memberTask)],[(u'编号',memberId)])
-        return 1
+        if success:
+            self.taskDict[taskId][u'参与人员'] = curmembers
+            memberId = member.split('(')[1].split(')')[0]
+            memberName = member.split('(')[0]
+            memberTask = self.allMembers[memberId][u'任务']
+            memberTask = memberTask.replace(taskId+';','')
+            self.allMembers[memberId][u'任务'] = memberTask
+            success = self.updateServer('member',[(u'任务',memberTask)],[(u'编号',memberId)])
+            return 1
+        else:
+            return 0
 
     
 
