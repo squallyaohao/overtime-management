@@ -389,9 +389,15 @@ class Department():
             total = len(allmembers.keys())
             memberId = '%04d'%(total+ 1)
             member[u'编号'] = memberId
+            for key in self.memberTabHeader:
+                if member.has_key(key):
+                    continue
+                else:
+                    member[key] = 'NULL'
             success = self.tableInsert(table='member', varsdict=member)
             if success:
                 self.allMembers[memberId] = member
+                print self.allMembers.keys()
                 return (1,member)
             else :
                 return (2,member)
@@ -455,14 +461,17 @@ class Department():
     def assignTask(self,curmembers,member,taskId):
         curmembers = curmembers + member + ';'
         success = self.updateServer('task', [(u'参与人员',curmembers)], [(u'任务编号',taskId)])
-        memberId = member.split('(')[1].split(')')[0]
-        memberName = member.split('(')[0]
-        memberTask = self.allMembers[memberName][u'任务']
+        memberId = unicode(member.split('(')[1].split(')')[0])
+        memberName = unicode(member.split('(')[0])
+        #print memberId
+        #print memberName
+        #print self.allMembers
+        memberTask = self.allMembers[memberId][u'任务']
         if memberTask is not None:
             memberTask = memberTask + taskId + ';'
         else:
             memberTask = taskId + ';'
-        self.allMembers[memberName][u'任务'] = memberTask
+        self.allMembers[memberId][u'任务'] = memberTask
         success = self.updateServer('member',[(u'任务',memberTask)],[(u'编号',memberId)])
         return 1
         
@@ -473,9 +482,9 @@ class Department():
         success = self.updateServer('task', [(u'参与人员',curmembers)], [(u'任务编号',taskId)])
         memberId = member.split('(')[1].split(')')[0]
         memberName = member.split('(')[0]
-        memberTask = self.allMembers[memberName][u'任务']
+        memberTask = self.allMembers[memberId][u'任务']
         memberTask = memberTask.replace(taskId+';','')
-        self.allMembers[memberName][u'任务'] = memberTask
+        self.allMembers[memberId][u'任务'] = memberTask
         success = self.updateServer('member',[(u'任务',memberTask)],[(u'编号',memberId)])
         return 1
 

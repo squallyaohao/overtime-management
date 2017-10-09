@@ -99,7 +99,7 @@ def sqlQueryState(table='',condition={}):
                     statement = statement + key + " like '%' and "
         statement = statement[:-5] + ";"
     else:
-        statement = "select * from " + table + ";"    
+        statement = "select * from " + table + ";"
     return statement
 
 
@@ -154,7 +154,7 @@ def initDatabase():
     conn.commit()
     statement = sqlCreateTableStatement('memberTabHeader',TableHeaderModule)
     cursor.execute(statement)
-    conn.commit()    
+    conn.commit()
     
     #===insert columns into header tables===
     for headertable in [proTabHeader,subproTabHeader,taskTabHeader,memberTabHeader]:

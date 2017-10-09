@@ -54,13 +54,14 @@ class DepartmentManager(Ui_MainWindow):
         for projectId in projectIdList:
             projectList.append(self.department.projectDict[projectId][u'项目名称'])
         self.drawComboBox('query_project', projectList)
+        
+
         self.query_overtime_table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         
         self.table_prodetail.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.table_prodetail.customContextMenuRequested.connect(self.showContextMenu)
         
 
-        self.period1_table.column
         self.scrollBar1 = self.period1_table.horizontalScrollBar()
         self.scrollBar2 = self.period2_table.horizontalScrollBar()
         self.scrollBar3 = self.schedule_table.horizontalScrollBar()
@@ -75,6 +76,8 @@ class DepartmentManager(Ui_MainWindow):
         #self.collapsItem()        
         self.tabWidget.setCurrentIndex(0)
         self.tabWidget_2.setCurrentIndex(0)
+        
+        self.drawComboBox('combo_scheduleProjectFilter', projectList)
 
                          
         
@@ -90,7 +93,6 @@ class DepartmentManager(Ui_MainWindow):
         self.connect(self.btn_save,QtCore.SIGNAL('clicked()'),self.saveTable)
         self.connect(self.btn_exportExcel,QtCore.SIGNAL('clicked()'),self.exportProjectToExcel)
         self.connect(self.table_prodetail,QtCore.SIGNAL('myReturnPressed(int,int)'),self.tableItemChange)
-        #self.table_prodetail.myReturnPressed.connect(self.tableItemChange)
                 
         self.connect(self.add_member_btn,QtCore.SIGNAL('clicked()'),self.addMember)
                 
@@ -132,9 +134,23 @@ class DepartmentManager(Ui_MainWindow):
         right_date = QtCore.QDate.currentDate()
         for projectId in self.department.projectDict.keys():
             date = self.department.projectDict[projectId][u'起始时间']
-            start_date = QtCore.QDate(date.year,date.month,date.day)
-            date = self.department.projectDict[projectId][u'结束时间']           
-            end_date = QtCore.QDate(date.year,date.month,date.day)
+            if type(date) == type(u''):
+                temp = date.split('-')
+                date = [int(temp[0]),int(temp[1]),int(temp[2])]
+            elif isinstance(date,datetime.date):
+                date = [date.year,date.month,date.day]
+            else:
+                date = [date.year(),date.month(),date.day()]
+            start_date = QtCore.QDate(date[0],date[1],date[2])
+            date = self.department.projectDict[projectId][u'结束时间']
+            if type(date) == type(u''):
+                temp = date.split('-')
+                date = [int(temp[0]),int(temp[1]),int(temp[2])]
+            elif isinstance(date,datetime.date):
+                date = [date.year,date.month,date.day]
+            else:
+                date = [date.year(),date.month(),date.day()]            
+            end_date = QtCore.QDate(date[0],date[1],date[2])
             if left_date > start_date:
                 left_date = start_date
             if right_date < end_date:
@@ -440,6 +456,7 @@ class DepartmentManager(Ui_MainWindow):
             self.tree_project.addTopLevelItem(nullItem)
             i=i+1
         self.expandItem()
+        self.setUpTables()
         self.drawSchedule()
 
 
@@ -498,10 +515,17 @@ class DepartmentManager(Ui_MainWindow):
             if success[0] == 1:
                 root = self.tree_project.topLevelItem(0)
                 newItem = newTreeWidgetItem(root)
+                font = QtGui.QFont()
+                font.setPixelSize(16)
+                newItem.setFont(0,font)                
                 newItem.setText(0,success[1][u'项目名称'])
                 newItem.setLevel(1)
                 newItem.setId(success[1][u'项目编号'])
                 self.drawEntryTree()
+                self.query_project.addItem(success[1][u'项目名称'])
+                self.combo_scheduleProjectFilter.addItem(success[1][u'项目名称'])
+                #self.drawComboBox('query_project',self.department.projectDict.keys())
+                #self.drawComboBox('combo_scheduleProjectFilter',self.department.projectDict.keys())
             elif success[0] == 2:
                 print '添加项目失败'
             else :
@@ -522,6 +546,9 @@ class DepartmentManager(Ui_MainWindow):
                 while itemIter.value() is not None:
                     if unicode(itemIter.value().text(0)) == project:
                         newItem = newTreeWidgetItem(itemIter.value())
+                        font = QtGui.QFont()
+                        font.setPixelSize(14)
+                        newItem.setFont(0,font)                         
                         newItem.setText(0,success[1][u'展项名称'])
                         newItem.setLevel(2)
                         newItem.setId(success[1][u'展项编号'])
@@ -553,6 +580,9 @@ class DepartmentManager(Ui_MainWindow):
                 while itemIter.value() is not None:
                     if unicode(itemIter.value().text(0)) == subproject:
                         newItem = newTreeWidgetItem(itemIter.value())
+                        font = QtGui.QFont()
+                        font.setPixelSize(12)
+                        newItem.setFont(0,font)                         
                         newItem.setText(0,success[1][u'任务名称'])
                         newItem.setLevel(3)
                         newItem.setId(success[1][u'任务编号'])
@@ -584,6 +614,8 @@ class DepartmentManager(Ui_MainWindow):
                 self.member_name_line.setText('')
                 self.member_title_line.setText('')
                 self.drawMemberList
+                self.query_member.addItem(memberDict[u'姓名'])
+                self.combo_scheduleMemberFilter.addItem(memberDict[u'姓名'])
             else :
                 print '添加成员失败'
         else:
