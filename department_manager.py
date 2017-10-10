@@ -76,6 +76,9 @@ class DepartmentManager(Ui_MainWindow):
         self.drawEntryTree()
         self.expandItem()
         #self.collapsItem()        
+        
+        self.table_memberDaily.setTableName('daily')
+        
         self.tabWidget.setCurrentIndex(0)
         self.tabWidget_2.setCurrentIndex(0)
         
@@ -100,6 +103,8 @@ class DepartmentManager(Ui_MainWindow):
         self.connect(self.btn_save,QtCore.SIGNAL('clicked()'),self.saveTable)
         self.connect(self.btn_exportExcel,QtCore.SIGNAL('clicked()'),self.exportProjectToExcel)
         self.connect(self.table_prodetail,QtCore.SIGNAL('myReturnPressed(int,int)'),self.tableItemChange)
+        self.connect(self.btn_addDaily,QtCore.SIGNAL('clicked()'),self.addNewDailyRow)
+        self.connect(self.btn_delDaily,QtCore.SIGNAL('clicked()'),self.delDaily)
                 
         self.connect(self.add_member_btn,QtCore.SIGNAL('clicked()'),self.addMember)
                 
@@ -107,7 +112,8 @@ class DepartmentManager(Ui_MainWindow):
         self.connect(self.save_excel,QtCore.SIGNAL('clicked()'),self.exportOvertimeToExcel)        
         self.tree_project.itemClicked.connect(self.showInfo)
         self.table_prodetail.itemDoubleClicked.connect(self.changeTableValue)
-        self.member_list.itemDoubleClicked.connect(self.showMemberTasks)
+        self.table_memberDaily.itemDoubleClicked.connect(self.changeTableValue2)
+        self.member_list.itemClicked.connect(self.showMemberTasks)
         
         self.scrollBar3.valueChanged.connect(self.synchronizeHorizontalScrollBar)
         self.scrollBar4.valueChanged.connect(self.synchronizeVerticalScrollBar1)
@@ -490,8 +496,7 @@ class DepartmentManager(Ui_MainWindow):
             projectId = unicode(self.combo_scheduleProjectFilter.itemData(index).toString())
             index = self.combo_scheduleSubprojectFilter.currentIndex()
             subprojectId = unicode(self.combo_scheduleSubprojectFilter.itemData(index).toString())                
-            memberTaskTree = {}
-            
+            memberTaskTree = {}            
             for task in taskList:
                 projectId = task[0:3]
                 subproId = task[0:6]
@@ -500,7 +505,6 @@ class DepartmentManager(Ui_MainWindow):
                 if not memberTaskTree[projectId].has_key(subproId):
                     memberTaskTree[projectId][subproId]=[]
                 memberTaskTree[projectId][subproId].append(task)
-            print memberTaskTree
 
             if projectFilter != QtCore.QString('*') and projectFilter != '':
                 if not memberTaskTree.has_key(projectId):
@@ -842,9 +846,10 @@ class DepartmentManager(Ui_MainWindow):
         for member in self.department.allMembers.keys():
             name = self.department.allMembers[member][u'姓名']
             memberId = self.department.allMembers[member][u'编号']
-            data = QtCore.QVariant(name)
+            data = QtCore.QVariant(memberId)
             item = QtGui.QListWidgetItem(name)
-            #item.setData(data)
+            item.setData(QtCore.Qt.UserRole,data)
+            item.setText(name)
             self.member_list.addItem(item)
 
 
@@ -852,23 +857,65 @@ class DepartmentManager(Ui_MainWindow):
 
     def showMemberTasks(self,item):
         self.assigned_task.clear()
-        member = unicode(item.text())
-        taskList = self.department.allMembers[member][u'任务'].split(';')[:-1]
-        for taskId in taskList:
-            projectId = taskId[0:3]
-            subprojectId = taskId[0:6]
-            project = self.department.projectDict[projectId][u'项目名称']
-            subproject = self.department.subprojectDict[subprojectId][u'展项名称']
-            task = self.department.taskDict[taskId][u'任务名称']
-            projectItem = QtGui.QTreeWidgetItem(self.assigned_task)
-            projectItem.setText(0,project)
-            subprojectItem = QtGui.QTreeWidgetItem(projectItem)
-            subprojectItem.setText(0,subproject)
-            taskItem = QtGui.QTreeWidgetItem(subprojectItem)
-            taskItem.setText(0,task)
-            self.assigned_task.addTopLevelItem(projectItem)
-            self.assigned_task.expandAll()
+        self.table_memberDaily.setRowCount(0)
+        memberId = unicode(item.data(QtCore.Qt.UserRole).toString())
+        taskList = self.department.allMembers[memberId][u'任务'].split(';')[:-1]
+        memberTaskTree = {}            
+        for task in taskList:
+            projectId = task[0:3]
+            subproId = task[0:6]
+            if not memberTaskTree.has_key(projectId):
+                memberTaskTree[projectId]={}
+            if not memberTaskTree[projectId].has_key(subproId):
+                memberTaskTree[projectId][subproId]=[]
+            memberTaskTree[projectId][subproId].append(task)        
             
+        for projectId in memberTaskTree:
+            projectItem = newTreeWidgetItem(self.assigned_task)
+            projectItem.setText(0,self.department.projectDict[projectId][u'项目名称'])
+            projectItem.setLevel(1)
+            projectItem.setId(projectId)
+            subproIdList = memberTaskTree[projectId].keys()
+            subproIdList.sort()
+            for subproId in subproIdList:            
+                subprojectItem =  newTreeWidgetItem(projectItem)           
+                subprojectItem.setText(0,self.department.subprojectDict[subproId][u'展项名称'])
+                subprojectItem.setLevel(2)
+                subprojectItem.setId(subproId)
+                taskList = memberTaskTree[projectId][subproId]
+                taskList.sort()
+                for task in taskList:
+                    taskItem = newTreeWidgetItem(subprojectItem)            
+                    taskItem.setText(0,self.department.taskDict[task][u'任务名称'])
+                    taskItem.setLevel(3)
+                    taskItem.setId(task)
+            self.assigned_task.addTopLevelItem(projectItem)
+        self.assigned_task.expandAll()
+        self.showMemberDaily()
+
+
+    def showMemberDaily(self):
+        pass
+
+    def addNewDailyRow(self):
+        listItem = self.member_list.currentItem()
+        if listItem is not None:
+            memberName = unicode(listItem.text())
+            memberId = listItem.data(QtCore.Qt.UserRole).toString()
+            rows = self.table_memberDaily.rowCount()
+            self.table_memberDaily.insertRow(rows)
+            for i in range(4):
+                item = QtGui.QTableWidgetItem('')
+                item.setTextAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
+                self.table_memberDaily.setItem(rows,i,item)
+                columnWidth = self.table_memberDaily.columnWidth(i)
+                self.table_memberDaily.columnsWidth.append(columnWidth)
+        
+    
+    
+    def delDaily(self):
+        pass
+        
             
             
     def showQueryResult(self):
@@ -1014,6 +1061,8 @@ class DepartmentManager(Ui_MainWindow):
 
                 
     def showProjectInfo(self):
+        self.table_prodetail.setRowCount(0)
+        self.table_prodetail.setColumnCount(0)        
         self.label_tables.setText(u'项目详情')
         self.table_prodetail.clear()
         self.table_prodetail.setTextElideMode(QtCore.Qt.ElideNone)
@@ -1034,13 +1083,15 @@ class DepartmentManager(Ui_MainWindow):
                 size2 = font.pointSize()
                 if size1>size2:
                     size = size1
+                    letterSpacing = font.letterSpacing()
                 else:
-                    size = size2
-                letterSpacing = font.letterSpacing()
-                contextWidth = len(text)*size + (len(text)-1)*letterSpacing
+                    dpi = self.logicalDpiX()
+                    size = size2 * dpi / 72
+                    letterSpacing = font.wordSpacing()
+                contextWidth = len(text)*size + (len(text)-1)*letterSpacing + 20
                 columnWidth = self.table_prodetail.columnWidth(j)
                 if columnWidth<contextWidth:
-                    columnWidth = contextWidth + 20                                     
+                    columnWidth = contextWidth                                   
                 if j==0 or col==u'完成度':
                     item.setFlags(QtCore.Qt.ItemIsEditable)
                 self.table_prodetail.setColumnWidth(j,columnWidth)
@@ -1050,6 +1101,8 @@ class DepartmentManager(Ui_MainWindow):
     
     
     def showSubprojectInfo(self,projectId):
+        self.table_prodetail.setRowCount(0)
+        self.table_prodetail.setColumnCount(0)        
         projectName = self.department.projectDict[projectId][u'项目名称']
         self.label_tables.setText(projectName +u' 展项详情: ')
         self.table_prodetail.clear()
@@ -1071,13 +1124,15 @@ class DepartmentManager(Ui_MainWindow):
                 size2 = font.pointSize()
                 if size1>size2:
                     size = size1
+                    letterSpacing = font.letterSpacing()
                 else:
-                    size = size2
-                letterSpacing = font.letterSpacing()
-                contextWidth = len(text)*size + (len(text)-1)*letterSpacing
+                    dpi = self.logicalDpiX()
+                    size = size2 * dpi / 72
+                    letterSpacing = font.wordSpacing()
+                contextWidth = len(text)*size + (len(text)-1)*letterSpacing + 20
                 columnWidth = self.table_prodetail.columnWidth(j)
                 if columnWidth<contextWidth:
-                    columnWidth = contextWidth + 20
+                    columnWidth = contextWidth
                 self.table_prodetail.setColumnWidth(j,columnWidth)                                   
                 if j==0 or col==u'完成度':
                     item.setFlags(QtCore.Qt.ItemIsEditable)
@@ -1087,6 +1142,8 @@ class DepartmentManager(Ui_MainWindow):
  
 
     def showTaskInfo(self,subprojectId):
+        self.table_prodetail.setRowCount(0)
+        self.table_prodetail.setColumnCount(0)
         subprojectName = self.department.subprojectDict[subprojectId][u'展项名称']
         self.label_tables.setText(subprojectName + u' 任务详情: ')
         self.table_prodetail.clear()
@@ -1109,13 +1166,15 @@ class DepartmentManager(Ui_MainWindow):
                 size2 = font.pointSize()
                 if size1>size2:
                     size = size1
+                    letterSpacing = font.letterSpacing()
                 else:
-                    size = size2
-                letterSpacing = font.letterSpacing()
-                contextWidth = len(text)*size + (len(text)-1)*letterSpacing
+                    dpi = self.logicalDpiX()
+                    size = size2 * dpi / 72
+                    letterSpacing = font.wordSpacing()
+                contextWidth = len(text)*size + (len(text)-1)*letterSpacing + 20
                 columnWidth = self.table_prodetail.columnWidth(j)
                 if columnWidth<contextWidth:
-                    columnWidth = contextWidth + 20
+                    columnWidth = contextWidth
                 self.table_prodetail.setColumnWidth(j,columnWidth)                  
                 if j==0:
                     item.setFlags(QtCore.Qt.ItemIsEditable)
@@ -1150,7 +1209,7 @@ class DepartmentManager(Ui_MainWindow):
             header = self.department.proTabHeader
         elif tableName == u'subproject':
             header = self.department.subproTabHeader
-        else:
+        else :
             header = self.department.taskTabHeader
         numCols = self.table_prodetail.columnCount()
         rows = []
@@ -1171,10 +1230,25 @@ class DepartmentManager(Ui_MainWindow):
                 item  = iterator.value()
                 if item.getId() == ID:
                     item.setText(0,value)
-                iterator = iterator.__iadd__(1)
-                
+                iterator = iterator.__iadd__(1)                
         self.drawEntryTree()
 
+
+
+    def tableItemChange2(self,row_index,col_index):
+        listItem = self.member_list.currentItem()
+        memberId = unicode(listItem.data(QtCore.Qt.UserRole).toString())
+        tableName = self.table_memberDaily.getTableName()
+        header = self.department.dailyTabHeader
+        numCols = self.table_memberDaily.columnCount()        
+        rows = []
+        row = []
+        row.append(memberId)
+        for j in range(numCols):
+            item = self.table_memberDaily.item(row_index,j)
+            row.append(unicode(item.text()))
+        rows.append(row)
+        self.department.addNewDaily(tableName,rows)
 
 
     def updateProgress(self,taskId):
@@ -1264,7 +1338,23 @@ class DepartmentManager(Ui_MainWindow):
         name = unicode(name)
         success = self.department.assignTask(curText,name,taskId)
         if success:
+            col = item.column()
+            columnwidth = self.table_prodetail.columnWidth(col)
+            font = item.font()
+            size1 = font.pixelSize()
+            size2 = font.pointSize()
+            if size1>size2:
+                size = size1
+                letterSpacing = font.letterSpacing()
+            else:
+                dpi = self.logicalDpiX()
+                size = size2 * dpi / 72
+                letterSpacing = font.wordSpacing()
             curText = curText + name + ';'
+            contextWidth = len(curText)*size + (len(curText)-1)*letterSpacing + 10 
+            if columnwidth < contextWidth:
+                columnwidth = contextWidth
+            self.table_prodetail.setColumnWidth(col,columnwidth)
             item.setText(curText)
 
                 
@@ -1320,7 +1410,7 @@ class DepartmentManager(Ui_MainWindow):
             slider.setValue(value)
             slider.valueChanged.connect(connectSlider)
             self.table_prodetail.setCellWidget(row,col,slider)
-        if headerLabel.find(u'时间')>0:
+        if headerLabel.find(u'时间')>0 or headerLabel.find(u'日期')>=0:
             text = item.text().split('-')
             if len(text)>0:
                 date = QtCore.QDate(int(text[0]),int(text[1]),int(text[2]))
@@ -1331,6 +1421,38 @@ class DepartmentManager(Ui_MainWindow):
             self.table_prodetail.setCellWidget(row,col,calendar)
 
 
+    def changeTableValue2(self,item):    
+        def connectSlider():
+            value = slider.value()
+            item.setText(str(value))
+        table_name = self.table_memberDaily.getTableName()
+        row = item.row()
+        col = item.column()
+        header = self.department.dailyTabHeader
+        headerLabel = header[col+1]
+        if headerLabel.find(u'事项')>=0:
+            combo = QtGui.QComboBox(self.table_memberDaily)
+            combo.addItem(u'调休')
+            combo.addItem(u'请假')
+            combo.addItem(u'出差')
+            self.table_memberDaily.setCellWidget(row,col,combo)
+        if headerLabel.find(u'时长')>=0:
+            value = item.text()
+            if value != '':
+                valeu = float(value)
+            else:
+                value = 0
+            slider = QtGui.QSlider(self.table_memberDaily)
+            slider.setOrientation(QtCore.Qt.Horizontal)
+            slider.setRange(0,10)
+            slider.setValue(value)
+            slider.valueChanged.connect(connectSlider)
+            self.table_memberDaily.setCellWidget(row,col,slider)
+        if headerLabel.find(u'日期')>=0:
+            calendar = myCalendarWidget(self.table_memberDaily)
+            self.table_memberDaily.setRowHeight(row,200)
+            self.table_memberDaily.setColumnWidth(col,250)
+            self.table_memberDaily.setCellWidget(row,col,calendar)
            
         
 class myCalendarWidget(QtGui.QCalendarWidget):

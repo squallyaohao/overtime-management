@@ -11,7 +11,7 @@ import MySQLdb as sql
 from db_structure import *
 
 
-depDict = {0:'三维动画',1:'投标动画',2:'二维动画',3:'平面设计',4:'编导'}
+depDict = {0:u'三维动画',1:u'投标动画',2:u'二维动画',3:u'平面设计',4:u'编导'}
 memberstabHeader = [u'id',u'department',u'title'] 
 projecttabHeader = [u'start_date',u'finish_date',u'subprojects',u'description']
 subprojecttabHeader = [u'subproject_category',u'project',u'start_date',u'finish_date',u'tasks',u'subproject_description']
@@ -95,7 +95,8 @@ class Department():
         self.proTabHeader = self.getTableHeader(headertable='proTabHeader')
         self.subproTabHeader = self.getTableHeader(headertable='subproTabHeader')
         self.taskTabHeader = self.getTableHeader(headertable='taskTabHeader')
-        self.memberTabHeader = self.getTableHeader(headertable='memberTabHeader')            
+        self.memberTabHeader = self.getTableHeader(headertable='memberTabHeader')
+        self.dailyTabHeader = self.getTableHeader(headertable='dailyTabHeader')
             
         self.getProjectsFromServer()
         self.getSubprojectFromServer()
@@ -254,7 +255,12 @@ class Department():
     
         
     def getMembersFromServer(self):
-        self.allMembers = self.queryServer(table='member', tabHeader=self.memberTabHeader)
+        allMembers = self.queryServer(table='member', tabHeader=self.memberTabHeader)
+        self.allMembers = {}
+        for key in allMembers:
+            if allMembers[key][u'部门'] == depDict[self.depName]:
+                self.allMembers[key] = allMembers[key]
+            
         return self.allMembers
 
 

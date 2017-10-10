@@ -8,6 +8,7 @@ from PyQt4.QtGui import *
 
 class NewTable(QTableWidget):
     myReturnPressed = pyqtSignal(int,int)
+    myDoubleClicked = pyqtSignal(int,int)
     def __init__(self,parent=None):
         super(QTableWidget,self).__init__(parent)
         self.tableName =''
@@ -50,7 +51,7 @@ class NewTable(QTableWidget):
                     value = curWidget.currentText()
                     self.removeCellWidget(curIndex.row(), curIndex.column())
                     item = QTableWidgetItem(value)
-                    item.setTextAlignment(Qt.AlignHCenter)
+                    item.setTextAlignment(Qt.AlignHCenter|Qt.AlignVCenter)
                     self.setItem(curIndex.row(), curIndex.column(), item)
                 elif isinstance(curWidget,QSlider):
                     value = curWidget.value()
@@ -59,7 +60,7 @@ class NewTable(QTableWidget):
                     date = curWidget.selectedDate().toString('yyyy-MM-dd')
                     self.removeCellWidget(curIndex.row(), curIndex.column())
                     item = QTableWidgetItem(date)
-                    item.setTextAlignment(Qt.AlignHCenter)                    
+                    item.setTextAlignment(Qt.AlignHCenter|Qt.AlignVCenter)                    
                     self.setItem(curIndex.row(), curIndex.column(), item)
                     self.setRowHeight(curIndex.row(),30)
                     self.setColumnWidth(curIndex.column(),self.columnsWidth[curIndex.column()])
@@ -70,20 +71,24 @@ class NewTable(QTableWidget):
                     size2 = font.pointSize()
                     if size1>size2:
                         size = size1
+                        letterSpacing = font.letterSpacing()
                     else:
-                        size = size2
-                    item = QTableWidgetItem(value)                 
-                    item.setTextAlignment(Qt.AlignHCenter)                    
+                        dpi = self.logicalDpiX()
+                        size = size2 * dpi / 72
+                        letterSpacing = font.wordSpacing()
+                    item = QTableWidgetItem(value)
+                    item.setTextAlignment(Qt.AlignHCenter|Qt.AlignVCenter)
                     self.setItem(curIndex.row(), curIndex.column(), item)
-                    letterSpacing = 1
                     contextWidth = len(value)*size + (len(value)-1)*letterSpacing
                     columnWidth = self.columnWidth(curIndex.column())
                     if columnWidth<contextWidth:
-                        columnWidth = contextWidth + 30
+                        columnWidth = contextWidth + 50
                     self.setColumnWidth(curIndex.column(),columnWidth)
-                    print contextWidth
             self.myReturnPressed.emit(curIndex.row(),curIndex.column())
             
+            
+
+    
     def adjustColumnWidth(self,row,col):
         pass
         

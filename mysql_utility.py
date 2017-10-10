@@ -22,7 +22,7 @@ user = 'root'
 pwd = '123456' 
 
 
-tableList = [overtime_varslist,members_varslist,project_varlist,tasks_varslist,subproject_varslist]
+#tableList = [overtime_varslist,members_varslist,project_varlist,tasks_varslist,subproject_varslist]
 
        
 #MySQL utility function
@@ -155,14 +155,18 @@ def initDatabase():
     #statement = sqlCreateTableStatement('memberTabHeader',TableHeaderModule)
     #cursor.execute(statement)
     #conn.commit()
+    statement = sqlCreateTableStatement('dailyTabHeader',TableHeaderModule)
+    cursor.execute(statement)
+    conn.commit()    
     
     #===insert columns into header tables===
-    #for headertable in [proTabHeader,subproTabHeader,taskTabHeader,memberTabHeader]:
-        #table = headertable[0]
-        #for column in headertable[1:]:
-            #statement = sqlInsertState1(table,column)
-            #cursor.execute(statement)
-            #conn.commit()
+    #for headertable in [proTabHeader,subproTabHeader,taskTabHeader,memberTabHeader,dailyTabHeader]:
+    for headertable in [dailyTabHeader]:
+        table = headertable[0]
+        for column in headertable[1:]:
+            statement = sqlInsertState1(table,column)
+            cursor.execute(statement)
+            conn.commit()
     
     
     #===create project table===
@@ -187,14 +191,20 @@ def initDatabase():
     #cursor.execute(statement)
     #conn.commit()
 
-    varslist = []
-    for data in memberTabHeader[1:]:
-        varslist.append([data[0],data[2]])
-    statement = sqlCreateTableStatement('member', varslist)
-    cursor.execute(statement)
-    conn.commit()    
+    #varslist = []
+    #for data in memberTabHeader[1:]:
+        #varslist.append([data[0],data[2]])
+    #statement = sqlCreateTableStatement('member', varslist)
+    #cursor.execute(statement)
+    #conn.commit() 
     
-    
+    #varslist = []
+    #for data in dailyTabHeader[1:]:
+        #varslist.append([data[0],data[2]])
+    #statement = sqlCreateTableStatement('daily', varslist)
+    #cursor.execute(statement)
+    #conn.commit()        
+       
     cursor.close()
     conn.close()
 
@@ -219,5 +229,5 @@ def dropTables():
 
 
 if __name__=='__main__':
-    dropTables()
+    #dropTables()
     initDatabase()

@@ -97,50 +97,17 @@ overtime_varslist = ['overtime',
 
 
 
-
-members_varslist = ['members',
-                    ('name','varchar(10)'),
-                    ('id','int'),
-                    ('department','varchar(10)'),
-                    ('title','varchar(10)')] 
-
-
-
-
-project_varlist = ['project',
-                   ('project','varchar(20)'),
-                   ('start_date','date'),
-                   ('finish_date','date'),
-                   ('subprojects','varchar(500)'),
-                   ('description','varchar(200)')]
-
-
-
-
-subproject_varslist = ['subproject',
-                       ('subproject','varchar(20)'),
-                       ('subproject_category','varchar(10)'),
-                       ('project','varchar(20)'),
-                       ('start_date','date'),('finish_date','date'),
-                       ('tasks','varchar(500)'),
-                       ('subproject_description','varchar(200)')]
-
-
-
-
-tasks_varslist = ['tasks',
-                  ('task','varchar(50)'),
-                  ('department','varchar(10)'),
-                  ('project','varchar(20)'),
-                  ('subproject','varchar(20)'),
-                  ('start_date','date'),
-                  ('finish_date','date'),
-                  ('progress','float'),
-                  ('members','varchar(200)'),
-                  ('description','varchar(50)')]
+dailyTabHeader = ['dailyTabHeader',
+                  (u'编号',u'0',u'varchar(10)'),
+                  (u'日期',u'1',u'date'),
+                  (u'时长',u'2',u'float'),
+                  (u'事项',u'3',u'varchar(10)'),
+                  (u'备注',u'4',u'text')]
 
 
 
 
 
-tableList = [overtime_varslist,members_varslist,project_varlist,tasks_varslist,subproject_varslist]
+
+
+#tableList = [overtime_varslist,members_varslist,project_varlist,tasks_varslist,subproject_varslist]
