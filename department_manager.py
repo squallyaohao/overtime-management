@@ -8,7 +8,7 @@ from ui_department_manager4 import Ui_MainWindow
 from ui_querytable import Ui_QueryTable
 import xml.etree.ElementInclude as ET
 import department as department
-import ui_newProjectDialog,ui_newSubprojectDialog,ui_newTaskDialog
+import ui_newProjectDialog,ui_newSubprojectDialog,ui_newTaskDialog,ui_newDailyDialog
 import member
 import pandas as pd
 import excelUtility
@@ -661,7 +661,7 @@ class DepartmentManager(Ui_MainWindow):
     
     def addProject(self):
         tempDict,ok = newProjectDialog.newProject()       
-        if tempDict[u'项目名称'] != '':
+        if tempDict[u'项目名称'] != '' and ok:
             tempDict[u'完成度'] = str(0)
             tempDict[u'项目状态'] = u'进行中'
             success = self.department.addProject(tempDict)
@@ -690,7 +690,7 @@ class DepartmentManager(Ui_MainWindow):
         project = tempDict[u'项目名称']
         tempDict[u'完成度'] = str(0)
         tempDict[u'展项状态'] = u'进行中'        
-        if project != '' and subproject != '':
+        if project != '' and subproject != '' and ok:
             success = self.department.addSubproject(tempDict,projectId)
             if success[0] == 1:
                 itemIter = QtGui.QTreeWidgetItemIterator(self.tree_project)
@@ -724,7 +724,7 @@ class DepartmentManager(Ui_MainWindow):
         tempDict[u'完成度'] = str(0)
         tempDict[u'任务状态'] = u'进行中'
         tempDict[u'参与人员'] = ''
-        if project != '' and subproject != '' and task != '':
+        if project != '' and subproject != '' and task != '' and ok:
             success = self.department.addTask(tempDict,projectId,subprojectId)
             if success[0] == 1:
                 itemIter = QtGui.QTreeWidgetItemIterator(self.tree_project)
@@ -843,7 +843,9 @@ class DepartmentManager(Ui_MainWindow):
  
  
     def drawMemberList(self):
-        for member in self.department.allMembers.keys():
+        idlist = self.department.allMembers.keys()
+        idlist.sort()
+        for member in idlist:
             name = self.department.allMembers[member][u'姓名']
             memberId = self.department.allMembers[member][u'编号']
             data = QtCore.QVariant(memberId)
@@ -895,28 +897,51 @@ class DepartmentManager(Ui_MainWindow):
 
 
     def showMemberDaily(self):
-        pass
+        self.table_memberDaily.setRowCount(0)
+        listItem = self.member_list.currentItem()
+        memberId = unicode(listItem.data(QtCore.Qt.UserRole).toString())
+        memberDailyDict = self.department.dailyDict[memberId]
+        dateList = memberDailyDict.keys()
+        dateList.sort()
+        self.table_memberDaily.setRowCount(len(dateList))
+        for i,date in enumerate(dateList):
+            for j,key in enumerate(self.department.dailyTabHeader[1:]):
+                item = QtGui.QTableWidgetItem()
+                item.setText(unicode(memberDailyDict[date][key]))
+                item.setTextAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
+                self.table_memberDaily.setItem(i,j,item)
+                
 
     def addNewDailyRow(self):
         listItem = self.member_list.currentItem()
+        index = 0
         if listItem is not None:
-            memberName = unicode(listItem.text())
-            memberId = listItem.data(QtCore.Qt.UserRole).toString()
-            rows = self.table_memberDaily.rowCount()
-            self.table_memberDaily.insertRow(rows)
-            for i in range(4):
-                item = QtGui.QTableWidgetItem('')
-                item.setTextAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
-                self.table_memberDaily.setItem(rows,i,item)
-                columnWidth = self.table_memberDaily.columnWidth(i)
-                self.table_memberDaily.columnsWidth.append(columnWidth)
-        
+            index = self.member_list.currentIndex().row()
+        newDailyDict,memberId,ok = newDailyDialog.newDaily(memberDict=self.department.allMembers,index=index)
+        if ok:
+            success = self.department.addNewDaily(newDailyDict)
+            if success:
+                date = newDailyDict[u'日期']
+                newDailyDict.pop(u'编号')
+                self.department.dailyDict[memberId][date] = newDailyDict
+                self.showMemberDaily()
     
     
     def delDaily(self):
-        pass
-        
-            
+        listItem = self.member_list.currentItem()
+        memberId = unicode(listItem.data(QtCore.Qt.UserRole).toString())        
+        curRow = self.table_memberDaily.currentRow()
+        dailyDict = {}
+        dailyDict[u'编号'] = memberId
+        for j,key in enumerate(self.department.dailyTabHeader[1:]): 
+            item = self.table_memberDaily.item(curRow,j)
+            dailyDict[key] = unicode(item.text())
+        #print dailyDict
+        success = self.department.delDaily(dailyDict)
+        if success:
+            self.table_memberDaily.removeRow(curRow)
+            date = dailyDict[u'日期']
+            self.department.dailyDict[memberId].pop(date)
             
     def showQueryResult(self):
         query_member = unicode(self.query_member.currentText())
@@ -1635,6 +1660,45 @@ class newTaskDialog(ui_newTaskDialog.Ui_Dialog):
         newTaskDict[u'结束时间'] = task_end_date
         newTaskDict[u'任务说明'] = task_desc
         return (newTaskDict,projectId,subprojectId,result==QtGui.QDialog.Accepted)
+        
+
+
+class newDailyDialog(ui_newDailyDialog.Ui_dialog):
+    def __init__(self,parent=None,memberDict={},index=0):
+        super(newDailyDialog,self).__init__(parent)
+        self.setupUi(self)
+        self.allMembers = memberDict
+        idlist = self.allMembers.keys()
+        idlist.sort()
+        for memberId in idlist:
+            memberName = self.allMembers[memberId][u'姓名']
+            data = QtCore.QVariant(memberId)
+            self.combo_name.addItem(memberName,data)
+        self.combo_name.setCurrentIndex(index)
+        for cate in [u'调休',u'请假',u'出差']:
+            self.combo_category.addItem(cate)
+        date = QtCore.QDate.currentDate()
+        self.date.setDate(date)
+        
+    @staticmethod
+    def newDaily(parent=None,memberDict={},index=0):
+        newDaily = newDailyDialog(parent,memberDict,index)
+        result = newDaily.exec_()
+        newDailyDict = {}
+        index = newDaily.combo_name.currentIndex()
+        memberId = unicode(newDaily.combo_name.itemData(index,QtCore.Qt.UserRole).toString())
+        date = unicode(newDaily.date.date().toString('yyyy-MM-dd'))
+        time  = unicode(str(newDaily.time.value()))
+        print time
+        cate = unicode(newDaily.combo_category.currentText())
+        comment = unicode(newDaily.comment.toPlainText())
+        newDailyDict[u'编号'] = memberId
+        newDailyDict[u'日期'] = date
+        newDailyDict[u'时长'] = time
+        newDailyDict[u'事项'] = cate
+        newDailyDict[u'备注'] = comment
+        return (newDailyDict,memberId,result==QtGui.QDialog.Accepted)
+        
         
 
 

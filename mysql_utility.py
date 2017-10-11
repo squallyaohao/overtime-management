@@ -198,12 +198,12 @@ def initDatabase():
     #cursor.execute(statement)
     #conn.commit() 
     
-    #varslist = []
-    #for data in dailyTabHeader[1:]:
-        #varslist.append([data[0],data[2]])
-    #statement = sqlCreateTableStatement('daily', varslist)
-    #cursor.execute(statement)
-    #conn.commit()        
+    varslist = []
+    for data in dailyTabHeader[1:]:
+        varslist.append([data[0],data[2]])
+    statement = sqlCreateTableStatement('daily', varslist)
+    cursor.execute(statement)
+    conn.commit()        
        
     cursor.close()
     conn.close()
@@ -213,7 +213,7 @@ def initDatabase():
 def dropTables():
     conn = sql.connect(hostname,user,pwd,db,charset='utf8')
     cursor = conn.cursor()    
-    tableList = [u'member']
+    tableList = [u'daily',u'dailyTabHeader']
     #tableList = [u'project',u'proTabHeader','subproject',u'subproTabHeader',u'task',u'taskTabHeader',u'member',u'memberTabHeader']
     for table in tableList:
         statement = "drop table if exists "+table+";"
@@ -229,5 +229,5 @@ def dropTables():
 
 
 if __name__=='__main__':
-    #dropTables()
+    dropTables()
     initDatabase()

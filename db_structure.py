@@ -99,7 +99,7 @@ overtime_varslist = ['overtime',
 
 dailyTabHeader = ['dailyTabHeader',
                   (u'编号',u'0',u'varchar(10)'),
-                  (u'日期',u'1',u'date'),
+                  (u'日期',u'1',u'varchar(10)'),
                   (u'时长',u'2',u'float'),
                   (u'事项',u'3',u'varchar(10)'),
                   (u'备注',u'4',u'text')]

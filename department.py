@@ -97,11 +97,13 @@ class Department():
         self.taskTabHeader = self.getTableHeader(headertable='taskTabHeader')
         self.memberTabHeader = self.getTableHeader(headertable='memberTabHeader')
         self.dailyTabHeader = self.getTableHeader(headertable='dailyTabHeader')
+
             
         self.getProjectsFromServer()
         self.getSubprojectFromServer()
         self.getTaskFromeServer()
         self.getMembersFromServer()
+        self.getDailyFromServer()
         self.buildTreeHierarchy()
 
 
@@ -278,7 +280,26 @@ class Department():
         self.taskDict = self.queryServer(table='task', tabHeader=self.taskTabHeader)
         return self.taskDict
 
-
+    
+    def getDailyFromServer(self):
+        self.dailyDict = {}
+        conn,cursor = self.connectToServer()
+        query_statement = mysql_utility.sqlQueryState('daily')
+        cursor.execute(query_statement)
+        conn.commit()
+        result = cursor.fetchall()
+        for memberId in self.allMembers:
+            self.dailyDict[memberId]={}
+        if len(result) > 0:
+            for row in result:
+                date = row[1]
+                daily = dict(zip(self.dailyTabHeader[1:], row[1:]))   
+                self.dailyDict[row[0]][date] = daily    
+                   
+        cursor.close()
+        conn.close()
+        return self.dailyDict
+    
 
     def buildTreeHierarchy(self):
         self.hierTree = {}
@@ -502,7 +523,24 @@ class Department():
 
     
 
-        
+    def addNewDaily(self,newDailyDict={}): 
+        conn,cursor = self.connectToServer()
+        statment = mysql_utility.sqlInsertState2(table='daily', varsdict=newDailyDict)
+        cursor.execute(statment)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return 1
+     
+    
+    def delDaily(self,dailyDict={}):
+        conn,cursor = self.connectToServer()
+        statement = mysql_utility.sqldeletState(table='daily', condition=dailyDict)
+        cursor.execute(statement)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return 1        
 
    
     

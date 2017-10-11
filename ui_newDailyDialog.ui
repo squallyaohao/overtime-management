@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>510</width>
-    <height>249</height>
+    <height>300</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,7 +19,7 @@
   <property name="maximumSize">
    <size>
     <width>510</width>
-    <height>400</height>
+    <height>300</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -29,10 +29,16 @@
    <property name="geometry">
     <rect>
      <x>155</x>
-     <y>195</y>
+     <y>245</y>
      <width>341</width>
-     <height>32</height>
+     <height>35</height>
     </rect>
+   </property>
+   <property name="minimumSize">
+    <size>
+     <width>0</width>
+     <height>35</height>
+    </size>
    </property>
    <property name="orientation">
     <enum>Qt::Horizontal</enum>
@@ -47,7 +53,7 @@
      <x>15</x>
      <y>30</y>
      <width>481</width>
-     <height>161</height>
+     <height>206</height>
     </rect>
    </property>
    <property name="frameShape">
@@ -56,13 +62,13 @@
    <property name="frameShadow">
     <enum>QFrame::Sunken</enum>
    </property>
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
       <y>15</y>
       <width>461</width>
-      <height>135</height>
+      <height>181</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
@@ -105,7 +111,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="comboBox">
+          <widget class="QComboBox" name="combo_name">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -137,7 +143,42 @@
           </widget>
          </item>
          <item>
-          <widget class="QDateEdit" name="dateEdit">
+          <widget class="QDateEdit" name="date">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>25</height>
+            </size>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QLabel" name="label_7">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="text">
+            <string>时长</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="time">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -172,7 +213,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QComboBox" name="comboBox_2">
+          <widget class="QComboBox" name="combo_category">
            <property name="minimumSize">
             <size>
              <width>0</width>
@@ -213,7 +254,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QPlainTextEdit" name="plainTextEdit"/>
+        <widget class="QPlainTextEdit" name="comment"/>
        </item>
       </layout>
      </item>
@@ -222,14 +263,8 @@
   </widget>
   <zorder>frame</zorder>
   <zorder>buttonBox</zorder>
-  <zorder>dateEdit</zorder>
-  <zorder>label</zorder>
-  <zorder>label_2</zorder>
-  <zorder>lineEdit</zorder>
-  <zorder>comboBox</zorder>
-  <zorder>label_3</zorder>
-  <zorder>label_4</zorder>
-  <zorder>plainTextEdit</zorder>
+  <zorder>label_7</zorder>
+  <zorder>time</zorder>
  </widget>
  <resources/>
  <connections>
