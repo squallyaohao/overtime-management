@@ -103,6 +103,7 @@ class DepartmentManager(Ui_MainWindow):
         self.connect(self.btn_save,QtCore.SIGNAL('clicked()'),self.saveTable)
         self.connect(self.btn_exportExcel,QtCore.SIGNAL('clicked()'),self.exportProjectToExcel)
         self.connect(self.table_prodetail,QtCore.SIGNAL('myReturnPressed(int,int)'),self.tableItemChange)
+        self.connect(self.table_memberDaily,QtCore.SIGNAL('myReturnPressed(int,int)'),self.tableItemChange2)
         self.connect(self.btn_addDaily,QtCore.SIGNAL('clicked()'),self.addNewDailyRow)
         self.connect(self.btn_delDaily,QtCore.SIGNAL('clicked()'),self.delDaily)
                 
@@ -898,6 +899,7 @@ class DepartmentManager(Ui_MainWindow):
 
     def showMemberDaily(self):
         self.table_memberDaily.setRowCount(0)
+        self.table_memberDaily.columnsWidth = []
         listItem = self.member_list.currentItem()
         memberId = unicode(listItem.data(QtCore.Qt.UserRole).toString())
         memberDailyDict = self.department.dailyDict[memberId]
@@ -907,9 +909,28 @@ class DepartmentManager(Ui_MainWindow):
         for i,date in enumerate(dateList):
             for j,key in enumerate(self.department.dailyTabHeader[1:]):
                 item = QtGui.QTableWidgetItem()
+                text = unicode(memberDailyDict[date][key])
                 item.setText(unicode(memberDailyDict[date][key]))
                 item.setTextAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
+                if j == 0:
+                    item.setFlags(QtCore.Qt.ItemIsEditable)
                 self.table_memberDaily.setItem(i,j,item)
+                font = item.font()
+                size1 = font.pixelSize()
+                size2 = font.pointSize()
+                if size1>size2:
+                    size = size1
+                    letterSpacing = font.letterSpacing()
+                else:
+                    dpi = self.logicalDpiX()
+                    size = size2 * dpi / 72
+                    letterSpacing = font.wordSpacing()
+                contextWidth = len(text)*size + (len(text)-1)*letterSpacing + 10
+                columnWidth = self.table_prodetail.columnWidth(j)
+                if columnWidth<contextWidth:
+                    columnWidth = contextWidth
+                self.table_memberDaily.setColumnWidth(j,contextWidth)
+                self.table_memberDaily.columnsWidth.append(columnWidth)
                 
 
     def addNewDailyRow(self):
@@ -1263,18 +1284,25 @@ class DepartmentManager(Ui_MainWindow):
     def tableItemChange2(self,row_index,col_index):
         listItem = self.member_list.currentItem()
         memberId = unicode(listItem.data(QtCore.Qt.UserRole).toString())
-        tableName = self.table_memberDaily.getTableName()
-        header = self.department.dailyTabHeader
-        numCols = self.table_memberDaily.columnCount()        
-        rows = []
-        row = []
-        row.append(memberId)
-        for j in range(numCols):
-            item = self.table_memberDaily.item(row_index,j)
-            row.append(unicode(item.text()))
-        rows.append(row)
-        self.department.addNewDaily(tableName,rows)
-
+        cols = self.table_memberDaily.columnCount()
+        item = self.table_memberDaily.item(row_index,col_index)
+        value = unicode(item.text())
+        tableHeader = self.department.dailyTabHeader[1:]
+        varsList = [(tableHeader[col_index],value)]
+        conditionList = []        
+        for j,key in enumerate(tableHeader):
+            if j == col_index:
+                continue
+            else:
+                item = self.table_memberDaily.item(row_index,j)
+                text = unicode(item.text())
+                conditionList.append((key,text))
+        conditionList.append((self.department.dailyTabHeader[0],memberId))
+        sccess = self.department.updateDaily(varsList,conditionList)
+        if sccess:
+            date = unicode(self.table_memberDaily.item(row_index,0).text())
+            self.department.dailyDict[memberId][date][tableHeader[col_index]]=value
+            
 
     def updateProgress(self,taskId):
         projectId = taskId[0:3]
@@ -1447,9 +1475,6 @@ class DepartmentManager(Ui_MainWindow):
 
 
     def changeTableValue2(self,item):    
-        def connectSlider():
-            value = slider.value()
-            item.setText(str(value))
         table_name = self.table_memberDaily.getTableName()
         row = item.row()
         col = item.column()
@@ -1467,12 +1492,11 @@ class DepartmentManager(Ui_MainWindow):
                 valeu = float(value)
             else:
                 value = 0
-            slider = QtGui.QSlider(self.table_memberDaily)
-            slider.setOrientation(QtCore.Qt.Horizontal)
-            slider.setRange(0,10)
-            slider.setValue(value)
-            slider.valueChanged.connect(connectSlider)
-            self.table_memberDaily.setCellWidget(row,col,slider)
+            spinbox = QtGui.QDoubleSpinBox(self.table_memberDaily)
+            spinbox.setValue(float(value))
+            spinbox.setRange(0.0,8.0)
+            spinbox.setSingleStep(0.5)
+            self.table_memberDaily.setCellWidget(row,col,spinbox)
         if headerLabel.find(u'日期')>=0:
             calendar = myCalendarWidget(self.table_memberDaily)
             self.table_memberDaily.setRowHeight(row,200)

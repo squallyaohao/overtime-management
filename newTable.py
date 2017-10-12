@@ -64,6 +64,14 @@ class NewTable(QTableWidget):
                     self.setItem(curIndex.row(), curIndex.column(), item)
                     self.setRowHeight(curIndex.row(),30)
                     self.setColumnWidth(curIndex.column(),self.columnsWidth[curIndex.column()])
+                elif isinstance(curWidget,QDoubleSpinBox):
+                    value = unicode(curWidget.value())
+                    self.removeCellWidget(curIndex.row(), curIndex.column())
+                    item = QTableWidgetItem(value)
+                    item.setTextAlignment(Qt.AlignHCenter|Qt.AlignVCenter)
+                    self.setItem(curIndex.row(), curIndex.column(), item)
+                    self.setRowHeight(curIndex.row(),30)
+                    self.setColumnWidth(curIndex.column(),self.columnsWidth[curIndex.column()])                    
                 elif isinstance(curWidget,QLineEdit):
                     value = curWidget.text()
                     font = curWidget.font()

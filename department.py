@@ -292,8 +292,9 @@ class Department():
             self.dailyDict[memberId]={}
         if len(result) > 0:
             for row in result:
-                date = row[1]
-                daily = dict(zip(self.dailyTabHeader[1:], row[1:]))   
+                date = row[1].isoformat() 
+                daily = dict(zip(self.dailyTabHeader[2:], row[2:]))
+                daily[self.dailyTabHeader[1]] = date
                 self.dailyDict[row[0]][date] = daily    
                    
         cursor.close()
@@ -542,6 +543,16 @@ class Department():
         conn.close()
         return 1        
 
+
+    def updateDaily(self,varsList=[],conditionList=[]):
+        conn,cursor = self.connectToServer()
+        statement = mysql_utility.sqlUpdateState(table='daily', varsList=varsList,conditionList=conditionList)
+        print statement
+        cursor.execute(statement)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return 1         
    
     
     def queryOvertime(self,table='',date=(),member='',project='',subproject=''):
