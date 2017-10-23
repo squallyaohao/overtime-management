@@ -292,7 +292,7 @@ class Department():
             self.dailyDict[memberId]={}
         if len(result) > 0:
             for row in result:
-                date = row[1].isoformat() 
+                date = row[1]
                 daily = dict(zip(self.dailyTabHeader[2:], row[2:]))
                 daily[self.dailyTabHeader[1]] = date
                 self.dailyDict[row[0]][date] = daily    
