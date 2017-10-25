@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1130</width>
+    <width>1200</width>
     <height>800</height>
    </rect>
   </property>
@@ -21,13 +21,13 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>1130</width>
+    <width>1200</width>
     <height>800</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>1130</width>
+    <width>1200</width>
     <height>800</height>
    </size>
   </property>
@@ -60,9 +60,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>40</y>
-      <width>1116</width>
-      <height>736</height>
+      <y>50</y>
+      <width>1181</width>
+      <height>726</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -87,7 +87,7 @@
      <enum>QTabWidget::Triangular</enum>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <property name="iconSize">
      <size>
@@ -108,10 +108,10 @@
      <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
-        <x>15</x>
+        <x>10</x>
         <y>25</y>
-        <width>1086</width>
-        <height>686</height>
+        <width>1151</width>
+        <height>671</height>
        </rect>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -198,8 +198,8 @@
             <rect>
              <x>5</x>
              <y>50</y>
-             <width>1066</width>
-             <height>601</height>
+             <width>1131</width>
+             <height>591</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_20">
@@ -260,8 +260,8 @@
             <rect>
              <x>5</x>
              <y>10</y>
-             <width>1066</width>
-             <height>641</height>
+             <width>1136</width>
+             <height>631</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -272,8 +272,46 @@
              <layout class="QHBoxLayout" name="horizontalLayout_9">
               <item>
                <widget class="QLabel" name="label_10">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="text">
                  <string/>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="check_scheduleShowDetail">
+                <property name="minimumSize">
+                 <size>
+                  <width>100</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>显示详情</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QCheckBox" name="check_showMyTask">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="minimumSize">
+                 <size>
+                  <width>200</width>
+                  <height>0</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>只显示我的任务</string>
                 </property>
                </widget>
               </item>
@@ -663,9 +701,9 @@
       <property name="geometry">
        <rect>
         <x>5</x>
-        <y>15</y>
-        <width>1101</width>
-        <height>691</height>
+        <y>10</y>
+        <width>1166</width>
+        <height>686</height>
        </rect>
       </property>
       <property name="font">
@@ -686,18 +724,30 @@
        <attribute name="title">
         <string>加班</string>
        </attribute>
-       <widget class="QWidget" name="">
+       <widget class="QWidget" name="layoutWidget">
         <property name="geometry">
          <rect>
           <x>5</x>
           <y>10</y>
-          <width>1081</width>
-          <height>656</height>
+          <width>1146</width>
+          <height>646</height>
          </rect>
         </property>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
           <widget class="QFrame" name="frame">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>300</width>
+             <height>0</height>
+            </size>
+           </property>
            <property name="frameShape">
             <enum>QFrame::Box</enum>
            </property>
@@ -759,7 +809,7 @@
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>200</width>
+                  <width>300</width>
                   <height>25</height>
                  </size>
                 </property>
@@ -773,6 +823,9 @@
                 </property>
                 <property name="displayFormat">
                  <string>yyyy-M-d</string>
+                </property>
+                <property name="calendarPopup">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -826,7 +879,7 @@
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>200</width>
+                  <width>300</width>
                   <height>25</height>
                  </size>
                 </property>
@@ -895,7 +948,7 @@
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>200</width>
+                  <width>300</width>
                   <height>25</height>
                  </size>
                 </property>
@@ -958,7 +1011,7 @@
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>200</width>
+                  <width>300</width>
                   <height>25</height>
                  </size>
                 </property>
@@ -1031,7 +1084,7 @@
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>200</width>
+                  <width>300</width>
                   <height>25</height>
                  </size>
                 </property>
@@ -1291,6 +1344,9 @@ p, li { white-space: pre-wrap; }
                       <property name="displayFormat">
                        <string>yyyy-M-d</string>
                       </property>
+                      <property name="calendarPopup">
+                       <bool>true</bool>
+                      </property>
                      </widget>
                     </item>
                    </layout>
@@ -1361,6 +1417,9 @@ p, li { white-space: pre-wrap; }
                       </property>
                       <property name="displayFormat">
                        <string>yyyy-M-d</string>
+                      </property>
+                      <property name="calendarPopup">
+                       <bool>true</bool>
                       </property>
                      </widget>
                     </item>
@@ -1561,6 +1620,12 @@ p, li { white-space: pre-wrap; }
             </item>
             <item>
              <widget class="QTableWidget" name="query_overtime_table">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="selectionMode">
                <enum>QAbstractItemView::SingleSelection</enum>
               </property>
@@ -1606,7 +1671,7 @@ p, li { white-space: pre-wrap; }
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>100</width>
+                  <width>200</width>
                   <height>30</height>
                  </size>
                 </property>
@@ -1628,100 +1693,26 @@ p, li { white-space: pre-wrap; }
         </layout>
        </widget>
       </widget>
-      <widget class="QWidget" name="tab_6">
-       <attribute name="title">
-        <string>日常</string>
-       </attribute>
-      </widget>
      </widget>
     </widget>
    </widget>
-   <widget class="QPushButton" name="dep_edit">
+   <widget class="QLabel" name="line_welcom">
     <property name="geometry">
      <rect>
-      <x>1063</x>
-      <y>13</y>
-      <width>50</width>
-      <height>23</height>
+      <x>10</x>
+      <y>15</y>
+      <width>176</width>
+      <height>26</height>
      </rect>
-    </property>
-    <property name="sizePolicy">
-     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-      <horstretch>0</horstretch>
-      <verstretch>0</verstretch>
-     </sizepolicy>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>0</width>
-      <height>20</height>
-     </size>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>50</width>
-      <height>16777215</height>
-     </size>
     </property>
     <property name="font">
      <font>
-      <family>Adobe Arabic</family>
-      <pointsize>9</pointsize>
+      <pointsize>15</pointsize>
      </font>
     </property>
     <property name="text">
-     <string>更改</string>
+     <string>你好，姚灏</string>
     </property>
-   </widget>
-   <widget class="QComboBox" name="dep_line">
-    <property name="enabled">
-     <bool>false</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>857</x>
-      <y>13</y>
-      <width>200</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="minimumSize">
-     <size>
-      <width>200</width>
-      <height>20</height>
-     </size>
-    </property>
-    <property name="layoutDirection">
-     <enum>Qt::LeftToRight</enum>
-    </property>
-    <property name="editable">
-     <bool>false</bool>
-    </property>
-    <item>
-     <property name="text">
-      <string>三维动画</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>投标动画</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>二维动画</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>平面设计</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>编导</string>
-     </property>
-    </item>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -1729,7 +1720,7 @@ p, li { white-space: pre-wrap; }
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1130</width>
+     <width>1200</width>
      <height>23</height>
     </rect>
    </property>

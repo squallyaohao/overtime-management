@@ -70,7 +70,8 @@ taskTabHeader = ['taskTabHeader',
                    (u'完成度'   ,u'6' ,u'float'),
                    (u'参与人员' ,u'7' ,u'varchar(225)'),
                    (u'任务状态' ,u'8' ,u'varchar(10)'),
-                   (u'任务说明' ,u'9' ,u'text')]
+                   (u'任务说明' ,u'9' ,u'text'),
+                   (u'部门' ,u'10' ,u'text')]
 
 
 

@@ -4,7 +4,7 @@
 import sys,os,os.path
 from PyQt4 import QtCore
 from PyQt4 import QtGui
-from ui_department_manager4 import Ui_MainWindow
+from ui_memberClient import Ui_MainWindow
 from ui_querytable import Ui_QueryTable
 import xml.etree.ElementInclude as ET
 import department as department
@@ -24,21 +24,21 @@ monthDict = {1:u'一月',2:u'二月',3:u'三月',4:u'四月',5:u'五月',6:u'六
 
 
 
-class DepartmentManager(Ui_MainWindow):
+class MemberClient(Ui_MainWindow):
     def __init__(self,parent=None,xmlpath=''):
         super(Ui_MainWindow,self).__init__(parent)
         self.setupUi(self)
         self.department = department.Department(xmlpath)
         self.dep = self.department.getDepName()
-        self.dep_line.setCurrentIndex(self.dep)
+        #self.dep_line.setCurrentIndex(self.dep)
         curDate = QtCore.QDate.currentDate()
         self.query_fromdate.setDate(curDate)
         self.query_todate.setDate(curDate)
         self.tree_project.setColumnCount(1)
         self.tree_project.setHeaderLabel(u'项目名称')
-        self.assigned_task.setHeaderLabel(u'任务列表')
+        #self.assigned_task.setHeaderLabel(u'任务列表')
         self.drawProjectTree()
-        self.drawMemberList()
+        #self.drawMemberList()
         
         #initialize query_member combobox
         memberIdList = self.department.allMembers.keys()
@@ -47,7 +47,7 @@ class DepartmentManager(Ui_MainWindow):
         for memberId in memberIdList:
             memberList.append((self.department.allMembers[memberId][u'姓名'],memberId))
         self.drawComboBox('query_member',memberList)
-        self.drawComboBox('combo_scheduleMemberFilter',memberList)
+        #self.drawComboBox('combo_scheduleMemberFilter',memberList)
         
         #initialize query_project combobox
         projectIdList = self.department.projectDict.keys()
@@ -56,7 +56,7 @@ class DepartmentManager(Ui_MainWindow):
         for projectId in projectIdList:
             projectList.append((self.department.projectDict[projectId][u'项目名称'],projectId))
         self.drawComboBox('query_project', projectList)
-        self.drawComboBox('combo_scheduleProjectFilter', projectList)
+        #self.drawComboBox('combo_scheduleProjectFilter', projectList)
 
         self.query_overtime_table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
         
@@ -88,33 +88,33 @@ class DepartmentManager(Ui_MainWindow):
                          
         
     def setConnections(self):
-        self.connect(self.dep_edit,QtCore.SIGNAL('clicked()'),self.editDepartment)
-        self.connect(self.dep_line,QtCore.SIGNAL('currentIndexChanged(int)'),self.confirmDepartment)
+        #self.connect(self.dep_edit,QtCore.SIGNAL('clicked()'),self.editDepartment)
+        #self.connect(self.dep_line,QtCore.SIGNAL('currentIndexChanged(int)'),self.confirmDepartment)
         self.connect(self.query_project,QtCore.SIGNAL('currentIndexChanged(int)'),self.showSubprojectComobox)
         self.connect(self.combo_scheduleProjectFilter,QtCore.SIGNAL('currentIndexChanged(int)'),self.showScheduleSubprojectComobox)
         self.connect(self.combo_scheduleSubprojectFilter,QtCore.SIGNAL('currentIndexChanged(int)'),self.drawEntryTree)
         self.connect(self.combo_scheduleMemberFilter,QtCore.SIGNAL('currentIndexChanged(int)'),self.drawEntryTree)
         self.connect(self.check_scheduleShowDetail,QtCore.SIGNAL('stateChanged(int)'),self.showScheduleDetail)
         
-        self.connect(self.btn_add_project,QtCore.SIGNAL('clicked()'),self.addProject)
-        self.connect(self.btn_add_subproject,QtCore.SIGNAL('clicked()'),self.addSubproject)
-        self.connect(self.btn_add_task,QtCore.SIGNAL('clicked()'),self.addTask)
-        self.connect(self.delete_2,QtCore.SIGNAL('clicked()'),self.delete)
-        self.connect(self.btn_save,QtCore.SIGNAL('clicked()'),self.saveTable)
-        self.connect(self.btn_exportExcel,QtCore.SIGNAL('clicked()'),self.exportProjectToExcel)
+        #self.connect(self.btn_add_project,QtCore.SIGNAL('clicked()'),self.addProject)
+        #self.connect(self.btn_add_subproject,QtCore.SIGNAL('clicked()'),self.addSubproject)
+        #self.connect(self.btn_add_task,QtCore.SIGNAL('clicked()'),self.addTask)
+        #self.connect(self.delete_2,QtCore.SIGNAL('clicked()'),self.delete)
+        #self.connect(self.btn_save,QtCore.SIGNAL('clicked()'),self.saveTable)
+        #self.connect(self.btn_exportExcel,QtCore.SIGNAL('clicked()'),self.exportProjectToExcel)
         self.connect(self.table_prodetail,QtCore.SIGNAL('myReturnPressed(int,int)'),self.tableItemChange)
-        self.connect(self.table_memberDaily,QtCore.SIGNAL('myReturnPressed(int,int)'),self.tableItemChange2)
-        self.connect(self.btn_addDaily,QtCore.SIGNAL('clicked()'),self.addNewDailyRow)
-        self.connect(self.btn_delDaily,QtCore.SIGNAL('clicked()'),self.delDaily)
+        #self.connect(self.table_memberDaily,QtCore.SIGNAL('myReturnPressed(int,int)'),self.tableItemChange2)
+        #self.connect(self.btn_addDaily,QtCore.SIGNAL('clicked()'),self.addNewDailyRow)
+        #self.connect(self.btn_delDaily,QtCore.SIGNAL('clicked()'),self.delDaily)
                 
-        self.connect(self.add_member_btn,QtCore.SIGNAL('clicked()'),self.addMember)
+
                 
         self.connect(self.query,QtCore.SIGNAL('clicked()'),self.showQueryResult)
         self.connect(self.save_excel,QtCore.SIGNAL('clicked()'),self.exportOvertimeToExcel)        
         self.tree_project.itemClicked.connect(self.showInfo)
         self.table_prodetail.itemDoubleClicked.connect(self.changeTableValue)
-        self.table_memberDaily.itemDoubleClicked.connect(self.changeTableValue2)
-        self.member_list.itemClicked.connect(self.showMemberTasks)
+        #self.table_memberDaily.itemDoubleClicked.connect(self.changeTableValue2)
+        #self.member_list.itemClicked.connect(self.showMemberTasks)
         
         self.scrollBar3.valueChanged.connect(self.synchronizeHorizontalScrollBar)
         self.scrollBar4.valueChanged.connect(self.synchronizeVerticalScrollBar1)
@@ -725,6 +725,7 @@ class DepartmentManager(Ui_MainWindow):
         tempDict[u'完成度'] = str(0)
         tempDict[u'任务状态'] = u'进行中'
         tempDict[u'参与人员'] = ''
+        tempDict[u'部门'] = depdict[self.dep]
         if project != '' and subproject != '' and task != '' and ok:
             success = self.department.addTask(tempDict,projectId,subprojectId)
             if success[0] == 1:
@@ -762,6 +763,8 @@ class DepartmentManager(Ui_MainWindow):
             success = self.department.addMember(memberDict)
             if success[0] == 1:
                 newItem = QtGui.QListWidgetItem(newMemberName)
+                data = QtCore.QVariant(success[1][u'编号'])
+                newItem.setData(QtCore.Qt.UserRole, data)
                 self.member_list.addItem(newItem)
                 self.member_name_line.setText('')
                 self.member_title_line.setText('')
@@ -862,7 +865,8 @@ class DepartmentManager(Ui_MainWindow):
         self.assigned_task.clear()
         self.table_memberDaily.setRowCount(0)
         memberId = unicode(item.data(QtCore.Qt.UserRole).toString())
-        taskList = self.department.allMembers[memberId][u'任务'].split(';')[:-1]
+        if self.department.allMembers[memberId].has_key(u'任务'):
+            taskList = self.department.allMembers[memberId][u'任务'].split(';')[:-1]
         memberTaskTree = {}            
         for task in taskList:
             projectId = task[0:3]
@@ -1916,6 +1920,6 @@ if __name__ == '__main__':
     path = sys.argv[0]
     cwd = os.path.dirname(path)
     xmlPath = cwd + '''\department.xml'''
-    manager = DepartmentManager(xmlpath=xmlPath)
+    manager = MemberClient(xmlpath=xmlPath)
     manager.show()
     app.exec_()

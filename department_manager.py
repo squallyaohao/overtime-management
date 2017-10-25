@@ -725,6 +725,7 @@ class DepartmentManager(Ui_MainWindow):
         tempDict[u'完成度'] = str(0)
         tempDict[u'任务状态'] = u'进行中'
         tempDict[u'参与人员'] = ''
+        tempDict[u'部门'] = depdict[self.dep]
         if project != '' and subproject != '' and task != '' and ok:
             success = self.department.addTask(tempDict,projectId,subprojectId)
             if success[0] == 1:
@@ -762,6 +763,8 @@ class DepartmentManager(Ui_MainWindow):
             success = self.department.addMember(memberDict)
             if success[0] == 1:
                 newItem = QtGui.QListWidgetItem(newMemberName)
+                data = QtCore.QVariant(success[1][u'编号'])
+                newItem.setData(QtCore.Qt.UserRole, data)
                 self.member_list.addItem(newItem)
                 self.member_name_line.setText('')
                 self.member_title_line.setText('')
@@ -862,7 +865,8 @@ class DepartmentManager(Ui_MainWindow):
         self.assigned_task.clear()
         self.table_memberDaily.setRowCount(0)
         memberId = unicode(item.data(QtCore.Qt.UserRole).toString())
-        taskList = self.department.allMembers[memberId][u'任务'].split(';')[:-1]
+        if self.department.allMembers[memberId].has_key(u'任务'):
+            taskList = self.department.allMembers[memberId][u'任务'].split(';')[:-1]
         memberTaskTree = {}            
         for task in taskList:
             projectId = task[0:3]

@@ -277,7 +277,8 @@ class Department():
     
     
     def getTaskFromeServer(self):
-        self.taskDict = self.queryServer(table='task', tabHeader=self.taskTabHeader)
+        con = {u'部门':depDict[self.depName]}
+        self.taskDict = self.queryServer2(table='task', columns=self.taskTabHeader,condition=con,tabHeader=self.taskTabHeader)
         return self.taskDict
 
     
@@ -292,10 +293,11 @@ class Department():
             self.dailyDict[memberId]={}
         if len(result) > 0:
             for row in result:
-                date = row[1]
-                daily = dict(zip(self.dailyTabHeader[2:], row[2:]))
-                daily[self.dailyTabHeader[1]] = date
-                self.dailyDict[row[0]][date] = daily    
+                if self.dailyDict.has_key(row[0]):
+                    date = row[1]
+                    daily = dict(zip(self.dailyTabHeader[2:], row[2:]))
+                    daily[self.dailyTabHeader[1]] = date
+                    self.dailyDict[row[0]][date] = daily    
                    
         cursor.close()
         conn.close()
@@ -426,6 +428,7 @@ class Department():
             success = self.tableInsert(table='member', varsdict=member)
             if success:
                 self.allMembers[memberId] = member
+                self.dailyDict[memberId]={}
                 print self.allMembers.keys()
                 return (1,member)
             else :
