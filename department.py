@@ -292,11 +292,13 @@ class Department():
         for memberId in self.allMembers:
             self.dailyDict[memberId]={}
         if len(result) > 0:
+            print self.dailyDict.keys()
             for row in result:
+                print row[0]
                 if self.dailyDict.has_key(row[0]):
-                    date = row[1]
-                    daily = dict(zip(self.dailyTabHeader[2:], row[2:]))
-                    daily[self.dailyTabHeader[1]] = date
+                    date = row[1].isoformat() 
+                    daily = dict(zip(self.dailyTabHeader[1:], row[1:]))
+                    #daily[self.dailyTabHeader[1]] = date
                     self.dailyDict[row[0]][date] = daily    
                    
         cursor.close()

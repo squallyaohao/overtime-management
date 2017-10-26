@@ -95,8 +95,6 @@ class NewTable(QTableWidget):
             self.myReturnPressed.emit(curIndex.row(),curIndex.column())
             
             
-
-    
     def adjustColumnWidth(self,row,col):
         pass
         

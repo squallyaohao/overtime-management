@@ -1165,7 +1165,7 @@ class DepartmentManager(Ui_MainWindow):
                 columnWidth = self.table_prodetail.columnWidth(j)
                 if columnWidth<contextWidth:
                     columnWidth = contextWidth                                   
-                if j==0 or col==u'完成度':
+                if j<=1 or col==u'完成度':
                     item.setFlags(QtCore.Qt.ItemIsEditable)
                 self.table_prodetail.setColumnWidth(j,columnWidth)
                 self.table_prodetail.columnsWidth.append(columnWidth)
@@ -1207,7 +1207,7 @@ class DepartmentManager(Ui_MainWindow):
                 if columnWidth<contextWidth:
                     columnWidth = contextWidth
                 self.table_prodetail.setColumnWidth(j,columnWidth)                                   
-                if j==0 or col==u'完成度':
+                if j<=2 or col==u'完成度':
                     item.setFlags(QtCore.Qt.ItemIsEditable)
                 self.table_prodetail.columnsWidth.append(columnWidth)
                 self.table_prodetail.setItem(i,j,item)
@@ -1249,7 +1249,7 @@ class DepartmentManager(Ui_MainWindow):
                 if columnWidth<contextWidth:
                     columnWidth = contextWidth
                 self.table_prodetail.setColumnWidth(j,columnWidth)                  
-                if j==0:
+                if j==0 or j==2 or j==3:
                     item.setFlags(QtCore.Qt.ItemIsEditable)
                 self.table_prodetail.columnsWidth.append(columnWidth)
                 self.table_prodetail.setItem(i,j,item)
@@ -1329,7 +1329,7 @@ class DepartmentManager(Ui_MainWindow):
         if sccess:
             date = unicode(self.table_memberDaily.item(row_index,0).text())
             self.department.dailyDict[memberId][date][tableHeader[col_index]]=value
-        self.countDaily()    
+        self.countDaily()
 
     def updateProgress(self,taskId):
         projectId = taskId[0:3]

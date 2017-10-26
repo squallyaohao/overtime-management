@@ -85,6 +85,11 @@ memberTabHeader = ['memberTabHeader',
                    (u'任务',u'4',u'text')]
  
 
+userTabHeader = ['user',
+                 (u'编号',u'0',u'varchar(10)'),
+                 (u'姓名',u'1',u'varchar(10)'),
+                 (u'部门',u'2',u'varchar(10)'),
+                 (u'计算机',u'3',u'varchar(20)')]
 
 
 overtime_varslist = ['overtime',

@@ -93,6 +93,7 @@ class Ui_dialog(QtGui.QDialog):
         self.date.setMinimumSize(QtCore.QSize(0, 25))
         self.date.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
         self.date.setObjectName(_fromUtf8("date"))
+        self.date.setCalendarPopup(True)
         self.horizontalLayout.addWidget(self.date)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
         self.horizontalLayout_5 = QtGui.QHBoxLayout()
