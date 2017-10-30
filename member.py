@@ -12,7 +12,7 @@ import MySQLdb as sql
 from db_structure import *
 
 
-depDict = {0:u'三维动画',1:u'投标动画',2:u'二维动画',3:u'平面设计',4:u'编导'}
+depDict = {1:u'三维动画',2:u'投标动画',3:u'二维动画',4:u'平面设计',5:u'编导'}
 memberstabHeader = [u'id',u'department',u'title'] 
 projecttabHeader = [u'start_date',u'finish_date',u'subprojects',u'description']
 subprojecttabHeader = [u'subproject_category',u'project',u'start_date',u'finish_date',u'tasks',u'subproject_description']
@@ -53,6 +53,7 @@ class Member():
         self.taskTabHeader = self.getTableHeader(headertable='taskTabHeader')
         self.memberTabHeader = self.getTableHeader(headertable='memberTabHeader')
         self.dailyTabHeader = self.getTableHeader(headertable='dailyTabHeader')
+        self.overtimeTabHeader = self.getTableHeader(headertable='overtimeTabHeader')
 
             
         self.getProjectsFromServer()
@@ -77,15 +78,15 @@ class Member():
     
     def connectToServer(self):
         pwd = os.getcwd()
-        print pwd
-        hostfile = os.path.dirname(pwd)+'\\hostname'
+        hostfile = pwd+'\\hostname'
+        print hostfile
         loginfile = open(hostfile,'r').read().split(' ')
         hostid = loginfile[0]
         database = loginfile[1]
         user = loginfile[2]
         pwd = loginfile[3]
         if hostid[:3] == codecs.BOM_UTF8:
-            hostid = hostid[3:] 
+            hostid = hostid[3:]
         conn = sql.connect(hostid,user,pwd,database,charset='utf8')
         cursor = conn.cursor()
         return (conn,cursor)
@@ -541,8 +542,7 @@ class Member():
             hostid = hostid[3:]
         conn = sql.connect(hostid,user,pwd,database,charset='utf8')
         cursor = conn.cursor()
-        query_condition = {'date':date,'name':self.memberName,'project':project,'subproject':subproject}
-        #query_condition = {'date':date,'name':member,'project':project}
+        query_condition = {u'日期':date,u'姓名':self.memberName,u'项目':project,u'展项':subproject}
         querystatement = mysql_utility.sqlQueryState(table,query_condition)
         print querystatement
         cursor.execute(querystatement)

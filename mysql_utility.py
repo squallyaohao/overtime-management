@@ -16,10 +16,10 @@ from db_structure import *
 #Utility fuctions
 #===================================================================================================
  
-hostname = 'localhost'
-db = 'myfirstdb'
+hostname = '162.16.100.101'
+db = 'andadb'
 user = 'root'
-pwd = '123456' 
+pwd = 'andaDB12345' 
 
 
 #tableList = [overtime_varslist,members_varslist,project_varlist,tasks_varslist,subproject_varslist]
@@ -140,28 +140,34 @@ def sqlCreateTableStatement(name='',varlist=[]):
 
 
 def initDatabase():
+    #===create header module table===
     conn = sql.connect(hostname,user,pwd,db,charset='utf8')
     cursor = conn.cursor()
-    #===create header module table===
-    #statement = sqlCreateTableStatement('proTabHeader',TableHeaderModule)
-    #cursor.execute(statement)
-    #conn.commit()
-    #statement = sqlCreateTableStatement('subproTabHeader',TableHeaderModule)
-    #cursor.execute(statement)
-    #conn.commit()
-    #statement = sqlCreateTableStatement('taskTabHeader',TableHeaderModule)
-    #cursor.execute(statement)
-    #conn.commit()
-    #statement = sqlCreateTableStatement('memberTabHeader',TableHeaderModule)
-    #cursor.execute(statement)
-    #conn.commit()
+
+    statement = sqlCreateTableStatement('proTabHeader',TableHeaderModule)
+    cursor.execute(statement)
+    conn.commit()
+    statement = sqlCreateTableStatement('subproTabHeader',TableHeaderModule)
+    cursor.execute(statement)
+    conn.commit()
+    statement = sqlCreateTableStatement('taskTabHeader',TableHeaderModule)
+    cursor.execute(statement)
+    conn.commit()
+    statement = sqlCreateTableStatement('memberTabHeader',TableHeaderModule)
+    cursor.execute(statement)
+    conn.commit()
     statement = sqlCreateTableStatement('dailyTabHeader',TableHeaderModule)
     cursor.execute(statement)
-    conn.commit()    
+    conn.commit()
+    statement = sqlCreateTableStatement('userTabHeader',TableHeaderModule)
+    cursor.execute(statement)
+    conn.commit()
+    statement = sqlCreateTableStatement('overtimeTabHeader',TableHeaderModule)
+    cursor.execute(statement)
+    conn.commit()       
     
     #===insert columns into header tables===
-    #for headertable in [proTabHeader,subproTabHeader,taskTabHeader,memberTabHeader,dailyTabHeader]:
-    for headertable in [dailyTabHeader]:
+    for headertable in [proTabHeader,subproTabHeader,taskTabHeader,memberTabHeader,dailyTabHeader,userTabHeader,overtimeTabHeader]:
         table = headertable[0]
         for column in headertable[1:]:
             statement = sqlInsertState1(table,column)
@@ -170,40 +176,56 @@ def initDatabase():
     
     
     #===create project table===
-    #varslist = []
-    #for data in proTabHeader[1:]:
-        #varslist.append([data[0],data[2]])
-    #statement = sqlCreateTableStatement('project', varslist)
-    #cursor.execute(statement)
-    #conn.commit()
+    varslist = []
+    for data in proTabHeader[1:]:
+        varslist.append([data[0],data[2]])
+    statement = sqlCreateTableStatement('project', varslist)
+    cursor.execute(statement)
+    conn.commit()
     
-    #varslist = []
-    #for data in subproTabHeader[1:]:
-        #varslist.append([data[0],data[2]])
-    #statement = sqlCreateTableStatement('subproject', varslist)
-    #cursor.execute(statement)
-    #conn.commit()    
+    varslist = []
+    for data in subproTabHeader[1:]:
+        varslist.append([data[0],data[2]])
+    statement = sqlCreateTableStatement('subproject', varslist)
+    cursor.execute(statement)
+    conn.commit()    
     
-    #varslist = []
-    #for data in taskTabHeader[1:]:
-        #varslist.append([data[0],data[2]])
-    #statement = sqlCreateTableStatement('task', varslist)
-    #cursor.execute(statement)
-    #conn.commit()
+    varslist = []
+    for data in taskTabHeader[1:]:
+        varslist.append([data[0],data[2]])
+    statement = sqlCreateTableStatement('task', varslist)
+    cursor.execute(statement)
+    conn.commit()
 
-    #varslist = []
-    #for data in memberTabHeader[1:]:
-        #varslist.append([data[0],data[2]])
-    #statement = sqlCreateTableStatement('member', varslist)
-    #cursor.execute(statement)
-    #conn.commit() 
+    varslist = []
+    for data in memberTabHeader[1:]:
+        varslist.append([data[0],data[2]])
+    statement = sqlCreateTableStatement('member', varslist)
+    cursor.execute(statement)
+    conn.commit() 
     
     varslist = []
     for data in dailyTabHeader[1:]:
         varslist.append([data[0],data[2]])
     statement = sqlCreateTableStatement('daily', varslist)
     cursor.execute(statement)
-    conn.commit()        
+    conn.commit()
+    
+    
+    varslist = []
+    for data in overtimeTabHeader[1:]:
+        varslist.append([data[0],data[2]])
+    statement = sqlCreateTableStatement('overtime', varslist)
+    cursor.execute(statement)
+    conn.commit()       
+       
+    varslist = []
+    for data in userTabHeader[1:]:
+        varslist.append([data[0],data[2]])
+    statement = sqlCreateTableStatement('user', varslist)
+    cursor.execute(statement)
+    conn.commit()          
+       
        
     cursor.close()
     conn.close()

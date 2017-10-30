@@ -5,9 +5,9 @@ import sys,os,os.path
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from ui_memberClient import Ui_MainWindow
-from ui_querytable import Ui_QueryTable
-import xml.etree.ElementInclude as ET
-import member 
+#from ui_querytable import Ui_QueryTable
+#import xml.etree.ElementInclude as ET
+import member
 import ui_newProjectDialog,ui_newSubprojectDialog,ui_newTaskDialog,ui_newDailyDialog
 import excelUtility
 import datetime
@@ -16,14 +16,14 @@ import random
 import datetime
 
 overtimetablehead = [u'日期',u'姓名',u'加班项目',u'加班展项',u'加班时长',u'加班餐',u'加班描述']
-depdict = {0:u'三维动画',1:u'投标动画',2:u'二维动画',3:u'平面设计',4:u'编导'}
+depDict = {1:u'三维动画',2:u'投标动画',3:u'二维动画',4:u'平面设计',5:u'编导'}
 category = {u'动画':0,u'游戏':1}
 monthDict = {1:u'一月',2:u'二月',3:u'三月',4:u'四月',5:u'五月',6:u'六月',7:u'七月',8:u'八月',9:u'九月',10:u'十月',11:u'十一月',12:u'十二月'}
 
 
 
 class MemberClient(Ui_MainWindow):
-    def __init__(self,parent=None,xmlpath=''):
+    def __init__(self,parent=None):
         super(Ui_MainWindow,self).__init__(parent)
         self.setupUi(self)
         self.member = member.Member()
@@ -84,10 +84,7 @@ class MemberClient(Ui_MainWindow):
         self.tabWidget.setCurrentIndex(0)
         self.tabWidget_2.setCurrentIndex(0)
         
-        
-
-
-                         
+                               
         
     def setConnections(self):
         #self.connect(self.dep_edit,QtCore.SIGNAL('clicked()'),self.editDepartment)
@@ -132,7 +129,7 @@ class MemberClient(Ui_MainWindow):
 
     def synchronizeHorizontalScrollBar(self,x):
         self.scrollBar1.setValue(x)
-        self.scrollBar2.setValue(x)    
+        self.scrollBar2.setValue(x)
         
 
     def synchronizeVerticalScrollBar1(self,y):
@@ -229,7 +226,7 @@ class MemberClient(Ui_MainWindow):
                 totalWidth = tableWidth
             
             labels = []
-            for i in range(len(Years)):                
+            for i in range(len(Years)):
                 year = Years[i]
                 firstDay = QtCore.QDate(year,1,1)
                 lastDay = QtCore.QDate(year,12,31)
@@ -250,7 +247,7 @@ class MemberClient(Ui_MainWindow):
                 columnWidth = daysInMonth*defaultWidth
                 self.period2_table.setColumnWidth(i,columnWidth)
                 labels.append(monthDict[month.month()])
-            self.period2_table.setHorizontalHeaderLabels(labels)            
+            self.period2_table.setHorizontalHeaderLabels(labels)
             self.schedule_table.setColumnWidth(0,totalWidth)
             
         if period == u'周':
@@ -718,7 +715,7 @@ class MemberClient(Ui_MainWindow):
         #tempDict[u'完成度'] = str(0)
         #tempDict[u'任务状态'] = u'进行中'
         #tempDict[u'参与人员'] = ''
-        #tempDict[u'部门'] = depdict[self.dep]
+        #tempDict[u'部门'] = depDict[self.dep]
         #if project != '' and subproject != '' and task != '' and ok:
             #success = self.member.addTask(tempDict,projectId,subprojectId)
             #if success[0] == 1:
@@ -752,7 +749,7 @@ class MemberClient(Ui_MainWindow):
             #memberDict = {}
             #memberDict[u'姓名'] = unicode(newMemberName)
             #memberDict[u'职务'] = unicode(newMemberTitle)
-            #memberDict[u'部门'] = depdict[self.dep]
+            #memberDict[u'部门'] = depDict[self.dep]
             #success = self.member.addMember(memberDict)
             #if success[0] == 1:
                 #newItem = QtGui.QListWidgetItem(newMemberName)
@@ -1968,7 +1965,7 @@ if __name__ == '__main__':
     app = QtGui.QApplication(sys.argv)
     path = sys.argv[0]
     cwd = os.path.dirname(path)
-    xmlPath = cwd + '''\department.xml'''
-    manager = MemberClient(xmlpath=xmlPath)
+    #xmlPath = cwd + '''\department.xml'''
+    manager = MemberClient()
     manager.show()
     app.exec_()

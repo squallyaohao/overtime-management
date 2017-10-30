@@ -3,15 +3,16 @@
 
 import sys
 import os,os.path
-import codecs
+from codecs import BOM_UTF8
 import xml.etree.cElementTree as ET
 import time,datetime
 import mysql_utility
 import MySQLdb as sql
 from db_structure import *
+import messageBox as mBox
 
 
-depDict = {0:u'三维动画',1:u'投标动画',2:u'二维动画',3:u'平面设计',4:u'编导'}
+depDict = {1:u'三维动画',2:u'投标动画',3:u'二维动画',4:u'平面设计',5:u'编导'}
 memberstabHeader = [u'id',u'department',u'title'] 
 projecttabHeader = [u'start_date',u'finish_date',u'subprojects',u'description']
 subprojecttabHeader = [u'subproject_category',u'project',u'start_date',u'finish_date',u'tasks',u'subproject_description']
@@ -31,13 +32,11 @@ def initXML(path):
 class Department(): 
     def __init__(self,*args):
         self.dataPath= ''
-        self.depName = ''
+        self.depName = 0
         self.memberList = set([])
         self.projectList = set([])
         if len(args)!=0 :
-            if len(args)>1:
-                print 'More than one argument has been passed!'
-            elif os.path.exists(args[0]) and os.path.getsize(args[0])>0 and os.path.splitext(args[0])[1]=='.xml':
+            if os.path.exists(args[0]) and os.path.getsize(args[0])>0 and os.path.splitext(args[0])[1]=='.xml':
                 self.dataPath = args[0]
                 xmltree = ET.parse(self.dataPath)
                 root = xmltree.getroot()
@@ -46,7 +45,7 @@ class Department():
                 try:
                     self.depName = int(root.get('depName').encode('utf-8'))
                 except AttributeError,e:
-                    self.depName = 0
+                    self.depName = 1
 
 
                 #loop all member and get their names
@@ -54,9 +53,7 @@ class Department():
                     for member in root.iter('member'):
                         name = member.get('name')
                         self.memberList.add(name.encode('utf-8'))
-                        print '成员名称：'.decode('utf-8') + name
                 except AttributeError,e:
-                    print e
                     self.memberList = []
                 
                 #loop all projects and get their names
@@ -64,25 +61,22 @@ class Department():
                     for project in root.iter('project'):
                         pro = project.get('project-name')
                         self.projectList.add(pro.encode('utf-8'))
-                        print '项目名称: '.decode('utf-8') + pro
                 except AttributeError,e:
-                    print e
                     self.projectList =[]
           
             elif os.path.exists(args[0]) and  os.path.splitext(args[0])[1]=='.xml' and os.path.getsize(args[0])==0:
                 self.dataPath= args[0]
-                self.depName = ''
+                self.depName = 1
                 self.memberList = set([])
                 self.projectList = set([])   
                 initXML(self.dataPath)
                 
             else:
                 self.dataPath= args[0]
-                self.depName = ''
+                self.depName = 1
                 self.memberList = set([])
                 self.projectList = set([])                 
                 initXML(args[0])
-                #print 'Invalid path passed!'
         else:
             print 'pleas pass the data file(*.xml)'
             
@@ -128,7 +122,7 @@ class Department():
         database = loginfile[1]
         user = loginfile[2]
         pwd = loginfile[3]
-        if hostid[:3] == codecs.BOM_UTF8:
+        if hostid[:3] == BOM_UTF8:
             hostid = hostid[3:] 
         conn = sql.connect(hostid,user,pwd,database,charset='utf8')
         cursor = conn.cursor()
@@ -194,7 +188,6 @@ class Department():
     def updateServer(self,table='',varsList=[],conditionsList=[]): 
         conn,cursor = self.connectToServer()
         update_statement = mysql_utility.sqlUpdateState(table, varsList,conditionsList)
-        #print update_statement
         cursor.execute(update_statement)
         conn.commit()
         cursor.close()
@@ -234,14 +227,7 @@ class Department():
         
         
     def deleteMember(self,name):
-        if name in self.memberList:
-            self.memberList.remove(name)
-        xmltree = ET.parse(self.dataPath)
-        memberlist = xmltree.getroot().find('MemberList')
-        for member in memberlist.findall('member'):
-            if member.get('name') == name.decode('utf-8'):
-                memberlist.remove(member)
-        xmltree.write(self.dataPath)
+        pass
         
     
     def getTableHeader(self,headertable=''):
@@ -292,11 +278,9 @@ class Department():
         for memberId in self.allMembers:
             self.dailyDict[memberId]={}
         if len(result) > 0:
-            print self.dailyDict.keys()
             for row in result:
-                print row[0]
                 if self.dailyDict.has_key(row[0]):
-                    date = row[1].isoformat() 
+                    date = row[1]
                     daily = dict(zip(self.dailyTabHeader[1:], row[1:]))
                     #daily[self.dailyTabHeader[1]] = date
                     self.dailyDict[row[0]][date] = daily    
@@ -380,6 +364,7 @@ class Department():
             return (3,project_vars)
 
 
+
     def addSubproject(self,subproject_vars={},projectId=''):
         ok = self.checkNotExist('subproject',{u'展项名称':subproject_vars[u'展项名称'],u'项目名称':subproject_vars[u'项目名称']})
         if ok:
@@ -395,6 +380,7 @@ class Department():
                 return (2,subproject_vars)
         else:
             return (3,subproject_vars)
+
 
 
     def addTask(self,task_vars={},projectId='',subprojectId=''):
@@ -413,6 +399,7 @@ class Department():
                 return (2,task_vars)
         else:
             return (3,task_vars)
+
         
     
     def addMember(self,member={}):
@@ -420,18 +407,22 @@ class Department():
         if ok:
             allmembers = self.queryServer(table='member', tabHeader=self.memberTabHeader)
             total = len(allmembers.keys())
-            memberId = '%04d'%(total+ 1)
+            memberId = '%03d%03d'%(self.depName,total+ 1)
             member[u'编号'] = memberId
             for key in self.memberTabHeader:
                 if member.has_key(key):
                     continue
                 else:
                     member[key] = ''
+            user = {}
+            user[u'编号'] = memberId
+            user[u'姓名'] = member[u'姓名']
+            user[u'部门'] = str(self.depName)
             success = self.tableInsert(table='member', varsdict=member)
+            self.tableInsert(table='user',varsdict=user)
             if success:
                 self.allMembers[memberId] = member
                 self.dailyDict[memberId]={}
-                print self.allMembers.keys()
                 return (1,member)
             else :
                 return (2,member)
@@ -552,7 +543,6 @@ class Department():
     def updateDaily(self,varsList=[],conditionList=[]):
         conn,cursor = self.connectToServer()
         statement = mysql_utility.sqlUpdateState(table='daily', varsList=varsList,conditionList=conditionList)
-        print statement
         cursor.execute(statement)
         conn.commit()
         cursor.close()
@@ -566,12 +556,11 @@ class Department():
         database = loginfile[1]
         user = loginfile[2]
         pwd = loginfile[3]
-        if hostid[:3] == codecs.BOM_UTF8:
+        if hostid[:3] == BOM_UTF8:
             hostid = hostid[3:]
         conn = sql.connect(hostid,user,pwd,database,charset='utf8')
         cursor = conn.cursor()
-        query_condition = {'date':date,'name':member,'project':project,'subproject':subproject}
-        #query_condition = {'date':date,'name':member,'project':project}
+        query_condition = {u'日期':date,u'姓名':member,u'项目':project,u'展项':subproject}
         querystatement = mysql_utility.sqlQueryState(table,query_condition)
         cursor.execute(querystatement)
         conn.commit()

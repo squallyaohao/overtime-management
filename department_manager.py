@@ -1,7 +1,7 @@
 #coding=utf-8
 #this file define the actual interface of the program and internal actions and slots
 
-import sys,os,os.path
+import sys,os.path
 from PyQt4 import QtCore
 from PyQt4 import QtGui
 from ui_department_manager4 import Ui_MainWindow
@@ -9,16 +9,15 @@ from ui_querytable import Ui_QueryTable
 import xml.etree.ElementInclude as ET
 import department as department
 import ui_newProjectDialog,ui_newSubprojectDialog,ui_newTaskDialog,ui_newDailyDialog
+import messageBox as mBox
 import member
-import pandas as pd
 import excelUtility
 import datetime
 from db_structure import *
-import random
 import datetime
 
 overtimetablehead = [u'日期',u'姓名',u'加班项目',u'加班展项',u'加班时长',u'加班餐',u'加班描述']
-depdict = {0:u'三维动画',1:u'投标动画',2:u'二维动画',3:u'平面设计',4:u'编导'}
+depDict = {1:u'三维动画',2:u'投标动画',3:u'二维动画',4:u'平面设计',5:u'编导'}
 category = {u'动画':0,u'游戏':1}
 monthDict = {1:u'一月',2:u'二月',3:u'三月',4:u'四月',5:u'五月',6:u'六月',7:u'七月',8:u'八月',9:u'九月',10:u'十月',11:u'十一月',12:u'十二月'}
 
@@ -30,7 +29,7 @@ class DepartmentManager(Ui_MainWindow):
         self.setupUi(self)
         self.department = department.Department(xmlpath)
         self.dep = self.department.getDepName()
-        self.dep_line.setCurrentIndex(self.dep)
+        self.dep_line.setCurrentIndex(self.dep-1)
         curDate = QtCore.QDate.currentDate()
         self.query_fromdate.setDate(curDate)
         self.query_todate.setDate(curDate)
@@ -75,7 +74,7 @@ class DepartmentManager(Ui_MainWindow):
         self.setUpTables()
         self.drawEntryTree()
         self.expandItem()
-        #self.collapsItem()        
+        #self.collapsItem()
         
         self.table_memberDaily.setTableName('daily')
         
@@ -127,7 +126,7 @@ class DepartmentManager(Ui_MainWindow):
 
     def synchronizeHorizontalScrollBar(self,x):
         self.scrollBar1.setValue(x)
-        self.scrollBar2.setValue(x)    
+        self.scrollBar2.setValue(x)
         
 
     def synchronizeVerticalScrollBar1(self,y):
@@ -645,9 +644,6 @@ class DepartmentManager(Ui_MainWindow):
                 widget.setShowDetial(show)
                 widget.repaint()
 
-            
-            
-        
 
         
     def editDepartment(self):
@@ -656,7 +652,7 @@ class DepartmentManager(Ui_MainWindow):
         
     def confirmDepartment(self):
         index = self.dep_line.currentIndex()
-        self.department.setDepName(index)
+        self.department.setDepName(index+1)
         self.dep_line.setEnabled(False)
         
     
@@ -679,9 +675,9 @@ class DepartmentManager(Ui_MainWindow):
                 self.query_project.addItem(success[1][u'项目名称'])
                 self.combo_scheduleProjectFilter.addItem(success[1][u'项目名称'])
             elif success[0] == 2:
-                print '添加项目失败'
+                mBox.Warning(u'添加项目失败', self)
             else :
-                print '该项目已存在'
+                mBox.Warning(u'该项目已存在', self)
             
 
 
@@ -711,9 +707,9 @@ class DepartmentManager(Ui_MainWindow):
                         itemIter = itemIter.__iadd__(1)
                 self.drawEntryTree()
             elif success[0] == 2:
-                print '添加展项失败'
-            else:
-                print '展项已存在'            
+                mBox.Warning(u'添加展项失败', self)
+            else :
+                mBox.Warning(u'该展项已存在', self)        
                     
             
                 
@@ -725,7 +721,7 @@ class DepartmentManager(Ui_MainWindow):
         tempDict[u'完成度'] = str(0)
         tempDict[u'任务状态'] = u'进行中'
         tempDict[u'参与人员'] = ''
-        tempDict[u'部门'] = depdict[self.dep]
+        tempDict[u'部门'] = depDict[self.dep]
         if project != '' and subproject != '' and task != '' and ok:
             success = self.department.addTask(tempDict,projectId,subprojectId)
             if success[0] == 1:
@@ -745,9 +741,9 @@ class DepartmentManager(Ui_MainWindow):
                         itemIter = itemIter.__iadd__(1)
                 self.drawEntryTree()
             elif success[0] == 2:
-                print '添加任务失败'
-            else:
-                print '任务已存在'
+                mBox.Warning(u'添加任务失败', self)
+            else :
+                mBox.Warning(u'该任务已存在', self)
                     
 
 
@@ -759,7 +755,7 @@ class DepartmentManager(Ui_MainWindow):
             memberDict = {}
             memberDict[u'姓名'] = unicode(newMemberName)
             memberDict[u'职务'] = unicode(newMemberTitle)
-            memberDict[u'部门'] = depdict[self.dep]
+            memberDict[u'部门'] = depDict[self.dep]
             success = self.department.addMember(memberDict)
             if success[0] == 1:
                 newItem = QtGui.QListWidgetItem(newMemberName)
@@ -771,10 +767,12 @@ class DepartmentManager(Ui_MainWindow):
                 self.drawMemberList
                 self.query_member.addItem(memberDict[u'姓名'])
                 self.combo_scheduleMemberFilter.addItem(memberDict[u'姓名'])
-            else :
-                print '添加成员失败'
+            elif success[0] == 3 :
+                mBox.Warning(u'添加成员失败,该成员已存在', self)
+            else:
+                mBox.Warning(u'添加成员失败', self)
         else:
-            print '该成员已存在'
+            mBox.Warning(u'添加成员失败', self)
 
         
     
@@ -984,7 +982,6 @@ class DepartmentManager(Ui_MainWindow):
         for j,key in enumerate(self.department.dailyTabHeader[1:]): 
             item = self.table_memberDaily.item(curRow,j)
             dailyDict[key] = unicode(item.text())
-        #print dailyDict
         success = self.department.delDaily(dailyDict)
         if success:
             self.table_memberDaily.removeRow(curRow)
@@ -1741,7 +1738,6 @@ class newDailyDialog(ui_newDailyDialog.Ui_dialog):
         memberId = unicode(newDaily.combo_name.itemData(index,QtCore.Qt.UserRole).toString())
         date = unicode(newDaily.date.date().toString('yyyy-MM-dd'))
         time  = unicode(str(newDaily.time.value()))
-        print time
         cate = unicode(newDaily.combo_category.currentText())
         comment = unicode(newDaily.comment.toPlainText())
         newDailyDict[u'编号'] = memberId
