@@ -39,7 +39,7 @@ class Member():
                 self.memberId = unicode(row[0])
                 self.memberName = unicode(row[1])
                 self.depName = int(row[2])
-        
+
         
             
         self.projectDict = {}
@@ -79,9 +79,9 @@ class Member():
     def connectToServer(self):
         pwd = os.getcwd()
         hostfile = pwd+'\\hostname'
-        print hostfile
         loginfile = open(hostfile,'r').read().split(' ')
         hostid = loginfile[0]
+        print hostid
         database = loginfile[1]
         user = loginfile[2]
         pwd = loginfile[3]
@@ -234,7 +234,7 @@ class Member():
     
     
     def getTaskFromeServer(self):
-        con = {u'部门':depDict[self.depName]}
+        con = {u'部门':depDict[1]}
         self.taskDict = self.queryServer2(table='task', columns=self.taskTabHeader,condition=con,tabHeader=self.taskTabHeader)
         return self.taskDict
 
@@ -507,7 +507,6 @@ class Member():
     def updateDaily(self,varsList=[],conditionList=[]):
         conn,cursor = self.connectToServer()
         statement = mysql_utility.sqlUpdateState(table='daily', varsList=varsList,conditionList=conditionList)
-        print statement
         cursor.execute(statement)
         conn.commit()
         cursor.close()
@@ -515,9 +514,19 @@ class Member():
         return 1         
 
 
+    def updateOvertime(self,varsList=[],conditionList=[]):
+        conn,cursor = self.connectToServer()
+        statement = mysql_utility.sqlUpdateState(table='overtime', varsList=varsList,conditionList=conditionList)
+        cursor.execute(statement)
+        conn.commit()
+        cursor.close()
+        conn.close()
+        return 1   
+
+
     def applyOvertime(self,table='',varsList=[]):
         conn,cursor = self.connectToServer()
-        query_statement = "select * from overtime where date='" + varsList[0] + "' and name='" + varsList[1] +"';"
+        query_statement = u"select * from overtime where 日期='" + varsList[0] + u"' and 姓名='" + varsList[1] +"';"
         cursor.execute(query_statement)
         conn.commit()
         result = cursor.fetchall()
@@ -540,11 +549,11 @@ class Member():
         pwd = loginfile[3]
         if hostid[:3] == codecs.BOM_UTF8:
             hostid = hostid[3:]
+        #hostid = '162.16.40.181'
         conn = sql.connect(hostid,user,pwd,database,charset='utf8')
         cursor = conn.cursor()
         query_condition = {u'日期':date,u'姓名':self.memberName,u'项目':project,u'展项':subproject}
         querystatement = mysql_utility.sqlQueryState(table,query_condition)
-        print querystatement
         cursor.execute(querystatement)
         conn.commit()
         result = cursor.fetchall()

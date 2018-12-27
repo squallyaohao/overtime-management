@@ -71,7 +71,7 @@ class NewTable(QTableWidget):
                     item.setTextAlignment(Qt.AlignHCenter|Qt.AlignVCenter)
                     self.setItem(curIndex.row(), curIndex.column(), item)
                     self.setRowHeight(curIndex.row(),30)
-                    self.setColumnWidth(curIndex.column(),self.columnsWidth[curIndex.column()])                    
+                    #self.setColumnWidth(curIndex.column(),self.columnsWidth[curIndex.column()])                    
                 elif isinstance(curWidget,QLineEdit):
                     value = curWidget.text()
                     font = curWidget.font()

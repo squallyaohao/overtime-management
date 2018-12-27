@@ -4,11 +4,12 @@
 import sys,os,os.path
 from PyQt4 import QtCore
 from PyQt4 import QtGui
-from ui_memberClient import Ui_MainWindow
+from ui_memberClient2 import Ui_MainWindow
 #from ui_querytable import Ui_QueryTable
 #import xml.etree.ElementInclude as ET
 import member
 import ui_newProjectDialog,ui_newSubprojectDialog,ui_newTaskDialog,ui_newDailyDialog
+import messageBox as mBox
 import excelUtility
 import datetime
 from db_structure import *
@@ -19,6 +20,7 @@ overtimetablehead = [u'日期',u'姓名',u'加班项目',u'加班展项',u'加�
 depDict = {1:u'三维动画',2:u'投标动画',3:u'二维动画',4:u'平面设计',5:u'编导'}
 category = {u'动画':0,u'游戏':1}
 monthDict = {1:u'一月',2:u'二月',3:u'三月',4:u'四月',5:u'五月',6:u'六月',7:u'七月',8:u'八月',9:u'九月',10:u'十月',11:u'十一月',12:u'十二月'}
+stateColorDict = {0:QtGui.QColor(255,76,80,150),1:QtGui.QColor(255,240,0,150),2:QtGui.QColor(152,152,152,150),3:QtGui.QColor(204,86,253,150),4:QtGui.QColor(0,204,255,150),5:QtGui.QColor(0,252,0,150)}
 
 
 
@@ -29,12 +31,13 @@ class MemberClient(Ui_MainWindow):
         self.member = member.Member()
         self.dep = self.member.getDepName()
         self.memberName = self.member.getMemberName()
-        self.line_welcom.setText(u'你好，'+self.memberName)
+        self.memberId = self.member.getMemberId()
+        self.line_welcom.setText(u'哈喽，'+self.memberName)
         #self.dep_line.setCurrentIndex(self.dep)
-        curDate = QtCore.QDate.currentDate()
-        self.apply_date.setDate(curDate)
-        self.query_fromdate.setDate(curDate)
-        self.query_todate.setDate(curDate)
+        #curDate = QtCore.QDate.currentDate()
+        #self.apply_date.setDate(curDate)
+        #self.query_fromdate.setDate(curDate)
+        #self.query_todate.setDate(curDate)
         self.tree_project.setColumnCount(1)
         self.tree_project.setHeaderLabel(u'项目名称')
         #self.assigned_task.setHeaderLabel(u'任务列表')
@@ -47,7 +50,6 @@ class MemberClient(Ui_MainWindow):
         memberList = []
         for memberId in memberIdList:
             memberList.append((self.member.allMembers[memberId][u'姓名'],memberId))
-        #self.drawComboBox('query_member',memberList)
         self.drawComboBox('combo_scheduleMemberFilter',memberList)
         
         #initialize query_project combobox
@@ -56,14 +58,8 @@ class MemberClient(Ui_MainWindow):
         projectList = []
         for projectId in projectIdList:
             projectList.append((self.member.projectDict[projectId][u'项目名称'],projectId))
-        self.drawComboBox('query_project', projectList)
-        self.drawComboBox('apply_project', projectList)
         self.drawComboBox('combo_scheduleProjectFilter', projectList)
 
-        self.query_overtime_table.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
-        
-        #self.table_prodetail.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        #self.table_prodetail.customContextMenuRequested.connect(self.showContextMenu)
         
 
         self.scrollBar1 = self.period1_table.horizontalScrollBar()
@@ -87,36 +83,25 @@ class MemberClient(Ui_MainWindow):
                                
         
     def setConnections(self):
-        #self.connect(self.dep_edit,QtCore.SIGNAL('clicked()'),self.editDepartment)
-        #self.connect(self.dep_line,QtCore.SIGNAL('currentIndexChanged(int)'),self.confirmDepartment)
-        self.connect(self.query_project,QtCore.SIGNAL('currentIndexChanged(int)'),self.showSubprojectComobox)
-        self.connect(self.apply_project,QtCore.SIGNAL('currentIndexChanged(int)'),self.showSubprojectComobox2)
+        #self.connect(self.query_project,QtCore.SIGNAL('currentIndexChanged(int)'),self.showSubprojectComobox)
+        #self.connect(self.apply_project,QtCore.SIGNAL('currentIndexChanged(int)'),self.showSubprojectComobox2)
         self.connect(self.combo_scheduleProjectFilter,QtCore.SIGNAL('currentIndexChanged(int)'),self.showScheduleSubprojectComobox)
         self.connect(self.combo_scheduleSubprojectFilter,QtCore.SIGNAL('currentIndexChanged(int)'),self.drawEntryTree)
         self.connect(self.combo_scheduleMemberFilter,QtCore.SIGNAL('currentIndexChanged(int)'),self.drawEntryTree)
         self.connect(self.check_scheduleShowDetail,QtCore.SIGNAL('stateChanged(int)'),self.showScheduleDetail)
-
-        
-        #self.connect(self.btn_add_project,QtCore.SIGNAL('clicked()'),self.addProject)
-        #self.connect(self.btn_add_subproject,QtCore.SIGNAL('clicked()'),self.addSubproject)
-        #self.connect(self.btn_add_task,QtCore.SIGNAL('clicked()'),self.addTask)
-        #self.connect(self.delete_2,QtCore.SIGNAL('clicked()'),self.delete)
-        #self.connect(self.btn_save,QtCore.SIGNAL('clicked()'),self.saveTable)
-        #self.connect(self.btn_exportExcel,QtCore.SIGNAL('clicked()'),self.exportProjectToExcel)
         self.connect(self.table_prodetail,QtCore.SIGNAL('myReturnPressed(int,int)'),self.tableItemChange)
-        #self.connect(self.table_memberDaily,QtCore.SIGNAL('myReturnPressed(int,int)'),self.tableItemChange2)
-        #self.connect(self.btn_addDaily,QtCore.SIGNAL('clicked()'),self.addNewDailyRow)
-        #self.connect(self.btn_delDaily,QtCore.SIGNAL('clicked()'),self.delDaily)
+
                 
 
-        self.connect(self.apply_overtime,QtCore.SIGNAL('clicked()'),self.applyForOvertime)
-        self.connect(self.query,QtCore.SIGNAL('clicked()'),self.queryOvertime)                
-        self.connect(self.save_excel,QtCore.SIGNAL('clicked()'),self.exportOvertimeToExcel)        
+        #self.connect(self.apply_overtime,QtCore.SIGNAL('clicked()'),self.applyForOvertime)
+        #self.connect(self.query,QtCore.SIGNAL('clicked()'),self.queryOvertime)
+        #self.connect(self.save_excel,QtCore.SIGNAL('clicked()'),self.exportOvertimeToExcel)
         self.tree_project.itemClicked.connect(self.showInfo)
-        #self.table_prodetail.itemDoubleClicked.connect(self.changeTableValue)
-        #self.table_memberDaily.itemDoubleClicked.connect(self.changeTableValue2)
-        self.query_overtime_table.itemDoubleClicked.connect(self.changeTableValue)
-        #self.member_list.itemClicked.connect(self.showMemberTasks)
+        self.table_prodetail.itemClicked.connect(self.prodetailItemClicked)
+        self.table_prodetail.itemDoubleClicked.connect(self.changeTableValue)
+        self.connect(self.table_prodetail,QtCore.SIGNAL('myReturnPressed(int,int)'),self.tableItemChange)
+        #self.query_overtime_table.itemDoubleClicked.connect(self.changeTableValue3)
+        #self.connect(self.query_overtime_table,QtCore.SIGNAL('myReturnPressed(int,int)'),self.tableItemChange3)
         
         self.scrollBar3.valueChanged.connect(self.synchronizeHorizontalScrollBar)
         self.scrollBar4.valueChanged.connect(self.synchronizeVerticalScrollBar1)
@@ -348,15 +333,15 @@ class MemberClient(Ui_MainWindow):
 
    
     def drawNullItem(self,row_index):
-       currentDate = QtCore.QDate.currentDate()
-       daysToToday = self.left_date.daysTo(currentDate)
-       totalDays = self.left_date.daysTo(self.right_date)
-       cur_pos = daysToToday*1.0/totalDays
-       cellWidth = self.schedule_table.columnWidth(0)
-       rowHeight = self.schedule_table.rowHeight(0)
-       rect = QtCore.QRect(0,0,cellWidth,rowHeight)
-       item = nullItem(rect,cur_pos)
-       self.schedule_table.setCellWidget(row_index,0,item)
+        currentDate = QtCore.QDate.currentDate()
+        daysToToday = self.left_date.daysTo(currentDate)
+        totalDays = self.left_date.daysTo(self.right_date)
+        cur_pos = daysToToday*1.0/totalDays
+        cellWidth = self.schedule_table.columnWidth(0)
+        rowHeight = self.schedule_table.rowHeight(0)
+        rect = QtCore.QRect(0,0,cellWidth,rowHeight)
+        item = nullItem(rect,cur_pos)
+        self.schedule_table.setCellWidget(row_index,0,item)
     
     
     def drawSchedule(self):
@@ -380,25 +365,34 @@ class MemberClient(Ui_MainWindow):
                 end_date = self.member.projectDict[Id][u'结束时间']
                 progress = float(self.member.projectDict[Id][u'完成度'])
                 status = self.member.projectDict[Id][u'项目状态']
-                detail = {}
-                detail[u'项目说明'] = unicode(self.member.projectDict[Id][u'项目说明'])
+                detail = []
+                detail.append((u'起始时间',unicode(self.member.projectDict[Id][u'起始时间'])))
+                detail.append((u'结束时间',unicode(self.member.projectDict[Id][u'结束时间'])))
+                detail.append((u'项目状态',unicode(self.member.projectDict[Id][u'项目状态'])))
+                detail.append((u'项目说明',unicode(self.member.projectDict[Id][u'项目说明'])))
             elif level == 2:
                 subproject = self.member.subprojectDict[Id]
                 start_date = self.member.subprojectDict[Id][u'起始时间']
                 end_date = self.member.subprojectDict[Id][u'结束时间']
                 progress = float(self.member.subprojectDict[Id][u'完成度'])
                 status = self.member.subprojectDict[Id][u'展项状态']
-                detail = {}
-                detail[u'展项说明'] = unicode(self.member.subprojectDict[Id][u'展项说明'])
+                detail = []
+                detail.append((u'起始时间',unicode(self.member.subprojectDict[Id][u'起始时间'])))
+                detail.append((u'结束时间',unicode(self.member.subprojectDict[Id][u'结束时间'])))
+                detail.append((u'展项状态',unicode(self.member.subprojectDict[Id][u'展项状态'])))
+                detail.append((u'展项说明',unicode(self.member.subprojectDict[Id][u'展项说明'])))
             elif level == 3:
                 task = self.member.taskDict[Id]
                 start_date = self.member.taskDict[Id][u'起始时间']
                 end_date = self.member.taskDict[Id][u'结束时间']
                 progress = float(self.member.taskDict[Id][u'完成度'])
                 status = self.member.taskDict[Id][u'任务状态']
-                detail = {}
-                detail[u'参与人员'] = unicode(self.member.taskDict[Id][u'参与人员'])
-                detail[u'任务说明'] = unicode(self.member.taskDict[Id][u'任务说明'])
+                detail = []
+                detail.append((u'起始时间',unicode(self.member.taskDict[Id][u'起始时间'])))
+                detail.append((u'结束时间',unicode(self.member.taskDict[Id][u'结束时间'])))
+                detail.append((u'参与人员', unicode(self.member.taskDict[Id][u'参与人员'])))
+                detail.append((u'任务状态',unicode(self.member.taskDict[Id][u'任务状态'])))
+                detail.append((u'任务说明',unicode(self.member.taskDict[Id][u'任务说明'])))
             else:
                 self.drawNullItem(row_index)
                 iterator = iterator.__iadd__(1)
@@ -494,12 +488,8 @@ class MemberClient(Ui_MainWindow):
         else:
             index = self.combo_scheduleMemberFilter.currentIndex()
             memberID = unicode(self.combo_scheduleMemberFilter.itemData(index).toString())
-            taskList = self.member.allMembers[memberID][u'任务'].split(';')[:-1]
-            index = self.combo_scheduleProjectFilter.currentIndex()
-            projectId = unicode(self.combo_scheduleProjectFilter.itemData(index).toString())
-            index = self.combo_scheduleSubprojectFilter.currentIndex()
-            subprojectId = unicode(self.combo_scheduleSubprojectFilter.itemData(index).toString())                
-            memberTaskTree = {}            
+            taskList = self.member.allMembers[memberID][u'任务'].split(';')[:-1]             
+            memberTaskTree = {}
             for task in taskList:
                 projectId = task[0:3]
                 subproId = task[0:6]
@@ -508,8 +498,13 @@ class MemberClient(Ui_MainWindow):
                 if not memberTaskTree[projectId].has_key(subproId):
                     memberTaskTree[projectId][subproId]=[]
                 memberTaskTree[projectId][subproId].append(task)
+            print memberTaskTree
 
             if projectFilter != QtCore.QString('*') and projectFilter != '':
+                index = self.combo_scheduleProjectFilter.currentIndex()
+                projectId = unicode(self.combo_scheduleProjectFilter.itemData(index).toString())
+                index = self.combo_scheduleSubprojectFilter.currentIndex()
+                subprojectId = unicode(self.combo_scheduleSubprojectFilter.itemData(index).toString())
                 if not memberTaskTree.has_key(projectId):
                     memberTaskTree = {}
                 elif subprojectFilter != QtCore.QString('*') and subprojectFilter != '':
@@ -911,6 +906,16 @@ class MemberClient(Ui_MainWindow):
             #text = text + str(statistics[key]) + u'小时  '
         #self.statistics.setText(text)
          
+
+    def countOvertime(self):
+        row = self.query_overtime_table.rowCount()
+        total = 0
+        for i in range(row):
+            total = total + float(self.query_overtime_table.item(i,4).text())
+        text = u'加班总时长：' + str(total) + u'小时'
+        self.overtime_statistic.setText(text)
+        
+
                    
 
     #def showMemberDaily(self):
@@ -1109,21 +1114,34 @@ class MemberClient(Ui_MainWindow):
 
 
                 
+    #def showInfo(self,item):
+        #level = item.getLevel()
+        #if level == 0:
+            #self.showProjectInfo()
+        #elif level == 1:
+            #projectId = item.getId()
+            #self.showSubprojectInfo(projectId)
+        #elif level == 2:
+            #subprojectId = item.getId()
+            #self.showTaskInfo(subprojectId)
+
+
     def showInfo(self,item):
         level = item.getLevel()
         if level == 0:
-            self.showProjectInfo()
+            self.showAllProjectInfo()
         elif level == 1:
             projectId = item.getId()
-            self.showSubprojectInfo(projectId)
+            self.showProjectInfo(projectId)
         elif level == 2:
             subprojectId = item.getId()
-            self.showTaskInfo(subprojectId)
+            self.showSubprojectInfo(subprojectId)
+        elif level == 3:
+            taskId = item.getId()
+            self.showTaskInfo(taskId)
 
 
-
-                
-    def showProjectInfo(self):
+    def showAllProjectInfo(self):
         self.table_prodetail.setRowCount(0)
         self.table_prodetail.setColumnCount(0)        
         self.label_tables.setText(u'项目详情')
@@ -1137,10 +1155,24 @@ class MemberClient(Ui_MainWindow):
         projectList = self.member.projectDict.keys()
         projectList.sort()
         for i,row in enumerate(projectList):
+            projectState = self.member.projectDict[row][u'项目状态']
+            if projectState == u'等待':
+                color = stateColorDict[0]
+            elif projectState == u'进行中':
+                color = stateColorDict[1]
+            elif projectState == u'暂停':
+                color = stateColorDict[2]
+            elif projectState == u'待审核':
+                color = stateColorDict[3]
+            elif projectState == u'通过':
+                color = stateColorDict[4]
+            elif projectState == u'已完成':
+                color = stateColorDict[5]         
             for j,col in enumerate(self.member.proTabHeader):
                 text = unicode(self.member.projectDict[row][col])
                 item = QtGui.QTableWidgetItem(text)
-                item.setTextAlignment(QtCore.Qt.AlignHCenter)
+                item.setTextAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
+                item.setBackgroundColor(color)
                 font = item.font()
                 size1 = font.pixelSize()
                 size2 = font.pointSize()
@@ -1155,18 +1187,56 @@ class MemberClient(Ui_MainWindow):
                 columnWidth = self.table_prodetail.columnWidth(j)
                 if columnWidth<contextWidth:
                     columnWidth = contextWidth                                   
-                item.setFlags(QtCore.Qt.ItemIsEditable)
+                item.setFlags(QtCore.Qt.ItemIsEditable|QtCore.Qt.ItemIsSelectable)
                 self.table_prodetail.setColumnWidth(j,columnWidth)
                 self.table_prodetail.columnsWidth.append(columnWidth)
                 self.table_prodetail.setItem(i,j,item)
     
-    
-    
-    def showSubprojectInfo(self,projectId):
+
+                
+    #def showAllProjectInfo(self):
+        #self.table_prodetail.setRowCount(0)
+        #self.table_prodetail.setColumnCount(0)        
+        #self.label_tables.setText(u'项目详情')
+        #self.table_prodetail.clear()
+        #self.table_prodetail.setTextElideMode(QtCore.Qt.ElideNone)
+        #rows = len(self.member.projectDict.keys())
+        #self.table_prodetail.setTableName(u'project')
+        #self.table_prodetail.setRowCount(rows)
+        #self.table_prodetail.setColumnCount(len(self.member.proTabHeader))
+        #self.table_prodetail.setHorizontalHeaderLabels(self.member.proTabHeader)
+        #projectList = self.member.projectDict.keys()
+        #projectList.sort()
+        #for i,row in enumerate(projectList):
+            #for j,col in enumerate(self.member.proTabHeader):
+                #text = unicode(self.member.projectDict[row][col])
+                #item = QtGui.QTableWidgetItem(text)
+                #item.setTextAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
+                #font = item.font()
+                #size1 = font.pixelSize()
+                #size2 = font.pointSize()
+                #if size1>size2:
+                    #size = size1
+                    #letterSpacing = font.letterSpacing()
+                #else:
+                    #dpi = self.logicalDpiX()
+                    #size = size2 * dpi / 72
+                    #letterSpacing = font.wordSpacing()
+                #contextWidth = len(text)*size + (len(text)-1)*letterSpacing + 20
+                #columnWidth = self.table_prodetail.columnWidth(j)
+                #if columnWidth<contextWidth:
+                    #columnWidth = contextWidth                                   
+                #item.setFlags(QtCore.Qt.ItemIsEditable)
+                #self.table_prodetail.setColumnWidth(j,columnWidth)
+                #self.table_prodetail.columnsWidth.append(columnWidth)
+                #self.table_prodetail.setItem(i,j,item)
+
+
+    def showProjectInfo(self,projectId):
         self.table_prodetail.setRowCount(0)
         self.table_prodetail.setColumnCount(0)        
         projectName = self.member.projectDict[projectId][u'项目名称']
-        self.label_tables.setText(projectName +u' 展项详情: ')
+        self.label_tables.setText(projectName +u' 展项详情')
         self.table_prodetail.clear()
         subprojectIdList = self.member.hierTree[projectId].keys()
         subprojectIdList.sort()
@@ -1177,10 +1247,24 @@ class MemberClient(Ui_MainWindow):
         self.table_prodetail.setColumnCount(len(self.member.subproTabHeader))
         self.table_prodetail.setHorizontalHeaderLabels(self.member.subproTabHeader)        
         for i,row in enumerate(subprojectIdList):
+            subprojectState = self.member.subprojectDict[row][u'展项状态']
+            if subprojectState == u'等待':
+                color = stateColorDict[0]
+            elif subprojectState == u'进行中':
+                color = stateColorDict[1]
+            elif subprojectState == u'暂停':
+                color = stateColorDict[2]
+            elif subprojectState == u'待审核':
+                color = stateColorDict[3]
+            elif subprojectState == u'通过':
+                color = stateColorDict[4]
+            elif subprojectState == u'已完成':
+                color = stateColorDict[5]                
             for j,col in enumerate(self.member.subproTabHeader):
                 text = unicode(self.member.subprojectDict[row][col])
                 item = QtGui.QTableWidgetItem(text)
-                item.setTextAlignment(QtCore.Qt.AlignHCenter)
+                item.setBackgroundColor(color)
+                item.setTextAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
                 font = item.font()
                 size1 = font.pixelSize()
                 size2 = font.pointSize()
@@ -1196,19 +1280,107 @@ class MemberClient(Ui_MainWindow):
                 if columnWidth<contextWidth:
                     columnWidth = contextWidth
                 self.table_prodetail.setColumnWidth(j,columnWidth)                                   
-                item.setFlags(QtCore.Qt.ItemIsEditable)
+                item.setFlags(QtCore.Qt.ItemIsEditable|QtCore.Qt.ItemIsSelectable)
                 self.table_prodetail.columnsWidth.append(columnWidth)
-                self.table_prodetail.setItem(i,j,item)
- 
- 
-
-    def showTaskInfo(self,subprojectId):
+                self.table_prodetail.setItem(i,j,item) 
+    
+    def showSubprojectInfo(self,subprojectId):
         self.table_prodetail.setRowCount(0)
         self.table_prodetail.setColumnCount(0)
         subprojectName = self.member.subprojectDict[subprojectId][u'展项名称']
-        self.label_tables.setText(subprojectName + u' 任务详情: ')
+        self.label_tables.setText(subprojectName + u' 展项详情')
         self.table_prodetail.clear()
-        projectId = subprojectId[0:3]
+        self.table_prodetail.setTextElideMode(QtCore.Qt.ElideNone)
+        self.table_prodetail.setTableName(u'subproject')
+        self.table_prodetail.setRowCount(1)
+        self.table_prodetail.setColumnCount(len(self.member.subproTabHeader))
+        self.table_prodetail.setHorizontalHeaderLabels(self.member.subproTabHeader)
+        
+        subprojectState = self.member.subprojectDict[subprojectId][u'展项状态']
+        if subprojectState == u'等待':
+            color = stateColorDict[0]
+        elif subprojectState == u'进行中':
+            color = stateColorDict[1]
+        elif subprojectState == u'暂停':
+            color = stateColorDict[2]
+        elif subprojectState == u'待审核':
+            color = stateColorDict[3]
+        elif subprojectState == u'通过':
+            color = stateColorDict[4]
+        elif subprojectState == u'已完成':
+            color = stateColorDict[5]   
+            
+        for j,col in enumerate(self.member.subproTabHeader):
+            text = unicode(self.member.subprojectDict[subprojectId][col])
+            item = QtGui.QTableWidgetItem(text)
+            item.setBackgroundColor(color)
+            item.setTextAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
+            font = item.font()
+            size1 = font.pixelSize()
+            size2 = font.pointSize()
+            if size1>size2:
+                size = size1
+                letterSpacing = font.letterSpacing()
+            else:
+                dpi = self.logicalDpiX()
+                size = size2 * dpi / 72
+                letterSpacing = font.wordSpacing()
+            contextWidth = len(text)*size + (len(text)-1)*letterSpacing + 20
+            columnWidth = self.table_prodetail.columnWidth(j)
+            if columnWidth<contextWidth:
+                columnWidth = contextWidth
+            self.table_prodetail.setColumnWidth(j,columnWidth)                  
+            item.setFlags(QtCore.Qt.ItemIsEditable|QtCore.Qt.ItemIsSelectable)
+            self.table_prodetail.columnsWidth.append(columnWidth)
+            self.table_prodetail.setItem(0,j,item)    
+    
+    #def showSubprojectInfo(self,projectId):
+        #self.table_prodetail.setRowCount(0)
+        #self.table_prodetail.setColumnCount(0)        
+        #projectName = self.member.projectDict[projectId][u'项目名称']
+        #self.label_tables.setText(projectName +u' 展项详情: ')
+        #self.table_prodetail.clear()
+        #subprojectIdList = self.member.hierTree[projectId].keys()
+        #subprojectIdList.sort()
+        #rows = len(subprojectIdList)
+        #self.table_prodetail.setTextElideMode(QtCore.Qt.ElideNone)
+        #self.table_prodetail.setTableName(u'subproject')
+        #self.table_prodetail.setRowCount(rows)
+        #self.table_prodetail.setColumnCount(len(self.member.subproTabHeader))
+        #self.table_prodetail.setHorizontalHeaderLabels(self.member.subproTabHeader)        
+        #for i,row in enumerate(subprojectIdList):
+            #for j,col in enumerate(self.member.subproTabHeader):
+                #text = unicode(self.member.subprojectDict[row][col])
+                #item = QtGui.QTableWidgetItem(text)
+                #item.setTextAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
+                #font = item.font()
+                #size1 = font.pixelSize()
+                #size2 = font.pointSize()
+                #if size1>size2:
+                    #size = size1
+                    #letterSpacing = font.letterSpacing()
+                #else:
+                    #dpi = self.logicalDpiX()
+                    #size = size2 * dpi / 72
+                    #letterSpacing = font.wordSpacing()
+                #contextWidth = len(text)*size + (len(text)-1)*letterSpacing + 20
+                #columnWidth = self.table_prodetail.columnWidth(j)
+                #if columnWidth<contextWidth:
+                    #columnWidth = contextWidth
+                #self.table_prodetail.setColumnWidth(j,columnWidth)                                   
+                #item.setFlags(QtCore.Qt.ItemIsEditable)
+                #self.table_prodetail.columnsWidth.append(columnWidth)
+                #self.table_prodetail.setItem(i,j,item)
+ 
+
+    def showTaskInfo(self,taskId):
+        self.table_prodetail.setRowCount(0)
+        self.table_prodetail.setColumnCount(0)
+        projectId = taskId[0:3]
+        subprojectId = taskId[0:6]
+        subprojectName = self.member.subprojectDict[subprojectId][u'展项名称']
+        self.label_tables.setText(subprojectName + u' 任务详情 ')
+        self.table_prodetail.clear()
         taskIdList = self.member.hierTree[projectId][subprojectId]
         taskIdList.sort()
         rows = len(taskIdList)
@@ -1218,10 +1390,24 @@ class MemberClient(Ui_MainWindow):
         self.table_prodetail.setColumnCount(len(self.member.taskTabHeader))
         self.table_prodetail.setHorizontalHeaderLabels(self.member.taskTabHeader)
         for i,row in enumerate(taskIdList):
+            taskState = self.member.taskDict[row][u'任务状态']
+            if taskState == u'等待':
+                color = stateColorDict[0]
+            elif taskState == u'进行中':
+                color = stateColorDict[1]
+            elif taskState == u'暂停':
+                color = stateColorDict[2]
+            elif taskState == u'待审核':
+                color = stateColorDict[3]
+            elif taskState == u'通过':
+                color = stateColorDict[4]
+            elif taskState == u'已完成':
+                color = stateColorDict[5]               
             for j,col in enumerate(self.member.taskTabHeader):
                 text = unicode(self.member.taskDict[row][col])
                 item = QtGui.QTableWidgetItem(text)
-                item.setTextAlignment(QtCore.Qt.AlignHCenter)
+                item.setBackgroundColor(color)
+                item.setTextAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
                 font = item.font()
                 size1 = font.pixelSize()
                 size2 = font.pointSize()
@@ -1240,6 +1426,71 @@ class MemberClient(Ui_MainWindow):
                 item.setFlags(QtCore.Qt.ItemIsEditable)
                 self.table_prodetail.columnsWidth.append(columnWidth)
                 self.table_prodetail.setItem(i,j,item)
+        self.highligthMyTask()
+ 
+
+    #def showTaskInfo(self,subprojectId):
+        #self.table_prodetail.setRowCount(0)
+        #self.table_prodetail.setColumnCount(0)
+        #subprojectName = self.member.subprojectDict[subprojectId][u'展项名称']
+        #self.label_tables.setText(subprojectName + u' 任务详情: ')
+        #self.table_prodetail.clear()
+        #projectId = subprojectId[0:3]
+        #taskIdList = self.member.hierTree[projectId][subprojectId]
+        #taskIdList.sort()
+        #rows = len(taskIdList)
+        #self.table_prodetail.setTextElideMode(QtCore.Qt.ElideNone)
+        #self.table_prodetail.setTableName(u'task')
+        #self.table_prodetail.setRowCount(rows)
+        #self.table_prodetail.setColumnCount(len(self.member.taskTabHeader))
+        #self.table_prodetail.setHorizontalHeaderLabels(self.member.taskTabHeader)
+        #for i,row in enumerate(taskIdList):
+            #for j,col in enumerate(self.member.taskTabHeader):
+                #text = unicode(self.member.taskDict[row][col])
+                #item = QtGui.QTableWidgetItem(text)
+                #item.setTextAlignment(QtCore.Qt.AlignHCenter|QtCore.Qt.AlignVCenter)
+                #font = item.font()
+                #size1 = font.pixelSize()
+                #size2 = font.pointSize()
+                #if size1>size2:
+                    #size = size1
+                    #letterSpacing = font.letterSpacing()
+                #else:
+                    #dpi = self.logicalDpiX()
+                    #size = size2 * dpi / 72
+                    #letterSpacing = font.wordSpacing()
+                #contextWidth = len(text)*size + (len(text)-1)*letterSpacing + 20
+                #columnWidth = self.table_prodetail.columnWidth(j)
+                #if columnWidth<contextWidth:
+                    #columnWidth = contextWidth
+                #self.table_prodetail.setColumnWidth(j,columnWidth)                  
+                #item.setFlags(QtCore.Qt.ItemIsEditable)
+                #self.table_prodetail.columnsWidth.append(columnWidth)
+                #self.table_prodetail.setItem(i,j,item)
+        #self.highligthMyTask()
+        
+        
+        
+    def highligthMyTask(self):
+        headers = self.member.taskTabHeader
+        taskList = self.member.allMembers[self.memberId][u'任务'].split(';')
+        rows = self.table_prodetail.rowCount()
+        cols = self.table_prodetail.columnCount()
+        color = QtGui.QColor(120,203,255,255)
+        font = QtGui.QFont('Microsoft YaHei UI',pointSize=11,)
+        font.setBold(True)
+        for i in range(rows):
+            taskID = unicode(self.table_prodetail.item(i,0).text())
+            if taskID in taskList:
+                for j in range(cols):
+                    item = self.table_prodetail.item(i,j)
+                    item.setFont(font)
+                    if headers[j] == u'完成度' or headers[j] == u'任务状态':
+                        flag = QtCore.Qt.ItemIsEditable | QtCore.Qt.ItemIsEnabled                    
+                        item.setFlags(flag)
+
+        
+        
         
         
     def applyForOvertime(self):
@@ -1251,8 +1502,11 @@ class MemberClient(Ui_MainWindow):
         subproject = unicode(self.apply_subproject.currentText())
         desc = unicode(self.desc.toPlainText())
         success = self.member.applyOvertime('overtime', [date,name,project,subproject,duration,meal,desc])
-        if not success:
-            print 'failed'
+        if success:
+            mBox.Info(u'加班申请成功', parent=self)
+        else:
+            mBox.Warning(u'申请失败，同一天不能重复申请',parent=self)
+        
             
             
 
@@ -1265,6 +1519,7 @@ class MemberClient(Ui_MainWindow):
         if len(result)>0:
             header = [u'日期',u'姓名',u'项目',u'展项',u'时长',u'加班餐',u'备注']
             self.drawTable(tablename='query_overtime_table', tableheader=header, tablelist=result)
+            self.countOvertime()
         else:
             messagebox = QtGui.QMessageBox(2,QtCore.QString(u'提示'),QtCore.QString(u'没有查询到相关记录'),QtGui.QMessageBox.Yes | QtGui.QMessageBox.Cancel)
             messagebox.exec_()
@@ -1285,10 +1540,27 @@ class MemberClient(Ui_MainWindow):
                 item = QtGui.QTableWidgetItem(unicode(col))
                 item.setTextAlignment(0x0004|0x0080)
                 item.setFont(textFont)
-                if j==0:
+                if j<2:
                     item.setFlags(QtCore.Qt.ItemIsEditable)
                 tableWidget.setItem(i,j,item)
 
+
+    def prodetailItemClicked(self,item):
+        row = item.row()
+        col = item.column()
+        if col == 0:
+            colcount = self.table_prodetail.columnCount()
+            selRange = QtGui.QTableWidgetSelectionRange(row,0,row,colcount-1)
+            self.table_prodetail.setRangeSelected(selRange,True)
+        itemId = unicode(self.table_prodetail.item(row,0).text())
+        iterator = QtGui.QTreeWidgetItemIterator(self.tree_project)
+        while iterator.value() is not None:
+            item = iterator.value()
+            tempId = item.getId()
+            if itemId == tempId:
+                self.tree_project.setCurrentItem(item)
+                break
+            iterator = iterator.__iadd__(1)
 
 
     def tableItemChange(self,row_index,col_index):
@@ -1351,6 +1623,31 @@ class MemberClient(Ui_MainWindow):
         projectId = taskId[0:3]
         self.member.updateProgress(projectId)
         
+
+
+    def tableItemChange3(self,row_index,col_index):
+        cols = self.query_overtime_table.columnCount()
+        item = self.query_overtime_table.item(row_index,col_index)
+        value = unicode(item.text())
+        tableHeader = self.member.overtimeTabHeader
+        varsList = [(tableHeader[col_index],value)]
+        conditionList = []        
+        for j,key in enumerate(tableHeader):
+            if j == col_index:
+                continue
+            item = self.query_overtime_table.item(row_index,j)
+            text = unicode(item.text())
+            conditionList.append((key,text))
+        sccess = self.member.updateOvertime(varsList,conditionList)
+        if sccess:
+            mBox.Info(u'加班信息修改成功', parent=self)
+            self.countOvertime()
+            
+            
+    def updateProgress(self,taskId):
+        projectId = taskId[0:3]
+        self.member.updateProgress(projectId)
+
 
 
     def saveTable(self):
@@ -1548,34 +1845,39 @@ class MemberClient(Ui_MainWindow):
             self.table_memberDaily.setCellWidget(row,col,calendar)
             
     def changeTableValue3(self,item):    
-        table_name = self.table_memberDaily.getTableName()
         row = item.row()
         col = item.column()
-        header = self.member.dailyTabHeader
-        headerLabel = header[col+1]
-        if headerLabel.find(u'事项')>=0:
-            combo = QtGui.QComboBox(self.table_memberDaily)
-            combo.addItem(u'调休')
-            combo.addItem(u'请假')
-            combo.addItem(u'出差')
-            combo.addItem(u'其他')
-            self.table_memberDaily.setCellWidget(row,col,combo)
-        if headerLabel.find(u'时长')>=0:
-            value = item.text()
-            if value != '':
-                valeu = float(value)
-            else:
-                value = 0
-            spinbox = QtGui.QDoubleSpinBox(self.table_memberDaily)
-            spinbox.setValue(float(value))
-            spinbox.setRange(0.0,8.0)
-            spinbox.setSingleStep(0.5)
-            self.table_memberDaily.setCellWidget(row,col,spinbox)
-        if headerLabel.find(u'日期')>=0:
-            calendar = myCalendarWidget(self.table_memberDaily)
-            self.table_memberDaily.setRowHeight(row,200)
-            self.table_memberDaily.setColumnWidth(col,250)
-            self.table_memberDaily.setCellWidget(row,col,calendar)    
+        header = self.member.overtimeTabHeader
+        headerLabel = header[col]
+        if headerLabel==u'项目':
+            combo = QtGui.QComboBox(self.query_overtime_table)
+            projectIdList = self.member.projectDict.keys()
+            projectIdList.sort()
+            projectList = []
+            for projectId in projectIdList:
+                projectName = self.member.projectDict[projectId][u'项目名称']
+                combo.addItem(projectName)
+            self.query_overtime_table.setCellWidget(row,col,combo)
+        if headerLabel==u'展项':
+            combo = QtGui.QComboBox(self.query_overtime_table)
+            projectName = unicode(self.query_overtime_table.item(row,2).text())
+            projectDict = self.member.projectDict
+            subprojectList = []
+            for key in projectDict:
+                if projectName == projectDict[key][u'项目名称']:
+                    projectId = key
+                    subprojectList = self.member.hierTree[projectId]
+            subprojectDict = self.member.subprojectDict
+            for subprojectId in subprojectList:
+                subprojectName = subprojectDict[subprojectId][u'展项名称']
+                combo.addItem(subprojectName)
+            self.query_overtime_table.setCellWidget(row,col,combo)         
+        if headerLabel==u'时长':
+            value = float(self.query_overtime_table.item(row,col).text())
+            spinBox = QtGui.QDoubleSpinBox(self.query_overtime_table)
+            spinBox.setValue(value)
+            spinBox.setSingleStep(0.5)
+            self.query_overtime_table.setCellWidget(row,col,spinBox)
            
         
 class myCalendarWidget(QtGui.QCalendarWidget):
@@ -1787,7 +2089,6 @@ class newDailyDialog(ui_newDailyDialog.Ui_dialog):
         memberId = unicode(newDaily.combo_name.itemData(index,QtCore.Qt.UserRole).toString())
         date = unicode(newDaily.date.date().toString('yyyy-MM-dd'))
         time  = unicode(str(newDaily.time.value()))
-        print time
         cate = unicode(newDaily.combo_category.currentText())
         comment = unicode(newDaily.comment.toPlainText())
         newDailyDict[u'编号'] = memberId
@@ -1859,8 +2160,11 @@ class scheduleBar(QtGui.QWidget):
         
     def detailToString(self):
         s =u'完成度：{:.2%}   '.format(self.progress)
-        for key in self.detail.keys():
-            temp = key + ':' + self.detail[key] + ' '*3
+        for info in self.detail:
+            value = info[1]
+            if value is None or value == '':
+                value = u'空'
+            temp = info[0] + ': ' + value + ' '*3
             s= s + unicode(temp)
         return s
         

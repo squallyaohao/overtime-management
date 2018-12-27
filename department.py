@@ -211,23 +211,29 @@ class Department():
             statement = mysql_utility.sqlUpdateState(table, varsList, [conditionList])
             cursor.execute(statement)
             conn.commit()
-            for key,value in varsList:
-                if key.find(u'时间')>=0:
-                    temp = value.split('-')
-                    value = datetime.date(int(temp[0]),int(temp[1]),int(temp[2]))
-                if table == u'project':
-                    self.projectDict[varsList[0][1]][key]=value
-                elif table == u'subproject':
-                    self.subprojectDict[varsList[0][1]][key]=value
-                else:
-                    self.taskDict[varsList[0][1]][key]=value
+            #for key,value in varsList:
+                #if key.find(u'时间')>=0:
+                    #temp = value.split('-')
+                    #value = datetime.date(int(temp[0]),int(temp[1]),int(temp[2]))
+                #if table == u'project':
+                    #self.projectDict[varsList[0][1]][key]=value
+                #elif table == u'subproject':
+                    #self.subprojectDict[varsList[0][1]][key]=value
+                #else:
+                    #self.taskDict[varsList[0][1]][key]=value
         cursor.close()
         conn.close()
-
+        if table == u'project':
+            self.getProjectsFromServer()
+        elif table == u'subproject':
+            self.getSubprojectFromServer()
+        else:
+            self.getTaskFromeServer()
+        self.buildTreeHierarchy()
+        
+         
         
         
-    def deleteMember(self,name):
-        pass
         
     
     def getTableHeader(self,headertable=''):
@@ -338,10 +344,16 @@ class Department():
             for task in taskList:
                 progress = float(self.taskDict[task][u'完成度'])
                 subproProgress = subproProgress + progress
-            subproProgress = subproProgress / len(taskList)
+            if len(taskList)>0:
+                subproProgress = subproProgress / len(taskList)
+            else:
+                subproProgress = 0
             self.subprojectDict[subpro][u'完成度']=str(subproProgress) 
             proProgress = proProgress + subproProgress
-        proProgress = proProgress/len(subproList)
+        if len(subproList) > 0:
+            proProgress = proProgress/len(subproList)
+        else:
+            proProgress = 0
         self.projectDict[projectId][u'完成度']=str(proProgress)        
         
 
@@ -406,8 +418,12 @@ class Department():
         ok = self.checkNotExist(table='member', condition=member)
         if ok:
             allmembers = self.queryServer(table='member', tabHeader=self.memberTabHeader)
-            total = len(allmembers.keys())
-            memberId = '%03d%03d'%(self.depName,total+ 1)
+            idList = sorted(allmembers.keys())
+            if len(idList) == 0:
+                lastId = 0
+            else:
+                lastId = int(idList[-1][3:])
+            memberId = '%03d%03d'%(self.depName,lastId+1)
             member[u'编号'] = memberId
             for key in self.memberTabHeader:
                 if member.has_key(key):
@@ -429,21 +445,29 @@ class Department():
         else:
             return (3,member)
     
+
+    def deleteMember(self,name):
+        pass
+
         
     def deleteProject(self,projectId):
         conn,cursor = self.connectToServer()
         deleteDict = self.hierTree[projectId]
+        taskList = []
         del_statments = []
         del_statments.append(mysql_utility.sqldeletState(table='project', condition={u'项目编号':projectId}))
         for subproId in deleteDict.keys():
             del_statments.append(mysql_utility.sqldeletState(table='subproject', condition={u'展项编号':subproId}))
             for taskId in deleteDict[subproId]:
+                taskList.append(taskId)
                 del_statments.append(mysql_utility.sqldeletState(table='task', condition={u'任务编号':taskId}))
         for statement in del_statments:
             cursor.execute(statement)
             conn.commit()
         cursor.close()
         conn.close()
+        for taskId in taskList:
+            self.deleteTask(taskId)
         self.hierTree.pop(projectId)
         self.projectDict.pop(projectId)
         return 1
@@ -453,22 +477,26 @@ class Department():
         conn,cursor = self.connectToServer()
         projectId = subprojectId[0:3]
         deleteDict = self.hierTree[projectId][subprojectId]
+        taskList = []
         del_statments = []
         del_statments.append(mysql_utility.sqldeletState(table='subproject', condition={u'展项编号':subprojectId}))
         for taskId in deleteDict:
+            taskList.append(taskId)
             del_statments.append(mysql_utility.sqldeletState(table='task', condition={u'任务编号':taskId}))
         for statement in del_statments:
             cursor.execute(statement)
             conn.commit()
         cursor.close()
         conn.close()
+        for taskId in taskList:
+            self.deleteTask(taskId)        
         self.hierTree[projectId].pop(subprojectId)
         self.subprojectDict.pop(subprojectId)
         return 1
 
 
 
-    def deleteTask(self,taskId):
+    def deleteTask_old(self,taskId):
         conn,cursor = self.connectToServer()
         projectId = taskId[0:3]
         subprojectId = taskId[0:6]
@@ -481,6 +509,32 @@ class Department():
         self.taskDict.pop(taskId)
         return 1
         
+
+    def deleteTask(self,taskId):
+        conn,cursor = self.connectToServer()
+        projectId = taskId[0:3]
+        subprojectId = taskId[0:6]
+        del_statement = mysql_utility.sqldeletState(table='task', condition={u'任务编号':taskId})
+        cursor.execute(del_statement)
+        conn.commit()   
+        cursor.close()
+        conn.close()
+  
+        membersList = self.taskDict[taskId][u'参与人员'].split(u';')
+        for member in membersList:
+            if member == u'':
+                continue
+            memberId = member.split(u'(')[1][0:6]
+            oldTasks = self.allMembers[memberId][u'任务']
+            newTasks = oldTasks.replace(taskId+u';',u'')
+            self.allMembers[memberId][u'任务'] = newTasks            
+            varsList = [(u'任务',newTasks)]
+            condistionList = [(u'编号',memberId)]
+            self.updateServer(table='member', varsList=varsList, conditionsList=condistionList) 
+            
+        self.hierTree[projectId][subprojectId].remove(taskId)
+        self.taskDict.pop(taskId)            
+        return 1
 
 
     def assignTask(self,curmembers,member,taskId):

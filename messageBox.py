@@ -10,7 +10,10 @@ class Warning(QtGui.QMessageBox):
         super(Warning,self).__init__(QtGui.QMessageBox.Warning,u'警告',msg,QtGui.QMessageBox.Ok,parent=parent)
         self.show()
         
-
+class Info(QtGui.QMessageBox):
+    def __init__(self,msg,parent=None):
+        super(Info,self).__init__(QtGui.QMessageBox.Information,u'提示',msg,QtGui.QMessageBox.Ok,parent=parent)
+        self.show()
 
 
 

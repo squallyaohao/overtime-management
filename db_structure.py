@@ -15,7 +15,9 @@ tasksTableHeader = [u'任务名称',u'起始时间',u'结束时间',u'完成进�
 
 
 
-TableHeaderModule= [('columnLabel','varchar(20)'),('columnIndex','int'),('valueType','varchar(15)')]
+TableHeaderModule= [('columnLabel','varchar(20)'),
+                    ('columnIndex','int'),
+                    ('valueType','varchar(15)')]
 
 
 
@@ -42,17 +44,18 @@ subproTabHeader = ['subproTabHeader',
                          (u'展项编号'    ,u'0'    ,u'varchar(10)'),
                          (u'展项名称'    ,u'1'    ,u'varchar(20)'),
                          (u'项目名称'    ,u'2'    ,u'varchar(20)'),
-                         (u'起始时间'    ,u'3'    ,u'varchar(10)'),
-                         (u'结束时间'    ,u'4'    ,u'varchar(10)'),
-                         (u'展项类型'    ,u'5'    ,u'varchar(10)'),
-                         (u'脚本负责'    ,u'6'    ,u'varchar(10)'), 
-                         (u'三维负责'    ,u'7'    ,u'varchar(10)'),
-                         (u'后期负责'    ,u'8'    ,u'varchar(10)'),
-                         (u'软件负责'    ,u'9'    ,u'varchar(10)'),
-                         (u'硬件负责'    ,u'10'   ,u'varchar(10)'),
-                         (u'完成度'      ,u'11'   ,u'float'),
-                         (u'展项状态'    ,u'12'   ,u'varchar(10)'),
-                         (u'展项说明'    ,u'13'   ,u'text')]
+                         (u'展区名称'    ,u'3'    ,u'varchar(20)'),
+                         (u'起始时间'    ,u'4'    ,u'varchar(10)'),
+                         (u'结束时间'    ,u'5'    ,u'varchar(10)'),
+                         (u'展项类型'    ,u'6'    ,u'varchar(10)'),
+                         (u'脚本负责'    ,u'7'    ,u'varchar(10)'), 
+                         (u'三维负责'    ,u'8'    ,u'varchar(10)'),
+                         (u'后期负责'    ,u'9'    ,u'varchar(10)'),
+                         (u'软件负责'    ,u'10'    ,u'varchar(10)'),
+                         (u'硬件负责'    ,u'11'   ,u'varchar(10)'),
+                         (u'完成度'      ,u'12'   ,u'float'),
+                         (u'展项状态'    ,u'13'   ,u'varchar(10)'),
+                         (u'展项说明'    ,u'14'   ,u'text')]
 
 
 
@@ -104,7 +107,7 @@ overtimeTabHeader = ['overtimeTabHeader',
                      (u'姓名'    ,u'0'    ,'varchar(10)'),
                      (u'项目'    ,u'0'    ,'varchar(20)'),
                      (u'展项'    ,u'0'    ,'varchar(20)'),
-                     (u'时长'    ,u'0'    ,'tinyint'),
+                     (u'时长'    ,u'0'    ,'float'),
                      (u'加班餐'  ,u'0'    ,'varchar(10)'),
                      (u'描述'    ,u'0'    ,'varchar(50)')]
 

@@ -16,7 +16,7 @@ from db_structure import *
 #Utility fuctions
 #===================================================================================================
  
-hostname = '162.16.100.101'
+hostname = '162.16.40.181'
 db = 'andadb'
 user = 'root'
 pwd = 'andaDB12345' 
@@ -167,7 +167,7 @@ def initDatabase():
     conn.commit()       
     
     #===insert columns into header tables===
-    for headertable in [proTabHeader,subproTabHeader,taskTabHeader,memberTabHeader,dailyTabHeader,userTabHeader,overtimeTabHeader]:
+    for headertable in [proTabHeader,subproTabHeader,taskTabHeader,memberTabHeader,userTabHeader,dailyTabHeader,overtimeTabHeader]:
         table = headertable[0]
         for column in headertable[1:]:
             statement = sqlInsertState1(table,column)
@@ -235,8 +235,8 @@ def initDatabase():
 def dropTables():
     conn = sql.connect(hostname,user,pwd,db,charset='utf8')
     cursor = conn.cursor()    
-    tableList = [u'daily',u'dailyTabHeader']
-    #tableList = [u'project',u'proTabHeader','subproject',u'subproTabHeader',u'task',u'taskTabHeader',u'member',u'memberTabHeader']
+    #tableList = [u'daily',u'dailyTabHeader']
+    tableList = [u'project',u'proTabHeader','subproject',u'subproTabHeader',u'task',u'taskTabHeader',u'member',u'memberTabHeader',u'user',u'userTabHeader',u'dailyTabHeader',u'daily',u'overtime',u'overtimeTabHeader']
     for table in tableList:
         statement = "drop table if exists "+table+";"
         cursor.execute(statement)
