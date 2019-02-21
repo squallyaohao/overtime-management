@@ -5,7 +5,7 @@
 
 import sys
 import os.path
-import pandas as pd
+#import pandas as pd
 import xml.etree.ElementInclude as ET
 import MySQLdb as sql
 import time
@@ -17,7 +17,7 @@ from db_structure import *
 #===================================================================================================
  
 hostname = '162.16.40.181'
-db = 'andadb'
+db = 'test'
 user = 'root'
 pwd = 'andaDB12345' 
 
@@ -39,7 +39,6 @@ def sqlInsertState1(table='',list=()):
 
 
 def sqlInsertState2(table='',varsdict={}):
-    print varsdict
     insert_statement = "insert into " + table + "("
     sortedKey = varsdict.keys()
     sortedKey.sort()

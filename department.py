@@ -269,8 +269,9 @@ class Department():
     
     
     def getTaskFromeServer(self):
-        con = {u'部门':depDict[self.depName]}
-        self.taskDict = self.queryServer2(table='task', columns=self.taskTabHeader,condition=con,tabHeader=self.taskTabHeader)
+        #con = {u'部门':depDict[self.depName]}
+        self.taskDict = self.queryServer(table='task',tabHeader=self.taskTabHeader)
+        #self.taskDict = self.queryServer2(table='task', columns=self.taskTabHeader,condition=con,tabHeader=self.taskTabHeader)
         return self.taskDict
 
     

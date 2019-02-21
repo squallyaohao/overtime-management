@@ -7,6 +7,7 @@
 #
 # WARNING! All changes made in this file will be lost!
 
+import sys
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -244,3 +245,9 @@ class Ui_Dialog(QtGui.QDialog):
         self.label_11.setText(_translate("Dialog", "硬件负责", None))
         self.label_12.setText(_translate("Dialog", "项目说明", None))
 
+
+if __name__ == '__main__':
+    app = QtGui.QApplication(sys.argv)
+    dialog = Ui_Dialog()
+    dialog.show()
+    app.exec_()

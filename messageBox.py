@@ -14,6 +14,12 @@ class Info(QtGui.QMessageBox):
     def __init__(self,msg,parent=None):
         super(Info,self).__init__(QtGui.QMessageBox.Information,u'提示',msg,QtGui.QMessageBox.Ok,parent=parent)
         self.show()
+        
+class confirm(QtGui.QMessageBox):
+    def __init__(self,msg,parent=None):
+        super(confirm,self).__init__(QtGui.QMessageBox.Question,u'确认',msg,QtGui.QMessageBox.Ok|QtGui.QMessageBox.Cancel,parent=parent)
+        self.show()
+
 
 
 

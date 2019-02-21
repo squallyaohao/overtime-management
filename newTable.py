@@ -45,7 +45,7 @@ class NewTable(QTableWidget):
             else:
                 curIndex = self.currentIndex()
             curWidget = self.cellWidget(curIndex.row(),curIndex.column())
-            print type(curWidget)
+
             if curWidget is not None:
                 if isinstance(curWidget,QComboBox):
                     value = curWidget.currentText()
